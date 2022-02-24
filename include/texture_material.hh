@@ -19,7 +19,7 @@ private:
 class Texture_Material
 {
 public:
-    virtual Material get_Material(Vector3 point);
+    virtual Material get_Material(Vector3 point) = 0;
 
 private:
 };

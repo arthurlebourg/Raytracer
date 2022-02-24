@@ -3,11 +3,13 @@
 #include <memory>
 #include <vector>
 
+#include "camera.hh"
+#include "light.hh"
 #include "object.hh"
 
 class Scene
 {
-public
+public:
     Scene(Camera camera)
         : camera_(camera)
     {}
@@ -18,4 +20,4 @@ public
 
 private:
     Camera camera_;
-}
+};

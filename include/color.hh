@@ -5,31 +5,31 @@
 class Color
 {
 public:
-    Color(char red, char green, char blue)
+    Color(unsigned char red, unsigned char green, unsigned char blue)
         : red_(red)
         , green_(green)
         , blue_(blue)
     {}
 
-    char red()
+    unsigned char red()
     {
         return red_;
     }
 
-    char green()
+    unsigned char green()
     {
         return green_;
     }
 
-    char blue()
+    unsigned char blue()
     {
         return blue_;
     }
 
 private:
-    char red_;
-    char green_;
-    char blue_;
+    unsigned char red_;
+    unsigned char green_;
+    unsigned char blue_;
 };
 
 inline std::ostream &operator<<(std::ostream &os, Color &col)

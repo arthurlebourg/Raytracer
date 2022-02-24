@@ -1,6 +1,7 @@
 #pragma once
 
 #include <iostream>
+#include <memory>
 #include <optional>
 
 #include "ray.hh"
@@ -15,12 +16,12 @@ public:
 
     Material get_texture(Vector3 point)
     {
-        return texture_.get_Material(point);
+        return texture_->get_Material(point);
     }
 
 protected:
-    Texture_Material texture_;
-    Object(Texture_Material texture)
+    std::shared_ptr<Texture_Material> texture_;
+    Object(std::shared_ptr<Texture_Material> texture)
         : texture_(texture)
     {}
 };

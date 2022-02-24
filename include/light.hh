@@ -2,7 +2,7 @@
 
 #include <iostream>
 
-#include "texture_material.h"
+#include "texture_material.hh"
 
 class Light
 {

@@ -8,7 +8,7 @@
 class Sphere : public Object
 {
 public:
-    Sphere(Vector3 pos, float radius, Texture_Material texture)
+    Sphere(Vector3 pos, float radius, std::shared_ptr<Texture_Material> texture)
         : Object(texture)
         , pos_(pos)
         , radius_(radius)

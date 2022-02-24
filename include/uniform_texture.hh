@@ -11,8 +11,9 @@ public:
         : mat_(mat)
     {}
 
-    Material get_Texture(Vector3 point)
+    Material get_Material(Vector3 point)
     {
+        point = point;
         return mat_;
     }
 

@@ -2,7 +2,7 @@
 
 #include <iostream>
 
-#include "vector3.h"
+#include "vector3.hh"
 
 class Ray
 {
@@ -27,15 +27,13 @@ public:
         return origin_ + (t * direction_);
     }
 
-    friend std::ostream &operator<<(std::ostream &os, const Ray &ray);
-
 private:
     Vector3 origin_;
     Vector3 direction_;
 };
 
-std::ostream &operator<<(std::ostream &os, const Ray &ray)
+inline std::ostream &operator<<(std::ostream &os, const Ray &ray)
 {
-    return os << "origin: " << ray.origin_ << ", direction: " << ray.direction_
-              << std::endl;
+    return os << "origin: " << ray.origin()
+              << ", direction: " << ray.direction() << std::endl;
 }

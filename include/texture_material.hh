@@ -1,8 +1,7 @@
 #pragma once
 
-#include <iostream>
-
 #include "color.hh"
+#include "vector3.hh"
 
 class Material
 {
@@ -15,12 +14,12 @@ public:
 private:
     Color kd_;
     float ks_;
-}
+};
 
 class Texture_Material
 {
 public:
-    virtual Material get_Material(Vector3 point) = 0;
+    virtual Material get_Material(Vector3 point);
 
 private:
 };

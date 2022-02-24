@@ -1,25 +1,24 @@
 #pragma once
 
-#include <iostream>
+#include "object.hh"
+#include "ray.hh"
+#include "texture_material.hh"
+#include "vector3.hh"
 
-#include "texture_material.h"
-
-class Sphere : Object
+class Sphere : public Object
 {
 public:
     Sphere(Vector3 pos, float radius, Texture_Material texture)
-        : pos_(pos)
+        : Object(texture)
+        , pos_(pos)
         , radius_(radius)
-        , texture_(texture)
     {}
 
-    Vector3 hit(Vector3 point, Vector3 direction);
+    std::optional<Vector3> hit(Ray ray);
 
     Vector3 normal(Vector3 point);
 
-    Material get_texture(Vector3 point);
-
 private:
     Vector3 pos_;
-    float radius_
+    float radius_;
 };

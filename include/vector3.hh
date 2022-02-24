@@ -18,12 +18,6 @@ public:
         , z_(0)
     {}
 
-    Vector3(const Vector3 &other)
-        : x_(other.x_)
-        , y_(other.y_)
-        , z_(other.z_)
-    {}
-
     float x() const
     {
         return x_;
@@ -65,17 +59,15 @@ public:
         return Vector3(-x_, -y_, -z_);
     }
 
-    friend std::ostream &operator<<(std::ostream &os, const Vector3 &vec);
-
 private:
     float x_;
     float y_;
     float z_;
 };
 
-std::ostream &operator<<(std::ostream &os, const Vector3 &vec)
+inline std::ostream &operator<<(std::ostream &os, const Vector3 &vec)
 {
-    return os << "(" << vec.x_ << ", " << vec.y_ << ", " << vec.z_ << ")"
+    return os << "(" << vec.x() << ", " << vec.y() << ", " << vec.z() << ")"
               << std::endl;
 }
 

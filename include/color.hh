@@ -26,16 +26,14 @@ public:
         return blue_;
     }
 
-    friend std::ostream &operator<<(std::ostream &os, const Color &col);
-
 private:
     char red_;
     char green_;
     char blue_;
 };
 
-std::ostream &operator<<(std::ostream &os, const Color &col)
+inline std::ostream &operator<<(std::ostream &os, Color &col)
 {
-    return os << "(R: " << col.red_ << ", G: " << col.green_
-              << ", B: " << col.blue_ << ")" << std::endl;
+    return os << "(R: " << col.red() << ", G: " << col.green()
+              << ", B: " << col.blue() << ")" << std::endl;
 }

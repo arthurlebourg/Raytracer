@@ -1,11 +1,11 @@
 #include <iostream>
 
-#include "color.h"
-#include "image.h"
-#include "ray.h"
-#include "vector3.h"
+#include "color.hh"
+#include "image.hh"
+#include "ray.hh"
+#include "vector3.hh"
 
-int main(int argc, const char **argv)
+int main()
 {
     Image img = Image("test.ppm", 10, 10);
 

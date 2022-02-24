@@ -1,30 +1,40 @@
-SRC_DIR := src
-OBJ_DIR := obj
-BIN_DIR := bin
+CXX      := -c++
+CXXFLAGS := -pedantic-errors -Wall -Wextra -Werror
+LDFLAGS  := -L/usr/lib -lstdc++ -lm
+OBJ_DIR  := ./build
+BIN_DIR  := ./bin
+TARGET   := raytracer
+INCLUDE  := -Iinclude/
+SRC      := $(wildcard src/*.cc)
 
-EXE := $(BIN_DIR)/raytracer
-SRC := $(wildcard $(SRC_DIR)/*.c)
-OBJ := $(SRC:$(SRC_DIR)/%.c=$(OBJ_DIR)/%.o)
+OBJECTS  := $(SRC:%.cc=$(OBJ_DIR)/%.o)
+DEPENDENCIES \
+         := $(OBJECTS:.o=.d)
 
-CPPFLAGS := -Iinclude -MMD -MP
-CFLAGS   := -Wall
-LDFLAGS  := -Llib
-LDLIBS   := -lm
+all: build $(BIN_DIR)/$(TARGET)
 
-.PHONY: all clean
+$(OBJ_DIR)/%.o: %.cc
+	@mkdir -p $(@D)
+	$(CXX) $(CXXFLAGS) $(INCLUDE) -c $< -MMD -o $@
 
-all: $(EXE)
+$(BIN_DIR)/$(TARGET): $(OBJECTS)
+	@mkdir -p $(@D)
+	$(CXX) $(CXXFLAGS) -o $(BIN_DIR)/$(TARGET) $^ $(LDFLAGS)
 
-$(EXE): $(OBJ) | $(BIN_DIR)
-    $(CC) $(LDFLAGS) $^ $(LDLIBS) -o $@
+-include $(DEPENDENCIES)
 
-$(OBJ_DIR)/%.o: $(SRC_DIR)/%.c | $(OBJ_DIR)
-    $(CC) $(CPPFLAGS) $(CFLAGS) -c $< -o $@
+.PHONY: all build clean debug release info
 
-$(BIN_DIR) $(OBJ_DIR):
-    mkdir -p $@
+build:
+	@mkdir -p $(BIN_DIR)
+	@mkdir -p $(OBJ_DIR)
+
+debug: CXXFLAGS += -DDEBUG -g
+debug: all
+
+release: CXXFLAGS += -O2
+release: all
 
 clean:
-    @$(RM) -rv $(BIN_DIR) $(OBJ_DIR)
-
--include $(OBJ:.o=.d)
+	-@rm -rvf $(OBJ_DIR)/*
+	-@rm -rvf $(BIN_DIR)/*

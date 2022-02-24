@@ -1,13 +1,14 @@
 #pragma once
 
+#include "ray.hh"
 #include "utils.hh"
 #include "vector3.hh"
 
 class Camera
 {
 public:
-    Camera(Vector3 center, Vector3 focus, Vector3 up, float fov_v, float fov_h,
-           float z_min);
+    Camera(Vector3 center, Vector3 focus, Vector3 up, double fov_v,
+           double fov_h, double z_min);
 
     Ray get_ray(int x, int y) const;
 

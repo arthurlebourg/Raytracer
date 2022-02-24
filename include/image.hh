@@ -8,26 +8,25 @@
 class Image
 {
 public:
-    Image(std::string path, int width, int height)
+    Image(std::string path, size_t width, size_t height)
         : path_(path)
         , width_(width)
         , height_(height)
     {
-        data_ = std::array<Color>(Color(0, 0, 0));
-        data_.fill(Color(0, 0, 0));
+        data_ = static_cast<Color *>(calloc(width * height, sizeof(Color)));
     }
 
-    int width()
+    size_t width()
     {
         return width_;
     }
 
-    int height()
+    size_t height()
     {
         return height_;
     }
 
-    void set(Color c, int x, int y)
+    void set(Color c, size_t x, size_t y)
     {
         data_[y * height_ + x] = c;
     }
@@ -39,8 +38,8 @@ public:
             << width_ << ' ' << height_ << std::endl
             << "255" << std::endl;
 
-        for (char j = 0; j < height_; ++j)
-            for (char i = 0; i < width_; ++i)
+        for (size_t j = 0; j < height_; ++j)
+            for (size_t i = 0; i < width_; ++i)
                 ofs << data_[height_ * j + i].red()
                     << data_[height_ * j + i].green()
                     << data_[height_ * j + i].blue();
@@ -52,9 +51,9 @@ public:
 
 private:
     std::string path_;
-    int width_;
-    int height_;
-    std::array<Color> data_;
+    size_t width_;
+    size_t height_;
+    Color *data_;
 };
 
 std::ostream &operator<<(std::ostream &os, const Image &img)

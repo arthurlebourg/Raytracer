@@ -4,9 +4,9 @@ Vector3 Sphere::hit(Vector3 point, Vector3 direction)
 {
     Vector3 oc = point - pos_;
     float b = 2.0 * dot(oc, direction);
-    float c = dot(oc,oc) - radius_*radius_;
-    float discriminant = b*b - 4*c;
-    if(discriminant < 0)
+    float c = dot(oc, oc) - radius_ * radius_;
+    float discriminant = b * b - 4 * c;
+    if (discriminant < 0)
     {
         return nullptr;
     }

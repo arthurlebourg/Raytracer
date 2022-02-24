@@ -13,7 +13,8 @@ public:
         , width_(width)
         , height_(height)
     {
-        data_ = std::array<Color>(width * height, Color(0, 0, 0));
+        data_ = std::array<Color>(Color(0, 0, 0));
+        data_.fill(Color(0, 0, 0));
     }
 
     int width()

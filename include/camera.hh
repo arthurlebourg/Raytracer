@@ -12,6 +12,16 @@ public:
 
     Ray get_ray(int x, int y) const;
 
+    Vector3 get_horizontal()
+    {
+        return horizontal_;
+    }
+
+    Vector3 get_vertical()
+    {
+        return vertical_;
+    }
+
 private:
     Vector3 center_;
     Vector3 lower_left_corner_;

@@ -1,5 +1,6 @@
 #pragma once
 
+#include <memory>
 #include <vector>
 
 #include "object.hh"
@@ -10,10 +11,11 @@ public
     Scene(Camera camera)
         : camera_(camera)
     {}
-    // will need to add more methods
+
+    // since we are using abstract classes we need pointers to them
+    std::vector<std::shared_ptr<Object>> objects_;
+    std::vector<std::shared_ptr<Light>> lights_;
 
 private:
-    std::vector<Object> objects_;
-    std::vector<Light> lights_;
     Camera camera_;
 }

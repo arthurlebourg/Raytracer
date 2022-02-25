@@ -34,10 +34,10 @@ int main()
             // Vector3(0,0,1));//cam.get_ray(x, y);
             Ray ray = cam.get_ray(x / 680, y / 460);
             // std::cout << ray << std::endl;
-            std::optional<Vector3> truc = green_boulasse.hit(ray);
+            std::optional<Vector3> hit = green_boulasse.hit(ray);
             if (truc.has_value())
             {
-                Material mat = green_boulasse.get_texture(ray.origin());
+                Material mat = green_boulasse.get_texture(hit);
                 img.set(mat.get_color(), x, y);
             }
         }

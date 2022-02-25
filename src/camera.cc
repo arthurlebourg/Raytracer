@@ -28,6 +28,6 @@ Camera::Camera(Vector3 center, Vector3 focus, Vector3 up, double fov_v,
 Ray Camera::get_ray(double x, double y) const
 {
     return Ray(center_,
-               center_
-                   - (lower_left_corner_ + x * horizontal_ + y * vertical_));
+               (lower_left_corner_ + x * horizontal_ + y * vertical_)
+                   - center_);
 }

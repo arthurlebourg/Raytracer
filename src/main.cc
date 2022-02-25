@@ -25,13 +25,16 @@ int main()
     std::cout << cam.get_horizontal() << std::endl
               << cam.get_vertical() << std::endl;
 
-    Image img = Image("bite.ppm", 680, 460);
+    double img_width = 680;
+    double img_height = 460;
 
-    for (double y = 0; y < 460; y++)
+    Image img = Image("bite.ppm", img_width, img_height);
+
+    for (double y = 0; y < img_height; y++)
     {
-        for (double x = 0; x < 680; x++)
+        for (double x = 0; x < img_width; x++)
         {
-            Ray ray = cam.get_ray(x / 680, y / 460);
+            Ray ray = cam.get_ray(x / img_width, y / img_height);
             float min_dist = std::numeric_limits<float>::max();
             Material mat = Material(Color(0, 0, 0), 0);
             for (size_t i = 0; i < sc.objects_.size(); i++)

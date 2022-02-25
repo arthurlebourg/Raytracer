@@ -1,4 +1,5 @@
 #include <iostream>
+#include <limits>
 
 #include "color.hh"
 #include "image.hh"
@@ -30,16 +31,24 @@ int main()
     {
         for (double x = 0; x < 680; x++)
         {
-            // Ray ray = cam.get_ray(50.0/100,50.0/100);//Ray(Vector3(0,0,0),
-            // Vector3(0,0,1));//cam.get_ray(x, y);
             Ray ray = cam.get_ray(x / 680, y / 460);
-            // std::cout << ray << std::endl;
-            std::optional<Vector3> hit = green_boulasse.hit(ray);
-            if (truc.has_value())
+            float min_dist = std::numeric_limits<float>::max();
+            Material mat = Material(Color(0, 0, 0), 0);
+            for (size_t i = 0; i < sc.objects_.size(); i++)
             {
-                Material mat = green_boulasse.get_texture(hit);
-                img.set(mat.get_color(), x, y);
+                std::optional<Vector3> hit = sc.objects_[i]->hit(ray);
+                if (hit.has_value())
+                {
+                    float new_dist =
+                        (hit.value() - cam.get_center()).squaredNorm();
+                    if (new_dist < min_dist)
+                    {
+                        min_dist = new_dist;
+                        mat = sc.objects_[i]->get_texture(hit.value());
+                    }
+                }
             }
+            img.set(mat.get_color(), x, y);
         }
     }
     img.save();

@@ -22,6 +22,11 @@ public:
         return vertical_;
     }
 
+    Vector3 get_center()
+    {
+        return center_;
+    }
+
 private:
     Vector3 center_;
     Vector3 lower_left_corner_;

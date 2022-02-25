@@ -10,7 +10,7 @@ public:
     Camera(Vector3 center, Vector3 focus, Vector3 up, double fov_v,
            double fov_h, double z_min);
 
-    Ray get_ray(int x, int y) const;
+    Ray get_ray(double x, double y) const;
 
     Vector3 get_horizontal()
     {

@@ -11,6 +11,11 @@ public:
         , ks_(ks)
     {}
 
+    Color get_color()
+    {
+        return kd_;
+    }
+
 private:
     Color kd_;
     float ks_;

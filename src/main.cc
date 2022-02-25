@@ -11,8 +11,11 @@
 
 int main()
 {
+    double fov_w = 110;
+    double fov_h = 90;
+    double dist_to_screen = 50.0;
     Camera cam = Camera(Vector3(0, 0, 0), Vector3(0, 0, 1), Vector3(0, 1, 0),
-                        55.0, 55.0, 50.0);
+                        fov_w / 2, fov_h / 2, dist_to_screen);
     Scene sc = Scene(cam);
 
     Uniform_Texture green_tex = Uniform_Texture(Material(Color(0, 255, 0), 1));

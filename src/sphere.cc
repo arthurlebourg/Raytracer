@@ -3,9 +3,13 @@
 std::optional<Vector3> Sphere::hit(Ray ray)
 {
     Vector3 oc = ray.origin() - pos_;
+    float b = 2.0 * dot(oc, ray.direction());
+    if (b < 0) // check if obj is behind cam
+    {
+        return std::nullopt;
+    }
     float a = dot(ray.direction(), ray.direction());
-    float b = 2.0 * dot(ray.direction(), oc);
-    float c = dot(oc, oc) - (radius_ * radius_);
+    float c = oc.squaredNorm() - (radius_ * radius_);
     float discriminant = b * b - 4 * a * c;
     if (discriminant < 0)
     {

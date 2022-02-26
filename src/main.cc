@@ -30,7 +30,7 @@ int main()
     Sphere red_boulasse = Sphere(Vector3(0, -0.25, 51), 50.95,
                                  std::make_shared<Uniform_Texture>(red_tex));
 
-    Plane plancher = Plane(Vector3(0, -1, 0), Vector3(0, 1, 0),
+    Plane plancher = Plane(Vector3(0, 1, 0), Vector3(0, 1, 0),
                            std::make_shared<Uniform_Texture>(gray_tex));
 
     sc.objects_.push_back(std::make_shared<Sphere>(green_boulasse));
@@ -51,8 +51,8 @@ int main()
         {
             Ray ray = cam.get_ray(x / img_width, y / img_height);
             float min_dist = std::numeric_limits<float>::max();
-            Material mat = Material(
-                Color((255 - y * 100 / 255), (255 - y * 100 / 255), 255), 0);
+            Material mat =
+                Material(Color((y * 100 / 255), (y * 100 / 255), 255), 0);
             for (size_t i = 0; i < sc.objects_.size(); i++)
             {
                 std::optional<Vector3> hit = sc.objects_[i]->hit(ray);

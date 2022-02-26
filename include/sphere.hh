@@ -18,6 +18,11 @@ public:
 
     Vector3 normal(Vector3 point);
 
+    void move(Vector3 vec)
+    {
+        pos_ = pos_ + vec;
+    }
+
 private:
     Vector3 pos_;
     float radius_;

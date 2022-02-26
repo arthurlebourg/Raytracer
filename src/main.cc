@@ -2,6 +2,7 @@
 #include <limits>
 
 #include "color.hh"
+#include "gif.h"
 #include "image.hh"
 #include "plane.hh"
 #include "ray.hh"
@@ -9,6 +10,20 @@
 #include "sphere.hh"
 #include "uniform_texture.hh"
 #include "vector3.hh"
+
+const size_t img_width = 680;
+const size_t img_height = 460;
+
+uint8_t image[img_width * img_height * 4];
+
+void SetPixel(int xx, int yy, uint8_t red, uint8_t grn, uint8_t blu)
+{
+    uint8_t *pixel = &image[(yy * img_width + xx) * 4];
+    pixel[0] = red;
+    pixel[1] = grn;
+    pixel[2] = blu;
+    pixel[3] = 255; // no alpha for this demo
+}
 
 int main()
 {
@@ -40,37 +55,48 @@ int main()
     std::cout << cam.get_horizontal() << std::endl
               << cam.get_vertical() << std::endl;
 
-    double img_width = 680;
-    double img_height = 460;
-
     Image img = Image("bite.ppm", img_width, img_height);
 
-    for (double y = 0; y < img_height; y++)
+    GifWriter writer = {};
+    GifBegin(&writer, "raytrace.gif", img_width, img_height, 2, 8, true);
+
+    for (int frame = 0; frame < 100; ++frame)
     {
-        for (double x = 0; x < img_width; x++)
+        for (double y = 0; y < img_height; y++)
         {
-            Ray ray = cam.get_ray(x / img_width, y / img_height);
-            float min_dist = std::numeric_limits<float>::max();
-            Material mat =
-                Material(Color((y * 100 / 255), (y * 100 / 255), 255), 0);
-            for (size_t i = 0; i < sc.objects_.size(); i++)
+            for (double x = 0; x < img_width; x++)
             {
-                std::optional<Vector3> hit = sc.objects_[i]->hit(ray);
-                if (hit.has_value())
+                Ray ray = cam.get_ray(x / img_width, y / img_height);
+                float min_dist = std::numeric_limits<float>::max();
+                Material mat =
+                    Material(Color((y * 100 / 255), (y * 100 / 255), 255), 0);
+                for (size_t i = 0; i < sc.objects_.size(); i++)
                 {
-                    float new_dist =
-                        (hit.value() - cam.get_center()).squaredNorm();
-                    if (new_dist < min_dist)
+                    std::optional<Vector3> hit = sc.objects_[i]->hit(ray);
+                    if (hit.has_value())
                     {
-                        min_dist = new_dist;
-                        mat = sc.objects_[i]->get_texture(hit.value());
+                        float new_dist =
+                            (hit.value() - cam.get_center()).squaredNorm();
+                        if (new_dist < min_dist)
+                        {
+                            min_dist = new_dist;
+                            mat = sc.objects_[i]->get_texture(hit.value());
+                        }
                     }
                 }
+                img.set(mat.get_color(), x, y);
+                SetPixel(x, y, mat.get_color().red(), mat.get_color().green(),
+                         mat.get_color().blue());
             }
-            img.set(mat.get_color(), x, y);
         }
+        // cam.change_pos(Vector3(0,frame < 50 ? 0.05 : -0.05,0));
+        sc.objects_[0]->move(Vector3(0, frame < 50 ? 0.05 : -0.05, 0));
+        sc.objects_[1]->move(Vector3(frame < 50 ? 0.05 : -0.05, 0, 0));
+        std::cout << "frame: " << frame << std::endl;
+        GifWriteFrame(&writer, image, img_width, img_height, 2, 8, true);
     }
     img.save();
+    GifEnd(&writer);
 
     return 0;
 }

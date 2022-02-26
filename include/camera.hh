@@ -27,6 +27,12 @@ public:
         return center_;
     }
 
+    void change_pos(Vector3 pos)
+    {
+        center_ = center_ + pos;
+        lower_left_corner_ = lower_left_corner_ + pos;
+    }
+
 private:
     Vector3 center_;
     Vector3 lower_left_corner_;

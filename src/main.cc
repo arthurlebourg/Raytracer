@@ -9,13 +9,37 @@
 #include "uniform_texture.hh"
 #include "vector3.hh"
 
-Color diffused_color(std::shared_ptr<Object> object, Scene scene,
-                     Vector3 hit_point)
+Color diffused_color(std::shared_ptr<Object> object, const Scene &scene,
+                     const Vector3 &hit_point)
 {
-    scene = scene;
     auto material = object->get_texture(hit_point);
-    return material.get_color();
-    // TODO :add proper diffusion computation
+    Color res;
+    for (auto light : scene.lights_)
+    {
+        // ray cast from light
+        Ray light_ray(hit_point, light->get_pos() - hit_point);
+
+        // checks if another object is in the way of the light
+        bool is_shadowed = false;
+        for (auto other_object : scene.objects_)
+        {
+            if (other_object == object)
+                continue;
+            if (other_object->hit(light_ray).has_value())
+            {
+                is_shadowed = true;
+                break;
+            }
+        }
+        if (is_shadowed)
+            continue;
+
+        res = res
+            + material.get_color() * material.get_diffusion_coeff()
+                * dot(object->normal(hit_point), light_ray.direction())
+                * light->get_intensity();
+    }
+    return res;
 }
 
 int main()
@@ -44,7 +68,7 @@ int main()
 
     double img_width = 680;
     double img_height = 460;
-    Color default_color(0, 0, 0);
+    Color default_color;
 
     Image img = Image("bite.ppm", img_width, img_height);
 

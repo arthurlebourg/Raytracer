@@ -9,12 +9,5 @@ class Light
 public:
     virtual float get_intensity() = 0;
 
-    Vector3 get_pos()
-    {
-        return pos_;
-    }
-
-private:
-    Vector3 pos_;
-    float intensity_;
+    virtual Vector3 get_pos() = 0;
 };

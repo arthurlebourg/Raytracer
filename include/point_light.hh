@@ -14,4 +14,13 @@ public:
     {
         return intensity_;
     }
+
+    Vector3 get_pos()
+    {
+        return pos_;
+    }
+
+private:
+    Vector3 pos_;
+    float intensity_;
 };

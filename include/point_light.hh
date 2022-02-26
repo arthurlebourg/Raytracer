@@ -2,10 +2,13 @@
 
 #include <iostream>
 
-class Point_Light : Light
+#include "light.hh"
+#include "vector3.hh"
+
+class Point_Light : public Light
 {
 public:
-    Point_Light(float intensity, Vector3 pos_)
+    Point_Light(float intensity, Vector3 pos)
         : pos_(pos)
         , intensity_(intensity)
     {}

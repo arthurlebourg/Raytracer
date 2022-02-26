@@ -47,9 +47,9 @@ inline std::ostream &operator<<(std::ostream &os, Color &col)
 
 inline Color operator+(const Color &c, float t)
 {
-    unsigned int red = t + c.red();
-    unsigned int green = t + c.green();
-    unsigned int blue = t + c.blue();
+    int red = t + c.red();
+    int green = t + c.green();
+    int blue = t + c.blue();
     // prevents signed overflow
     return Color(red > 255 ? 255 : red, green > 255 ? 255 : green,
                  blue > 255 ? 255 : blue);
@@ -57,9 +57,9 @@ inline Color operator+(const Color &c, float t)
 
 inline Color operator+(const Color &lhs, const Color &rhs)
 {
-    unsigned int red = lhs.red() * rhs.red();
-    unsigned int green = lhs.green() * rhs.green();
-    unsigned int blue = lhs.blue() * rhs.blue();
+    unsigned int red = lhs.red() + rhs.red();
+    unsigned int green = lhs.green() + rhs.green();
+    unsigned int blue = lhs.blue() + rhs.blue();
     // prevents signed overflow
     return Color(red > 255 ? 255 : red, green > 255 ? 255 : green,
                  blue > 255 ? 255 : blue);
@@ -67,9 +67,12 @@ inline Color operator+(const Color &lhs, const Color &rhs)
 
 inline Color operator*(const Color &c, float t)
 {
-    unsigned int red = t * c.red();
-    unsigned int green = t * c.green();
-    unsigned int blue = t * c.blue();
+    if (t <= 0)
+        return Color(0, 0, 0);
+
+    int red = t * c.red();
+    int green = t * c.green();
+    int blue = t * c.blue();
     // prevents signed overflow
     return Color(red > 255 ? 255 : red, green > 255 ? 255 : green,
                  blue > 255 ? 255 : blue);

@@ -3,6 +3,7 @@
 
 #include "color.hh"
 #include "image.hh"
+#include "point_light.hh"
 #include "ray.hh"
 #include "scene.hh"
 #include "sphere.hh"
@@ -44,7 +45,7 @@ Color diffused_color(std::shared_ptr<Object> object, const Scene &scene,
 
 int main()
 {
-    double fov_w = 110;
+    double fov_w = 90;
     double fov_h = 110;
     double dist_to_screen = 50.0;
 
@@ -63,12 +64,17 @@ int main()
 
     sc.objects_.push_back(std::make_shared<Sphere>(green_boulasse));
 
+    Vector3 light_pos(-1, 3, 0.05);
+    float luminosty = 1;
+    Point_Light light(luminosty, light_pos);
+    sc.lights_.push_back(std::make_shared<Point_Light>(light));
+
     std::cout << cam.get_horizontal() << std::endl
               << cam.get_vertical() << std::endl;
 
     double img_width = 680;
     double img_height = 460;
-    Color default_color;
+    Color default_color(255, 0, 0);
 
     Image img = Image("bite.ppm", img_width, img_height);
 

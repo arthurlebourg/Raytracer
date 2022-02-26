@@ -38,8 +38,9 @@ public:
             << width_ << ' ' << height_ << std::endl
             << "255" << std::endl;
 
-        for (size_t j = 0; j < height_; ++j)
-            for (size_t i = 0; i < width_; ++i)
+        // for (size_t j = height_ - 1; j < height_; j--)
+        for (size_t j = 0; j < height_; j++)
+            for (size_t i = 0; i < width_; i++)
                 ofs << data_[height_ * j + i].red()
                     << data_[height_ * j + i].green()
                     << data_[height_ * j + i].blue();

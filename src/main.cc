@@ -15,36 +15,8 @@
 const size_t img_width = 680;
 const size_t img_height = 460;
 
-int make_gif()
+int make_gif(Camera &cam, const Scene &sc)
 {
-    double fov_w = 90;
-    double fov_h = 110;
-    double dist_to_screen = 50.0;
-    Camera cam = Camera(Vector3(0, 0, 0), Vector3(0, 0, 1), Vector3(0, 1, 0),
-                        fov_w / 2, fov_h / 2, dist_to_screen);
-    Scene sc = Scene(cam);
-
-    Uniform_Texture green_tex = Uniform_Texture(Material(Color(0, 255, 0), 1));
-    Uniform_Texture red_tex = Uniform_Texture(Material(Color(255, 0, 0), 1));
-    Uniform_Texture gray_tex =
-        Uniform_Texture(Material(Color(125, 125, 125), 1));
-
-    Sphere green_boulasse = Sphere(
-        Vector3(0, 0, 51), 50.95, std::make_shared<Uniform_Texture>(green_tex));
-
-    Sphere red_boulasse = Sphere(Vector3(0, -0.25, 51), 50.95,
-                                 std::make_shared<Uniform_Texture>(red_tex));
-
-    Plane plancher = Plane(Vector3(0, 1, 0), Vector3(0, 1, 0),
-                           std::make_shared<Uniform_Texture>(gray_tex));
-
-    sc.objects_.push_back(std::make_shared<Sphere>(green_boulasse));
-    sc.objects_.push_back(std::make_shared<Sphere>(red_boulasse));
-    sc.objects_.push_back(std::make_shared<Plane>(plancher));
-
-    std::cout << cam.get_horizontal() << std::endl
-              << cam.get_vertical() << std::endl;
-
     int frames = 100;
 
     Gif gif = Gif("raytrace.gif", img_width, img_height, frames);
@@ -87,36 +59,8 @@ int make_gif()
     return 0;
 }
 
-int make_image()
+int make_image(Camera &cam, const Scene &sc)
 {
-    double fov_w = 90;
-    double fov_h = 110;
-    double dist_to_screen = 50.0;
-    Camera cam = Camera(Vector3(0, 0, 0), Vector3(0, 0, 1), Vector3(0, 1, 0),
-                        fov_w / 2, fov_h / 2, dist_to_screen);
-    Scene sc = Scene(cam);
-
-    Uniform_Texture green_tex = Uniform_Texture(Material(Color(0, 255, 0), 1));
-    Uniform_Texture red_tex = Uniform_Texture(Material(Color(255, 0, 0), 1));
-    Uniform_Texture gray_tex =
-        Uniform_Texture(Material(Color(125, 125, 125), 1));
-
-    Sphere green_boulasse = Sphere(
-        Vector3(0, 0, 51), 50.95, std::make_shared<Uniform_Texture>(green_tex));
-
-    Sphere red_boulasse = Sphere(Vector3(0, -0.25, 51), 50.95,
-                                 std::make_shared<Uniform_Texture>(red_tex));
-
-    Plane plancher = Plane(Vector3(0, 1, 0), Vector3(0, 1, 0),
-                           std::make_shared<Uniform_Texture>(gray_tex));
-
-    sc.objects_.push_back(std::make_shared<Sphere>(green_boulasse));
-    sc.objects_.push_back(std::make_shared<Sphere>(red_boulasse));
-    sc.objects_.push_back(std::make_shared<Plane>(plancher));
-
-    std::cout << cam.get_horizontal() << std::endl
-              << cam.get_vertical() << std::endl;
-
     Image img = Image("bite.ppm", img_width, img_height);
 
     for (double y = 0; y < img_height; y++)
@@ -152,9 +96,36 @@ int make_image()
 int main(int argc, char *argv[])
 {
     argv = argv;
+    double fov_w = 90;
+    double fov_h = 110;
+    double dist_to_screen = 50.0;
+    Camera cam = Camera(Vector3(0, 0, 0), Vector3(0, 0, 1), Vector3(0, 1, 0),
+                        fov_w / 2, fov_h / 2, dist_to_screen);
+    Scene sc = Scene(cam);
+
+    Uniform_Texture green_tex = Uniform_Texture(Material(Color(0, 255, 0), 1));
+    Uniform_Texture red_tex = Uniform_Texture(Material(Color(255, 0, 0), 1));
+    Uniform_Texture gray_tex =
+        Uniform_Texture(Material(Color(125, 125, 125), 1));
+
+    Sphere green_boulasse = Sphere(
+        Vector3(0, 0, 51), 50.95, std::make_shared<Uniform_Texture>(green_tex));
+
+    Sphere red_boulasse = Sphere(Vector3(0, -0.25, 51), 50.95,
+                                 std::make_shared<Uniform_Texture>(red_tex));
+
+    Plane plancher = Plane(Vector3(0, 1, 0), Vector3(0, 1, 0),
+                           std::make_shared<Uniform_Texture>(gray_tex));
+
+    sc.objects_.push_back(std::make_shared<Sphere>(green_boulasse));
+    sc.objects_.push_back(std::make_shared<Sphere>(red_boulasse));
+    sc.objects_.push_back(std::make_shared<Plane>(plancher));
+
+    std::cout << cam.get_horizontal() << std::endl
+              << cam.get_vertical() << std::endl;
     if (argc > 1)
     {
-        return make_gif();
+        return make_gif(cam, sc);
     }
-    return make_image();
+    return make_image(cam, sc);
 }

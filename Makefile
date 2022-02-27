@@ -35,6 +35,10 @@ debug: all
 release: CXXFLAGS += -O2
 release: all
 
+exe: all
+	./$(BIN_DIR)/$(TARGET)
+	@feh bite.ppm
+
 clean:
 	-@rm -rvf $(OBJ_DIR)/*
 	-@rm -rvf $(BIN_DIR)/*

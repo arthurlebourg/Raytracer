@@ -6,6 +6,7 @@
 #include "gif.hh"
 #include "image.hh"
 #include "plane.hh"
+#include "point_light.hh"
 #include "ray.hh"
 #include "scene.hh"
 #include "sphere.hh"
@@ -15,11 +16,45 @@
 const size_t img_width = 680;
 const size_t img_height = 460;
 
+Color diffused_color(std::shared_ptr<Object> object, const Scene &scene,
+                     const Vector3 &hit_point)
+{
+    auto material = object->get_texture(hit_point);
+    Color res;
+    for (auto light : scene.lights_)
+    {
+        // ray cast from light
+        Ray light_ray(hit_point, light->get_pos() - hit_point);
+
+        // checks if another object is in the way of the light
+        bool is_shadowed = false;
+        for (auto other_object : scene.objects_)
+        {
+            if (other_object == object)
+                continue;
+            if (other_object->hit(light_ray).has_value())
+            {
+                is_shadowed = true;
+                break;
+            }
+        }
+        if (is_shadowed)
+            continue;
+
+        res = res
+            + material.get_color() * material.get_diffusion_coeff()
+                * dot(object->normal(hit_point), light_ray.direction())
+                * light->get_intensity();
+    }
+    return res;
+}
+
+
 int make_gif(Camera &cam, const Scene &sc)
 {
     int frames = 100;
-
     Gif gif = Gif("raytrace.gif", img_width, img_height, frames);
+    Color default_color;
 
     for (int frame = 0; frame < frames; ++frame)
     {
@@ -29,11 +64,12 @@ int make_gif(Camera &cam, const Scene &sc)
             {
                 Ray ray = cam.get_ray(x / img_width, y / img_height);
                 float min_dist = std::numeric_limits<float>::max();
-                Material mat =
-                    Material(Color((y * 100 / 255), (y * 100 / 255), 255), 0);
+                std::shared_ptr<Object> object = nullptr;
+                std::optional<Vector3> hit = std::nullopt;
+                // finds objects with closest point
                 for (size_t i = 0; i < sc.objects_.size(); i++)
                 {
-                    std::optional<Vector3> hit = sc.objects_[i]->hit(ray);
+                    hit = sc.objects_[i]->hit(ray);
                     if (hit.has_value())
                     {
                         float new_dist =
@@ -41,11 +77,19 @@ int make_gif(Camera &cam, const Scene &sc)
                         if (new_dist < min_dist)
                         {
                             min_dist = new_dist;
-                            mat = sc.objects_[i]->get_texture(hit.value());
+                            object = sc.objects_[i];
                         }
                     }
                 }
-                gif.set(mat.get_color(), x, y);
+
+                if (object == nullptr)
+                {
+                    gif.set(default_color, x, y);
+                }
+                else
+                {
+                    gif.set(diffused_color(object, sc, hit.value()), x, y);
+                }
             }
         }
         // cam.change_pos(Vector3(0,frame < 50 ? 0.05 : -0.05,0));
@@ -62,6 +106,7 @@ int make_gif(Camera &cam, const Scene &sc)
 int make_image(Camera &cam, const Scene &sc)
 {
     Image img = Image("bite.ppm", img_width, img_height);
+    Color default_color(255, 255, 255);
 
     for (double y = 0; y < img_height; y++)
     {
@@ -69,23 +114,33 @@ int make_image(Camera &cam, const Scene &sc)
         {
             Ray ray = cam.get_ray(x / img_width, y / img_height);
             float min_dist = std::numeric_limits<float>::max();
-            Material mat =
-                Material(Color((y * 100 / 255), (y * 100 / 255), 255), 0);
+            std::shared_ptr<Object> object = nullptr;
+            std::optional<Vector3> hit = std::nullopt;
+            // finds objects with closest point
             for (size_t i = 0; i < sc.objects_.size(); i++)
             {
-                std::optional<Vector3> hit = sc.objects_[i]->hit(ray);
-                if (hit.has_value())
+                auto new_hit = sc.objects_[i]->hit(ray);
+                if (new_hit.has_value())
                 {
                     float new_dist =
-                        (hit.value() - cam.get_center()).squaredNorm();
+                        (new_hit.value() - cam.get_center()).squaredNorm();
                     if (new_dist < min_dist)
                     {
                         min_dist = new_dist;
-                        mat = sc.objects_[i]->get_texture(hit.value());
+                        object = sc.objects_[i];
+                        hit = new_hit;
                     }
                 }
             }
-            img.set(mat.get_color(), x, y);
+
+            if (object == nullptr)
+            {
+                img.set(default_color, x, y);
+            }
+            else
+            {
+                img.set(diffused_color(object, sc, hit.value()), x, y);
+            }
         }
     }
     img.save();
@@ -95,34 +150,52 @@ int make_image(Camera &cam, const Scene &sc)
 
 int main(int argc, char *argv[])
 {
-    argv = argv;
-    double fov_w = 90;
-    double fov_h = 110;
-    double dist_to_screen = 50.0;
-    Camera cam = Camera(Vector3(0, 0, 0), Vector3(0, 0, 1), Vector3(0, 1, 0),
-                        fov_w / 2, fov_h / 2, dist_to_screen);
+    double fov_w = 90.0;
+    double fov_h = 120.0;
+    double dist_to_screen = 1;
+
+    Vector3 camCenter(0, 0, 0);
+    Vector3 camFocus(0, 0, 1);
+    Vector3 camUp(0, 1, 0);
+
+    Camera cam = Camera(camCenter, camFocus, camUp, fov_w / 2, fov_h / 2,
+                        dist_to_screen);
+    std::cout << cam.get_horizontal() << std::endl
+              << cam.get_vertical() << std::endl;
     Scene sc = Scene(cam);
+
+    Vector3 light_pos(0, 1, 2.5);
+    float luminosty = 1;
+    Point_Light light(luminosty, light_pos);
+    sc.lights_.push_back(std::make_shared<Point_Light>(light));
+
+
+    argv = argv;
 
     Uniform_Texture green_tex = Uniform_Texture(Material(Color(0, 255, 0), 1));
     Uniform_Texture red_tex = Uniform_Texture(Material(Color(255, 0, 0), 1));
     Uniform_Texture gray_tex =
-        Uniform_Texture(Material(Color(125, 125, 125), 1));
+        Uniform_Texture(Material(Color(125, 125, 125),0.05));
 
     Sphere green_boulasse = Sphere(
-        Vector3(0, 0, 51), 50.95, std::make_shared<Uniform_Texture>(green_tex));
+        Vector3(0, 0, 6), 3, std::make_shared<Uniform_Texture>(green_tex));
 
     Sphere red_boulasse = Sphere(Vector3(0, -0.25, 51), 50.95,
                                  std::make_shared<Uniform_Texture>(red_tex));
 
-    Plane plancher = Plane(Vector3(0, 1, 0), Vector3(0, 1, 0),
+/*
+    Plane plancher = Plane(Vector3(0, -1, 0), Vector3(0, 1, 0),
+                           std::make_shared<Uniform_Texture>(gray_tex));
+    */
+    Sphere gray_sphere = Sphere(Vector3(0, 0, 100), 80 ,
                            std::make_shared<Uniform_Texture>(gray_tex));
 
     sc.objects_.push_back(std::make_shared<Sphere>(green_boulasse));
-    sc.objects_.push_back(std::make_shared<Sphere>(red_boulasse));
-    sc.objects_.push_back(std::make_shared<Plane>(plancher));
+   // sc.objects_.push_back(std::make_shared<Sphere>(red_boulasse));
+    //sc.objects_.push_back(std::make_shared<Sphere>(gray_sphere));
+    red_boulasse = red_boulasse;
+    gray_sphere = gray_sphere;
 
-    std::cout << cam.get_horizontal() << std::endl
-              << cam.get_vertical() << std::endl;
     if (argc > 1)
     {
         return make_gif(cam, sc);

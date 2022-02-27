@@ -33,6 +33,8 @@
 
 #images
 *.ppm
+*.gif
+
 
 bin/
 

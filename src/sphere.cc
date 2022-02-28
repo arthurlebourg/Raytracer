@@ -18,14 +18,14 @@ std::optional<Vector3> Sphere::hit(Ray ray)
     }
     else
     {
-        float dist = (-b + sqrt(discriminant)) / a;
-        // std::cout << "dist: " << dist << " -b: " << -b << " sqrt(delta): " <<
-        // sqrt(discriminant) << std::endl;
+        float dist = (-b - sqrt(discriminant)) / a;
+        std::cout << "dist: " << dist << " -b: " << -b
+                  << " sqrt(delta): " << sqrt(discriminant) << std::endl;
         return ray.origin() + ray.direction() * dist;
     }
 }
 
 Vector3 Sphere::normal(Vector3 point)
 {
-    return point - pos_;
+    return (point - pos_).normalized();
 }

@@ -24,7 +24,8 @@ Color diffused_color(std::shared_ptr<Object> object, const Scene &scene,
     for (auto light : scene.lights_)
     {
         // ray cast from point to light
-        Ray light_ray(light->get_pos(), hit_point - light->get_pos());
+        Ray light_ray(light->get_pos(),
+                      (hit_point - light->get_pos()).normalized());
 
         // checks if another object is in the way of the light
         bool is_shadowed = false;
@@ -40,6 +41,12 @@ Color diffused_color(std::shared_ptr<Object> object, const Scene &scene,
         }
         if (is_shadowed)
             continue;
+
+        std::cout << "normal: " << object->normal(hit_point)
+                  << " point: " << hit_point;
+        std::cout << "dot: "
+                  << dot(object->normal(hit_point), light_ray.direction())
+                  << std::endl;
 
         res = res
             + material.get_color() * material.get_diffusion_coeff()
@@ -112,7 +119,6 @@ int make_image(Camera &cam, const Scene &sc)
         for (double x = 0; x < img_width; x++)
         {
             Ray ray = cam.get_ray(x / img_width, y / img_height);
-            std::cout << ray << std::endl;
             float min_dist = std::numeric_limits<float>::max();
             std::shared_ptr<Object> object = nullptr;
             std::optional<Vector3> hit = std::nullopt;
@@ -152,7 +158,7 @@ int main(int argc, char *argv[])
 {
     double fov_w = 90.0;
     double fov_h = 110.0;
-    double dist_to_screen = 50;
+    double dist_to_screen = 1;
 
     Vector3 camCenter(0, 0, 0);
     Vector3 camFocus(0, 0, 1);
@@ -164,7 +170,7 @@ int main(int argc, char *argv[])
               << cam.get_vertical() << std::endl;
     Scene sc = Scene(cam);
 
-    Vector3 light_pos(-1, 3, 0.05);
+    Vector3 light_pos(5, 2, 5);
     float luminosty = 1;
     Point_Light light(luminosty, light_pos);
     sc.lights_.push_back(std::make_shared<Point_Light>(light));
@@ -176,9 +182,8 @@ int main(int argc, char *argv[])
     Uniform_Texture gray_tex =
         Uniform_Texture(Material(Color(125, 125, 125), 0.1));
 
-    Sphere green_boulasse =
-        Sphere(Vector3(00, 0, 51), 50.95,
-               std::make_shared<Uniform_Texture>(green_tex));
+    Sphere green_boulasse = Sphere(
+        Vector3(2, 0, 5), 2, std::make_shared<Uniform_Texture>(green_tex));
 
     Sphere red_boulasse = Sphere(Vector3(0, -0.25, 51), 50.95,
                                  std::make_shared<Uniform_Texture>(red_tex));

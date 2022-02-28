@@ -24,8 +24,7 @@ Color diffused_color(std::shared_ptr<Object> object, const Scene &scene,
     for (auto light : scene.lights_)
     {
         // ray cast from point to light
-        Ray light_ray(light->get_pos(),
-                      (hit_point - light->get_pos()).normalized());
+        Ray light_ray(hit_point, (light->get_pos() - hit_point).normalized());
 
         // checks if another object is in the way of the light
         bool is_shadowed = false;
@@ -42,12 +41,6 @@ Color diffused_color(std::shared_ptr<Object> object, const Scene &scene,
         if (is_shadowed)
             continue;
 
-        std::cout << "normal: " << object->normal(hit_point)
-                  << " point: " << hit_point;
-        std::cout << "dot: "
-                  << dot(object->normal(hit_point), light_ray.direction())
-                  << std::endl;
-
         res = res
             + material.get_color() * material.get_diffusion_coeff()
                 * dot(object->normal(hit_point), light_ray.direction())
@@ -60,7 +53,7 @@ int make_gif(Camera &cam, const Scene &sc)
 {
     int frames = 100;
     Gif gif = Gif("raytrace.gif", img_width, img_height, frames);
-    Color default_color;
+    Color default_color(255, 0, 0);
 
     for (int frame = 0; frame < frames; ++frame)
     {
@@ -99,8 +92,8 @@ int make_gif(Camera &cam, const Scene &sc)
             }
         }
         // cam.change_pos(Vector3(0,frame < 50 ? 0.05 : -0.05,0));
-        sc.objects_[0]->move(Vector3(0, frame < 50 ? 0.05 : -0.05, 0));
-        // sc.objects_[1]->move(Vector3(frame < 50 ? 0.05 : -0.05, 0, 0));
+        // sc.objects_[0]->move(Vector3(0, frame < 50 ? 0.05 : -0.05, 0));
+        sc.objects_[0]->move(Vector3(frame < 50 ? 0.05 : -0.05, 0, 0));
         std::cout << "frame: " << frame << std::endl;
         gif.write_frame();
     }
@@ -170,7 +163,7 @@ int main(int argc, char *argv[])
               << cam.get_vertical() << std::endl;
     Scene sc = Scene(cam);
 
-    Vector3 light_pos(5, 2, 5);
+    Vector3 light_pos(5, 5, 5);
     float luminosty = 1;
     Point_Light light(luminosty, light_pos);
     sc.lights_.push_back(std::make_shared<Point_Light>(light));
@@ -183,7 +176,7 @@ int main(int argc, char *argv[])
         Uniform_Texture(Material(Color(125, 125, 125), 0.1));
 
     Sphere green_boulasse = Sphere(
-        Vector3(2, 0, 5), 2, std::make_shared<Uniform_Texture>(green_tex));
+        Vector3(2, -1, 5), 2, std::make_shared<Uniform_Texture>(green_tex));
 
     Sphere red_boulasse = Sphere(Vector3(0, -0.25, 51), 50.95,
                                  std::make_shared<Uniform_Texture>(red_tex));

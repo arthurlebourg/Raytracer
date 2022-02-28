@@ -39,7 +39,7 @@ public:
             << "255" << std::endl;
 
         // for (size_t j = height_ - 1; j < height_; j--)
-        for (size_t j = 0; j < height_; j++)
+        for (size_t j = height_ - 1; j < height_; j--)
             for (size_t i = 0; i < width_; i++)
                 ofs << data_[width_ * j + i].red()
                     << data_[width_ * j + i].green()

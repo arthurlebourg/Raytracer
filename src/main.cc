@@ -14,7 +14,7 @@
 #include "vector3.hh"
 
 const size_t img_width = 680;
-const size_t img_height = 460;
+const size_t img_height = 480;
 
 Color diffused_color(std::shared_ptr<Object> object, const Scene &scene,
                      const Vector3 &hit_point)
@@ -24,7 +24,7 @@ Color diffused_color(std::shared_ptr<Object> object, const Scene &scene,
     for (auto light : scene.lights_)
     {
         // ray cast from light
-        Ray light_ray(hit_point, light->get_pos() - hit_point);
+        Ray light_ray(hit_point, hit_point - light->get_pos());
 
         // checks if another object is in the way of the light
         bool is_shadowed = false;
@@ -48,7 +48,6 @@ Color diffused_color(std::shared_ptr<Object> object, const Scene &scene,
     }
     return res;
 }
-
 
 int make_gif(Camera &cam, const Scene &sc)
 {
@@ -106,7 +105,7 @@ int make_gif(Camera &cam, const Scene &sc)
 int make_image(Camera &cam, const Scene &sc)
 {
     Image img = Image("bite.ppm", img_width, img_height);
-    Color default_color(255, 255, 255);
+    Color default_color(0, 255, 255);
 
     for (double y = 0; y < img_height; y++)
     {
@@ -151,7 +150,7 @@ int make_image(Camera &cam, const Scene &sc)
 int main(int argc, char *argv[])
 {
     double fov_w = 90.0;
-    double fov_h = 120.0;
+    double fov_h = 110.0;
     double dist_to_screen = 1;
 
     Vector3 camCenter(0, 0, 0);
@@ -164,37 +163,37 @@ int main(int argc, char *argv[])
               << cam.get_vertical() << std::endl;
     Scene sc = Scene(cam);
 
-    Vector3 light_pos(0, 1, 2.5);
+    Vector3 light_pos(0, 12, 2);
     float luminosty = 1;
     Point_Light light(luminosty, light_pos);
     sc.lights_.push_back(std::make_shared<Point_Light>(light));
-
 
     argv = argv;
 
     Uniform_Texture green_tex = Uniform_Texture(Material(Color(0, 255, 0), 1));
     Uniform_Texture red_tex = Uniform_Texture(Material(Color(255, 0, 0), 1));
     Uniform_Texture gray_tex =
-        Uniform_Texture(Material(Color(125, 125, 125),0.05));
+        Uniform_Texture(Material(Color(125, 125, 125), 0.1));
 
     Sphere green_boulasse = Sphere(
-        Vector3(0, 0, 6), 3, std::make_shared<Uniform_Texture>(green_tex));
+        Vector3(0, 0, 7), 3, std::make_shared<Uniform_Texture>(green_tex));
 
     Sphere red_boulasse = Sphere(Vector3(0, -0.25, 51), 50.95,
                                  std::make_shared<Uniform_Texture>(red_tex));
 
-/*
-    Plane plancher = Plane(Vector3(0, -1, 0), Vector3(0, 1, 0),
-                           std::make_shared<Uniform_Texture>(gray_tex));
-    */
-    Sphere gray_sphere = Sphere(Vector3(0, 0, 100), 80 ,
+    Plane plancher = Plane(Vector3(0, 0, 0), Vector3(0, 1, 0),
                            std::make_shared<Uniform_Texture>(gray_tex));
 
+    Sphere gray_sphere = Sphere(Vector3(0, 0, 10), 0.5,
+                                std::make_shared<Uniform_Texture>(gray_tex));
+
     sc.objects_.push_back(std::make_shared<Sphere>(green_boulasse));
-   // sc.objects_.push_back(std::make_shared<Sphere>(red_boulasse));
-    //sc.objects_.push_back(std::make_shared<Sphere>(gray_sphere));
+    // sc.objects_.push_back(std::make_shared<Sphere>(red_boulasse));
+    // sc.objects_.push_back(std::make_shared<Sphere>(gray_sphere));
+    //    sc.objects_.push_back(std::make_shared<Plane>(plancher));
     red_boulasse = red_boulasse;
     gray_sphere = gray_sphere;
+    plancher = plancher;
 
     if (argc > 1)
     {

@@ -22,7 +22,8 @@ Camera::Camera(Vector3 center, Vector3 focus, Vector3 up, double fov_v,
     center_ = center;
     horizontal_ = viewport_h * u;
     vertical_ = viewport_v * v;
-    lower_left_corner_ = center - horizontal_ / 2 - vertical_ / 2 - w;
+    lower_left_corner_ = center - horizontal_ / 2 - vertical_ / 2 + w;
+    std::cout << "image origin: " << lower_left_corner_ << std::endl;
 }
 
 Ray Camera::get_ray(double x, double y) const

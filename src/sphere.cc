@@ -2,7 +2,7 @@
 
 std::optional<Vector3> Sphere::hit(Ray ray)
 {
-    Vector3 oc = ray.origin() - pos_;
+    Vector3 oc = pos_ - ray.origin();
     float b = 2.0 * dot(oc, ray.direction());
     if (b < 0) // check if obj is behind cam
     {

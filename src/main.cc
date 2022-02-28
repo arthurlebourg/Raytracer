@@ -24,7 +24,7 @@ Color diffused_color(std::shared_ptr<Object> object, const Scene &scene,
     for (auto light : scene.lights_)
     {
         // ray cast from light
-        Ray light_ray(hit_point, hit_point - light->get_pos());
+        Ray light_ray(light->get_pos(), hit_point - light->get_pos());
 
         // checks if another object is in the way of the light
         bool is_shadowed = false;
@@ -41,10 +41,14 @@ Color diffused_color(std::shared_ptr<Object> object, const Scene &scene,
         if (is_shadowed)
             continue;
 
+        std::cout << "before: " << res;
         res = res
             + material.get_color() * material.get_diffusion_coeff()
                 * dot(object->normal(hit_point), light_ray.direction())
                 * light->get_intensity();
+        std::cout << " after: " << res << " dot: "
+                  << dot(object->normal(hit_point), light_ray.direction())
+                  << "intesity: " << light->get_intensity() << std::endl;
     }
     return res;
 }

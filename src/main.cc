@@ -93,7 +93,7 @@ int make_gif(Camera &cam, const Scene &sc)
         }
         // cam.change_pos(Vector3(0,frame < 50 ? 0.05 : -0.05,0));
         sc.objects_[0]->move(Vector3(0, frame < 50 ? 0.05 : -0.05, 0));
-        sc.objects_[1]->move(Vector3(frame < 50 ? 0.05 : -0.05, 0, 0));
+        // sc.objects_[1]->move(Vector3(frame < 50 ? 0.05 : -0.05, 0, 0));
         std::cout << "frame: " << frame << std::endl;
         gif.write_frame();
     }

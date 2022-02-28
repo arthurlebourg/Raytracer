@@ -53,7 +53,7 @@ int make_gif(Camera &cam, const Scene &sc)
 {
     int frames = 100;
     Gif gif = Gif("raytrace.gif", img_width, img_height, frames);
-    Color default_color(255, 0, 0);
+    Color default_color(0, 125, 255);
 
     for (int frame = 0; frame < frames; ++frame)
     {
@@ -68,15 +68,16 @@ int make_gif(Camera &cam, const Scene &sc)
                 // finds objects with closest point
                 for (size_t i = 0; i < sc.objects_.size(); i++)
                 {
-                    hit = sc.objects_[i]->hit(ray);
-                    if (hit.has_value())
+                    auto new_hit = sc.objects_[i]->hit(ray);
+                    if (new_hit.has_value())
                     {
                         float new_dist =
-                            (hit.value() - cam.get_center()).squaredNorm();
+                            (new_hit.value() - cam.get_center()).squaredNorm();
                         if (new_dist < min_dist)
                         {
                             min_dist = new_dist;
                             object = sc.objects_[i];
+                            hit = new_hit;
                         }
                     }
                 }
@@ -92,7 +93,7 @@ int make_gif(Camera &cam, const Scene &sc)
             }
         }
         // cam.change_pos(Vector3(0,frame < 50 ? 0.05 : -0.05,0));
-        // sc.objects_[0]->move(Vector3(0, frame < 50 ? 0.05 : -0.05, 0));
+        sc.objects_[1]->move(Vector3(0, frame < 50 ? 0.05 : -0.05, 0));
         sc.objects_[0]->move(Vector3(frame < 50 ? 0.05 : -0.05, 0, 0));
         std::cout << "frame: " << frame << std::endl;
         gif.write_frame();
@@ -173,27 +174,25 @@ int main(int argc, char *argv[])
     Uniform_Texture green_tex = Uniform_Texture(Material(Color(0, 255, 0), 1));
     Uniform_Texture red_tex = Uniform_Texture(Material(Color(255, 0, 0), 1));
     Uniform_Texture gray_tex =
-        Uniform_Texture(Material(Color(125, 125, 125), 0.1));
+        Uniform_Texture(Material(Color(125, 125, 125), 1));
 
     Sphere green_boulasse = Sphere(
         Vector3(2, -1, 5), 2, std::make_shared<Uniform_Texture>(green_tex));
 
-    Sphere red_boulasse = Sphere(Vector3(0, -0.25, 51), 50.95,
+    Sphere red_boulasse = Sphere(Vector3(-4, 0, 8), 2,
                                  std::make_shared<Uniform_Texture>(red_tex));
 
-    Plane plancher = Plane(Vector3(0, 0, 0), Vector3(0, 1, 0),
+    Plane plancher = Plane(Vector3(0, -1, 0), Vector3(0, 1, 0),
                            std::make_shared<Uniform_Texture>(gray_tex));
 
     Sphere gray_sphere = Sphere(Vector3(0, 0, 10), 0.5,
                                 std::make_shared<Uniform_Texture>(gray_tex));
 
     sc.objects_.push_back(std::make_shared<Sphere>(green_boulasse));
-    // sc.objects_.push_back(std::make_shared<Sphere>(red_boulasse));
-    // sc.objects_.push_back(std::make_shared<Sphere>(gray_sphere));
-    //    sc.objects_.push_back(std::make_shared<Plane>(plancher));
+    sc.objects_.push_back(std::make_shared<Sphere>(red_boulasse));
+    sc.objects_.push_back(std::make_shared<Plane>(plancher));
     red_boulasse = red_boulasse;
     gray_sphere = gray_sphere;
-    plancher = plancher;
 
     if (argc > 1)
     {

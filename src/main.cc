@@ -13,7 +13,7 @@
 #include "uniform_texture.hh"
 #include "vector3.hh"
 
-const size_t img_width = 680;
+const size_t img_width = 640;
 const size_t img_height = 480;
 
 Color diffused_color(std::shared_ptr<Object> object, const Scene &scene,
@@ -23,7 +23,7 @@ Color diffused_color(std::shared_ptr<Object> object, const Scene &scene,
     Color res;
     for (auto light : scene.lights_)
     {
-        // ray cast from light
+        // ray cast from point to light
         Ray light_ray(light->get_pos(), hit_point - light->get_pos());
 
         // checks if another object is in the way of the light
@@ -41,14 +41,10 @@ Color diffused_color(std::shared_ptr<Object> object, const Scene &scene,
         if (is_shadowed)
             continue;
 
-        std::cout << "before: " << res;
         res = res
             + material.get_color() * material.get_diffusion_coeff()
                 * dot(object->normal(hit_point), light_ray.direction())
                 * light->get_intensity();
-        std::cout << " after: " << res << " dot: "
-                  << dot(object->normal(hit_point), light_ray.direction())
-                  << "intesity: " << light->get_intensity() << std::endl;
     }
     return res;
 }
@@ -167,7 +163,7 @@ int main(int argc, char *argv[])
               << cam.get_vertical() << std::endl;
     Scene sc = Scene(cam);
 
-    Vector3 light_pos(0, 12, 2);
+    Vector3 light_pos(-1, 0, 0.05);
     float luminosty = 1;
     Point_Light light(luminosty, light_pos);
     sc.lights_.push_back(std::make_shared<Point_Light>(light));
@@ -180,7 +176,7 @@ int main(int argc, char *argv[])
         Uniform_Texture(Material(Color(125, 125, 125), 0.1));
 
     Sphere green_boulasse = Sphere(
-        Vector3(0, 0, 7), 3, std::make_shared<Uniform_Texture>(green_tex));
+        Vector3(20, 0, 50), 20, std::make_shared<Uniform_Texture>(green_tex));
 
     Sphere red_boulasse = Sphere(Vector3(0, -0.25, 51), 50.95,
                                  std::make_shared<Uniform_Texture>(red_tex));

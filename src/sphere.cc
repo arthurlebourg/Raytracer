@@ -1,6 +1,6 @@
 #include "sphere.hh"
 
-std::optional<Vector3> Sphere::hit(Ray ray)
+std::optional<HitInfo> Sphere::hit(Ray ray)
 {
     Vector3 oc = pos_ - ray.origin();
     float b = dot(oc, ray.direction());
@@ -19,7 +19,9 @@ std::optional<Vector3> Sphere::hit(Ray ray)
     else
     {
         float dist = (-b + sqrt(discriminant)) / a;
-        return ray.origin() + ray.direction() * -dist;
+        // return ray.origin() + ray.direction() * -dist;
+        return HitInfo(ray.origin() + ray.direction() * -dist, ray.direction(),
+                       std::make_shared<Object>(this));
     }
 }
 

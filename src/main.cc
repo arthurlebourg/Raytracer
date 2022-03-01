@@ -5,6 +5,7 @@
 #include "color.hh"
 #include "gif.h"
 #include "gif.hh"
+#include "hitinfo.hh"
 #include "image.hh"
 #include "plane.hh"
 #include "point_light.hh"

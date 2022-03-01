@@ -1,5 +1,6 @@
 #include <iostream>
 #include <limits>
+#include <tuple>
 
 #include "color.hh"
 #include "gif.h"
@@ -49,6 +50,31 @@ Color diffused_color(std::shared_ptr<Object> object, const Scene &scene,
     return res;
 }
 
+std::tuple<std::shared_ptr<Object>, std::optional<Vector3>>
+trace_ray(double x, double y, const Scene &sc, Camera &cam)
+{
+    Ray ray = cam.get_ray(x / img_width, y / img_height);
+    float min_dist = std::numeric_limits<float>::max();
+    std::shared_ptr<Object> object = nullptr;
+    std::optional<Vector3> hit = std::nullopt;
+    // finds objects with closest point
+    for (size_t i = 0; i < sc.objects_.size(); i++)
+    {
+        auto new_hit = sc.objects_[i]->hit(ray);
+        if (new_hit.has_value())
+        {
+            float new_dist = (new_hit.value() - cam.get_center()).squaredNorm();
+            if (new_dist < min_dist)
+            {
+                min_dist = new_dist;
+                object = sc.objects_[i];
+                hit = new_hit;
+            }
+        }
+    }
+    return std::make_tuple(object, hit);
+}
+
 int make_gif(Camera &cam, const Scene &sc)
 {
     int frames = 100;
@@ -61,34 +87,17 @@ int make_gif(Camera &cam, const Scene &sc)
         {
             for (double x = 0; x < img_width; x++)
             {
-                Ray ray = cam.get_ray(x / img_width, y / img_height);
-                float min_dist = std::numeric_limits<float>::max();
-                std::shared_ptr<Object> object = nullptr;
-                std::optional<Vector3> hit = std::nullopt;
-                // finds objects with closest point
-                for (size_t i = 0; i < sc.objects_.size(); i++)
-                {
-                    auto new_hit = sc.objects_[i]->hit(ray);
-                    if (new_hit.has_value())
-                    {
-                        float new_dist =
-                            (new_hit.value() - cam.get_center()).squaredNorm();
-                        if (new_dist < min_dist)
-                        {
-                            min_dist = new_dist;
-                            object = sc.objects_[i];
-                            hit = new_hit;
-                        }
-                    }
-                }
+                auto trace = trace_ray(x, y, sc, cam);
 
-                if (object == nullptr)
+                if (std::get<0>(trace) == nullptr)
                 {
                     gif.set(default_color, x, y);
                 }
                 else
                 {
-                    gif.set(diffused_color(object, sc, hit.value()), x, y);
+                    gif.set(diffused_color(std::get<0>(trace), sc,
+                                           std::get<1>(trace).value()),
+                            x, y);
                 }
             }
         }
@@ -112,34 +121,17 @@ int make_image(Camera &cam, const Scene &sc)
     {
         for (double x = 0; x < img_width; x++)
         {
-            Ray ray = cam.get_ray(x / img_width, y / img_height);
-            float min_dist = std::numeric_limits<float>::max();
-            std::shared_ptr<Object> object = nullptr;
-            std::optional<Vector3> hit = std::nullopt;
-            // finds objects with closest point
-            for (size_t i = 0; i < sc.objects_.size(); i++)
-            {
-                auto new_hit = sc.objects_[i]->hit(ray);
-                if (new_hit.has_value())
-                {
-                    float new_dist =
-                        (new_hit.value() - cam.get_center()).squaredNorm();
-                    if (new_dist < min_dist)
-                    {
-                        min_dist = new_dist;
-                        object = sc.objects_[i];
-                        hit = new_hit;
-                    }
-                }
-            }
+            auto trace = trace_ray(x, y, sc, cam);
 
-            if (object == nullptr)
+            if (std::get<0>(trace) == nullptr)
             {
                 img.set(default_color, x, y);
             }
             else
             {
-                img.set(diffused_color(object, sc, hit.value()), x, y);
+                img.set(diffused_color(std::get<0>(trace), sc,
+                                       std::get<1>(trace).value()),
+                        x, y);
             }
         }
     }

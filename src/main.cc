@@ -79,9 +79,12 @@ Color specular_light(std::shared_ptr<Object> object, Scene &scene,
             - 2 * object->normal(hit_point)
                 * dot(object->normal(hit_point), direction);
 
-        float spec = material.ks()
-            * pow(dot(S, light_ray.direction()), scene.ns())
-            * -light->get_intensity();
+        float dotp = dot(S, light_ray.direction());
+        if (dotp < 0)
+            dotp = 0;
+
+        float spec =
+            material.ks() * pow(dotp, scene.ns()) * light->get_intensity();
 
         res = res + spec;
     }
@@ -140,7 +143,8 @@ int make_gif(Camera &cam, Scene &sc)
                         + specular_light(
                             std::get<0>(trace), sc, std::get<1>(trace).value(),
                             cam.get_ray(x / img_width, y / img_height)
-                                .direction());
+                                .direction()
+                                .normalized());
                     gif.set(c, x, y);
                 }
             }
@@ -177,9 +181,11 @@ int make_image(Camera &cam, Scene &sc)
                                          std::get<1>(trace).value());
 
                 c = c
-                    + specular_light(
-                        std::get<0>(trace), sc, std::get<1>(trace).value(),
-                        cam.get_ray(x / img_width, y / img_height).direction());
+                    + specular_light(std::get<0>(trace), sc,
+                                     std::get<1>(trace).value(),
+                                     cam.get_ray(x / img_width, y / img_height)
+                                         .direction()
+                                         .normalized());
                 img.set(c, x, y);
             }
         }
@@ -203,7 +209,7 @@ int main(int argc, char *argv[])
                         dist_to_screen);
     std::cout << cam.get_horizontal() << std::endl
               << cam.get_vertical() << std::endl;
-    Scene sc = Scene(cam, 15);
+    Scene sc = Scene(cam, 5);
 
     Vector3 light_pos(5, 5, 5);
     float luminosty = 1;
@@ -213,10 +219,11 @@ int main(int argc, char *argv[])
     argv = argv;
 
     Uniform_Texture green_tex =
-        Uniform_Texture(Material(Color(0, 255, 0), 1, 1));
-    Uniform_Texture red_tex = Uniform_Texture(Material(Color(255, 0, 0), 1, 1));
+        Uniform_Texture(Material(Color(0, 255, 0), 1, 100));
+    Uniform_Texture red_tex =
+        Uniform_Texture(Material(Color(255, 0, 0), 1, 100));
     Uniform_Texture gray_tex =
-        Uniform_Texture(Material(Color(125, 125, 125), 1, 1));
+        Uniform_Texture(Material(Color(125, 125, 125), 1, 100));
 
     Sphere green_boulasse = Sphere(
         Vector3(2, -1, 5), 2, std::make_shared<Uniform_Texture>(green_tex));

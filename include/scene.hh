@@ -15,7 +15,7 @@ public:
         , ns_(ns)
     {}
 
-    float ns()
+    float ns() const
     {
         return ns_;
     }

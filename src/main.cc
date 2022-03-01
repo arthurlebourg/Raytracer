@@ -17,6 +17,24 @@
 const size_t img_width = 640;
 const size_t img_height = 480;
 
+bool is_shadowed(const Scene &scene, const Ray &light_ray,
+                 std::shared_ptr<Object> object)
+{
+    bool is_shadowed = false;
+
+    for (auto other_object : scene.objects_)
+    {
+        if (other_object == object)
+            continue;
+        if (other_object->hit(light_ray).has_value())
+        {
+            is_shadowed = true;
+            break;
+        }
+    }
+    return is_shadowed;
+}
+
 Color diffused_color(std::shared_ptr<Object> object, const Scene &scene,
                      const Vector3 &hit_point)
 {
@@ -28,18 +46,8 @@ Color diffused_color(std::shared_ptr<Object> object, const Scene &scene,
         Ray light_ray(hit_point, (light->get_pos() - hit_point).normalized());
 
         // checks if another object is in the way of the light
-        bool is_shadowed = false;
-        for (auto other_object : scene.objects_)
-        {
-            if (other_object == object)
-                continue;
-            if (other_object->hit(light_ray).has_value())
-            {
-                is_shadowed = true;
-                break;
-            }
-        }
-        if (is_shadowed)
+        bool shadowed = is_shadowed(scene, light_ray, object);
+        if (shadowed)
             continue;
 
         res = res
@@ -61,18 +69,8 @@ Color specular_light(std::shared_ptr<Object> object, Scene &scene,
         Ray light_ray(hit_point, (light->get_pos() - hit_point).normalized());
 
         // checks if another object is in the way of the light
-        bool is_shadowed = false;
-        for (auto other_object : scene.objects_)
-        {
-            if (other_object == object)
-                continue;
-            if (other_object->hit(light_ray).has_value())
-            {
-                is_shadowed = true;
-                break;
-            }
-        }
-        if (is_shadowed)
+        bool shadowed = is_shadowed(scene, light_ray, object);
+        if (shadowed)
             continue;
 
         Vector3 S = direction
@@ -81,7 +79,7 @@ Color specular_light(std::shared_ptr<Object> object, Scene &scene,
 
         float dotp = dot(S, light_ray.direction());
         if (dotp < 0)
-            dotp = 0;
+            continue;
 
         float spec =
             material.ks() * pow(dotp, scene.ns()) * light->get_intensity();
@@ -116,9 +114,8 @@ trace_ray(double x, double y, const Scene &sc, Camera &cam)
     return std::make_tuple(object, hit);
 }
 
-int make_gif(Camera &cam, Scene &sc)
+int make_gif(Camera &cam, Scene &sc, int frames)
 {
-    int frames = 100;
     Gif gif = Gif("raytrace.gif", img_width, img_height, frames);
     Color default_color(0, 125, 255);
 
@@ -242,7 +239,7 @@ int main(int argc, char *argv[])
 
     if (argc > 1)
     {
-        return make_gif(cam, sc);
+        return make_gif(cam, sc, 100);
     }
     return make_image(cam, sc);
 }

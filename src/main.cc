@@ -17,8 +17,26 @@
 const size_t img_width = 640;
 const size_t img_height = 480;
 
-Color diffused_color(std::shared_ptr<Object> object, const Scene &scene,
-                     const Vector3 &hit_point)
+bool is_shadowed(const Scene &scene, const Ray &light_ray,
+                 std::shared_ptr<Object> object)
+{
+    bool is_shadowed = false;
+
+    for (auto other_object : scene.objects_)
+    {
+        if (other_object == object)
+            continue;
+        if (other_object->hit(light_ray).has_value())
+        {
+            is_shadowed = true;
+            break;
+        }
+    }
+    return is_shadowed;
+}
+
+Color diffused_specular(std::shared_ptr<Object> object, const Scene &scene,
+                        const Vector3 &hit_point, const Vector3 &direction)
 {
     auto material = object->get_texture(hit_point);
     Color res;
@@ -28,24 +46,29 @@ Color diffused_color(std::shared_ptr<Object> object, const Scene &scene,
         Ray light_ray(hit_point, (light->get_pos() - hit_point).normalized());
 
         // checks if another object is in the way of the light
-        bool is_shadowed = false;
-        for (auto other_object : scene.objects_)
-        {
-            if (other_object == object)
-                continue;
-            if (other_object->hit(light_ray).has_value())
-            {
-                is_shadowed = true;
-                break;
-            }
-        }
-        if (is_shadowed)
+        bool shadowed = is_shadowed(scene, light_ray, object);
+        if (shadowed)
             continue;
 
-        res = res
-            + material.get_color() * material.get_diffusion_coeff()
-                * dot(object->normal(hit_point), light_ray.direction())
-                * light->get_intensity();
+        Color diffused_color = material.get_color()
+            * material.get_diffusion_coeff()
+            * dot(object->normal(hit_point), light_ray.direction())
+            * light->get_intensity();
+
+        Vector3 S = direction
+            - 2 * object->normal(hit_point)
+                * dot(object->normal(hit_point), direction);
+
+        res = res + diffused_color;
+
+        float dotp = dot(S, light_ray.direction());
+        if (dotp < 0)
+            continue;
+
+        float spec =
+            material.ks() * pow(dotp, scene.ns()) * light->get_intensity();
+
+        res = res + spec;
     }
     return res;
 }
@@ -75,9 +98,8 @@ trace_ray(double x, double y, const Scene &sc, Camera &cam)
     return std::make_tuple(object, hit);
 }
 
-int make_gif(Camera &cam, const Scene &sc)
+int make_gif(Camera &cam, Scene &sc, int frames)
 {
-    int frames = 100;
     Gif gif = Gif("raytrace.gif", img_width, img_height, frames);
     Color default_color(0, 125, 255);
 
@@ -95,15 +117,16 @@ int make_gif(Camera &cam, const Scene &sc)
                 }
                 else
                 {
-                    gif.set(diffused_color(std::get<0>(trace), sc,
-                                           std::get<1>(trace).value()),
-                            x, y);
+                    Color c = diffused_specular(
+                        std::get<0>(trace), sc, std::get<1>(trace).value(),
+                        cam.get_ray(x / img_width, y / img_height).direction());
+                    gif.set(c, x, y);
                 }
             }
         }
         // cam.change_pos(Vector3(0,frame < 50 ? 0.05 : -0.05,0));
-        sc.objects_[1]->move(Vector3(0, frame < 50 ? 0.05 : -0.05, 0));
-        sc.objects_[0]->move(Vector3(frame < 50 ? 0.05 : -0.05, 0, 0));
+        sc.objects_[1]->move(Vector3(0, frame < frames / 2 ? 0.05 : -0.05, 0));
+        sc.objects_[0]->move(Vector3(frame < frames / 2 ? 0.05 : -0.05, 0, 0));
         std::cout << "frame: " << frame << std::endl;
         gif.write_frame();
     }
@@ -112,7 +135,7 @@ int make_gif(Camera &cam, const Scene &sc)
     return 0;
 }
 
-int make_image(Camera &cam, const Scene &sc)
+int make_image(Camera &cam, Scene &sc)
 {
     Image img = Image("bite.ppm", img_width, img_height);
     Color default_color(0, 255, 255);
@@ -129,9 +152,10 @@ int make_image(Camera &cam, const Scene &sc)
             }
             else
             {
-                img.set(diffused_color(std::get<0>(trace), sc,
-                                       std::get<1>(trace).value()),
-                        x, y);
+                Color c = diffused_specular(
+                    std::get<0>(trace), sc, std::get<1>(trace).value(),
+                    cam.get_ray(x / img_width, y / img_height).direction());
+                img.set(c, x, y);
             }
         }
     }
@@ -154,7 +178,7 @@ int main(int argc, char *argv[])
                         dist_to_screen);
     std::cout << cam.get_horizontal() << std::endl
               << cam.get_vertical() << std::endl;
-    Scene sc = Scene(cam);
+    Scene sc = Scene(cam, 5);
 
     Vector3 light_pos(5, 5, 5);
     float luminosty = 1;
@@ -163,10 +187,12 @@ int main(int argc, char *argv[])
 
     argv = argv;
 
-    Uniform_Texture green_tex = Uniform_Texture(Material(Color(0, 255, 0), 1));
-    Uniform_Texture red_tex = Uniform_Texture(Material(Color(255, 0, 0), 1));
+    Uniform_Texture green_tex =
+        Uniform_Texture(Material(Color(0, 255, 0), 1, 100));
+    Uniform_Texture red_tex =
+        Uniform_Texture(Material(Color(255, 0, 0), 1, 100));
     Uniform_Texture gray_tex =
-        Uniform_Texture(Material(Color(125, 125, 125), 1));
+        Uniform_Texture(Material(Color(125, 125, 125), 1, 10));
 
     Sphere green_boulasse = Sphere(
         Vector3(2, -1, 5), 2, std::make_shared<Uniform_Texture>(green_tex));
@@ -188,7 +214,7 @@ int main(int argc, char *argv[])
 
     if (argc > 1)
     {
-        return make_gif(cam, sc);
+        return make_gif(cam, sc, 100);
     }
     return make_image(cam, sc);
 }

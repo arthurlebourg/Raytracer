@@ -82,7 +82,8 @@ Color get_color(std::shared_ptr<Object> object, const Scene &scene,
             - 2 * object->normal(hit_point)
                 * dot(object->normal(hit_point), direction);
 
-        Ray ray = Ray(hit_point, S);
+        // Reflection ray
+        Ray ray = Ray(hit_point + S * 0.001, S);
         auto trace = find_closest_obj(scene, ray);
         if (n > 0 && std::get<0>(trace) != nullptr)
         {
@@ -93,7 +94,7 @@ Color get_color(std::shared_ptr<Object> object, const Scene &scene,
         }
         else
         {
-            res = res + diffused_color;
+            res = res + diffused_color * 0.5;
         }
 
         float dotp = dot(S, light_ray.direction());
@@ -136,7 +137,7 @@ int make_gif(Camera &cam, Scene &sc, int frames)
                 }
             }
         }
-        // cam.change_pos(Vector3(0,frame < 50 ? 0.05 : -0.05,0));
+        cam.change_pos(Vector3(0, frame < 50 ? 0.05 : -0.05, 0));
         sc.objects_[1]->move(Vector3(0, frame < frames / 2 ? 0.05 : -0.05, 0));
         sc.objects_[0]->move(Vector3(frame < frames / 2 ? 0.05 : -0.05, 0, 0));
         std::cout << "frame: " << frame << std::endl;

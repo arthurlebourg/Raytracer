@@ -143,15 +143,14 @@ int make_gif(Camera &cam, Scene &sc)
                         + specular_light(
                             std::get<0>(trace), sc, std::get<1>(trace).value(),
                             cam.get_ray(x / img_width, y / img_height)
-                                .direction()
-                                .normalized());
+                                .direction());
                     gif.set(c, x, y);
                 }
             }
         }
         // cam.change_pos(Vector3(0,frame < 50 ? 0.05 : -0.05,0));
-        sc.objects_[1]->move(Vector3(0, frame < 50 ? 0.05 : -0.05, 0));
-        sc.objects_[0]->move(Vector3(frame < 50 ? 0.05 : -0.05, 0, 0));
+        sc.objects_[1]->move(Vector3(0, frame < frames / 2 ? 0.05 : -0.05, 0));
+        sc.objects_[0]->move(Vector3(frame < frames / 2 ? 0.05 : -0.05, 0, 0));
         std::cout << "frame: " << frame << std::endl;
         gif.write_frame();
     }
@@ -181,11 +180,9 @@ int make_image(Camera &cam, Scene &sc)
                                          std::get<1>(trace).value());
 
                 c = c
-                    + specular_light(std::get<0>(trace), sc,
-                                     std::get<1>(trace).value(),
-                                     cam.get_ray(x / img_width, y / img_height)
-                                         .direction()
-                                         .normalized());
+                    + specular_light(
+                        std::get<0>(trace), sc, std::get<1>(trace).value(),
+                        cam.get_ray(x / img_width, y / img_height).direction());
                 img.set(c, x, y);
             }
         }
@@ -223,7 +220,7 @@ int main(int argc, char *argv[])
     Uniform_Texture red_tex =
         Uniform_Texture(Material(Color(255, 0, 0), 1, 100));
     Uniform_Texture gray_tex =
-        Uniform_Texture(Material(Color(125, 125, 125), 1, 100));
+        Uniform_Texture(Material(Color(125, 125, 125), 1, 10));
 
     Sphere green_boulasse = Sphere(
         Vector3(2, -1, 5), 2, std::make_shared<Uniform_Texture>(green_tex));

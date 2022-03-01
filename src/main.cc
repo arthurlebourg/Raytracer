@@ -35,8 +35,8 @@ bool is_shadowed(const Scene &scene, const Ray &light_ray,
     return is_shadowed;
 }
 
-Color diffused_color(std::shared_ptr<Object> object, const Scene &scene,
-                     const Vector3 &hit_point)
+Color diffused_specular(std::shared_ptr<Object> object, const Scene &scene,
+                        const Vector3 &hit_point, const Vector3 &direction)
 {
     auto material = object->get_texture(hit_point);
     Color res;
@@ -50,32 +50,16 @@ Color diffused_color(std::shared_ptr<Object> object, const Scene &scene,
         if (shadowed)
             continue;
 
-        res = res
-            + material.get_color() * material.get_diffusion_coeff()
-                * dot(object->normal(hit_point), light_ray.direction())
-                * light->get_intensity();
-    }
-    return res;
-}
-
-Color specular_light(std::shared_ptr<Object> object, Scene &scene,
-                     const Vector3 &hit_point, const Vector3 &direction)
-{
-    auto material = object->get_texture(hit_point);
-    Color res;
-    for (auto light : scene.lights_)
-    {
-        // ray cast from point to light
-        Ray light_ray(hit_point, (light->get_pos() - hit_point).normalized());
-
-        // checks if another object is in the way of the light
-        bool shadowed = is_shadowed(scene, light_ray, object);
-        if (shadowed)
-            continue;
+        Color diffused_color = material.get_color()
+            * material.get_diffusion_coeff()
+            * dot(object->normal(hit_point), light_ray.direction())
+            * light->get_intensity();
 
         Vector3 S = direction
             - 2 * object->normal(hit_point)
                 * dot(object->normal(hit_point), direction);
+
+        res = res + diffused_color;
 
         float dotp = dot(S, light_ray.direction());
         if (dotp < 0)
@@ -133,14 +117,9 @@ int make_gif(Camera &cam, Scene &sc, int frames)
                 }
                 else
                 {
-                    Color c = diffused_color(std::get<0>(trace), sc,
-                                             std::get<1>(trace).value());
-
-                    c = c
-                        + specular_light(
-                            std::get<0>(trace), sc, std::get<1>(trace).value(),
-                            cam.get_ray(x / img_width, y / img_height)
-                                .direction());
+                    Color c = diffused_specular(
+                        std::get<0>(trace), sc, std::get<1>(trace).value(),
+                        cam.get_ray(x / img_width, y / img_height).direction());
                     gif.set(c, x, y);
                 }
             }
@@ -173,13 +152,9 @@ int make_image(Camera &cam, Scene &sc)
             }
             else
             {
-                Color c = diffused_color(std::get<0>(trace), sc,
-                                         std::get<1>(trace).value());
-
-                c = c
-                    + specular_light(
-                        std::get<0>(trace), sc, std::get<1>(trace).value(),
-                        cam.get_ray(x / img_width, y / img_height).direction());
+                Color c = diffused_specular(
+                    std::get<0>(trace), sc, std::get<1>(trace).value(),
+                    cam.get_ray(x / img_width, y / img_height).direction());
                 img.set(c, x, y);
             }
         }

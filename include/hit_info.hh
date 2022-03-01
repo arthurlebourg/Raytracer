@@ -4,11 +4,11 @@
 #include "ray.hh"
 #include "vector3.hh"
 
-class HitInfo
+class Hit_Info
 {
 public:
-    HitInfo(Vector3 hit_location, Vector3 direction,
-            std::shared_ptr<Object> obj)
+    Hit_Info(Vector3 hit_location, Vector3 direction,
+             std::shared_ptr<Object> obj)
         : hit_location_(hit_location)
         , direction_(direction)
         , obj_(obj)

@@ -14,6 +14,8 @@ public:
 
     virtual Vector3 normal(Vector3 point) = 0;
 
+    virtual void move(Vector3 vec) = 0;
+
     Material get_texture(Vector3 point)
     {
         return texture_->get_Material(point);

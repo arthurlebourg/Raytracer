@@ -5,13 +5,14 @@
 #include "texture_material.hh"
 #include "vector3.hh"
 
-class Sphere : public Object
+class Plane : public Object
 {
 public:
-    Sphere(Vector3 pos, float radius, std::shared_ptr<Texture_Material> texture)
+    Plane(Vector3 pos, Vector3 normal,
+          std::shared_ptr<Texture_Material> texture)
         : Object(texture)
         , pos_(pos)
-        , radius_(radius)
+        , normal_(normal)
     {}
 
     std::optional<Vector3> hit(Ray ray);
@@ -25,5 +26,5 @@ public:
 
 private:
     Vector3 pos_;
-    float radius_;
+    Vector3 normal_;
 };

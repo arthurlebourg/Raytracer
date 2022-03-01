@@ -6,9 +6,10 @@
 class Material
 {
 public:
-    Material(Color color, float kd)
+    Material(Color color, float kd, float ks)
         : color_(color)
         , kd_(kd)
+        , ks_(ks)
     {}
 
     Color get_color()
@@ -21,9 +22,15 @@ public:
         return kd_;
     }
 
+    float ks()
+    {
+        return ks_;
+    }
+
 private:
     Color color_;
     float kd_;
+    float ks_;
 };
 
 class Texture_Material

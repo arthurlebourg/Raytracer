@@ -19,6 +19,7 @@ std::optional<Vector3> Sphere::hit(Ray ray)
     else
     {
         float dist = (-b + sqrt(discriminant)) / a;
+        // return ray.origin() + ray.direction() * -dist;
         return ray.origin() + ray.direction() * -dist;
     }
 }

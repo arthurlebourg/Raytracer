@@ -5,6 +5,7 @@
 #include "color.hh"
 #include "gif.h"
 #include "gif.hh"
+#include "hit_info.hh"
 #include "image.hh"
 #include "plane.hh"
 #include "point_light.hh"
@@ -73,8 +74,7 @@ Color diffused_specular(std::shared_ptr<Object> object, const Scene &scene,
     return res;
 }
 
-std::tuple<std::shared_ptr<Object>, std::optional<Vector3>>
-trace_ray(double x, double y, const Scene &sc, Camera &cam)
+Hit_Info trace_ray(double x, double y, const Scene &sc, Camera &cam)
 {
     Ray ray = cam.get_ray(x / img_width, y / img_height);
     float min_dist = std::numeric_limits<float>::max();
@@ -95,7 +95,7 @@ trace_ray(double x, double y, const Scene &sc, Camera &cam)
             }
         }
     }
-    return std::make_tuple(object, hit);
+    return Hit_Info(hit, ray.direction(), object);
 }
 
 int make_gif(Camera &cam, Scene &sc, int frames)
@@ -109,18 +109,18 @@ int make_gif(Camera &cam, Scene &sc, int frames)
         {
             for (double x = 0; x < img_width; x++)
             {
-                auto trace = trace_ray(x, y, sc, cam);
+                auto hit_info = trace_ray(x, y, sc, cam);
 
-                if (std::get<0>(trace) == nullptr)
+                if (hit_info.get_obj() == nullptr)
                 {
                     gif.set(default_color, x, y);
                 }
                 else
                 {
-                    Color c = diffused_specular(
-                        std::get<0>(trace), sc, std::get<1>(trace).value(),
-                        cam.get_ray(x / img_width, y / img_height).direction());
-                    gif.set(c, x, y);
+                    gif.set(diffused_specular(hit_info.get_obj(), sc,
+                                              hit_info.get_location(),
+                                              hit_info.get_dir()),
+                            x, y);
                 }
             }
         }
@@ -144,18 +144,18 @@ int make_image(Camera &cam, Scene &sc)
     {
         for (double x = 0; x < img_width; x++)
         {
-            auto trace = trace_ray(x, y, sc, cam);
+            auto hit_info = trace_ray(x, y, sc, cam);
 
-            if (std::get<0>(trace) == nullptr)
+            if (hit_info.get_obj() == nullptr)
             {
                 img.set(default_color, x, y);
             }
             else
             {
-                Color c = diffused_specular(
-                    std::get<0>(trace), sc, std::get<1>(trace).value(),
-                    cam.get_ray(x / img_width, y / img_height).direction());
-                img.set(c, x, y);
+                img.set(diffused_specular(hit_info.get_obj(), sc,
+                                          hit_info.get_location(),
+                                          hit_info.get_dir()),
+                        x, y);
             }
         }
     }

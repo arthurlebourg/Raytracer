@@ -1,5 +1,6 @@
 #pragma once
 
+#include "hit_info.hh"
 #include "object.hh"
 #include "ray.hh"
 #include "texture_material.hh"

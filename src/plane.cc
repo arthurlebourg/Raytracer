@@ -1,6 +1,6 @@
 #include "plane.hh"
 
-std::optional<HitInfo> Plane::hit(Ray ray)
+std::optional<Vector3> Plane::hit(Ray ray)
 {
     Vector3 d = ray.direction();
     float denominator = dot(d, normal_);
@@ -12,7 +12,7 @@ std::optional<HitInfo> Plane::hit(Ray ray)
     if (t < 0)
         return std::nullopt; // plane behind ray's origin
 
-    return HitInfo(ray.origin() + ray.direction() * t, ray.direction(), this);
+    return ray.origin() + ray.direction() * t;
 }
 
 Vector3 Plane::normal(Vector3 point)

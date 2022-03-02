@@ -4,14 +4,13 @@
 #include <memory>
 #include <optional>
 
-#include "hitinfo.hh"
 #include "ray.hh"
 #include "texture_material.hh"
 
 class Object
 {
 public:
-    virtual HitInfo hit(Ray ray) = 0;
+    virtual std::optional<Vector3> hit(Ray ray) = 0;
 
     virtual Vector3 normal(Vector3 point) = 0;
 

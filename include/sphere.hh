@@ -1,6 +1,6 @@
 #pragma once
 
-#include "hitinfo.hh"
+#include "hit_info.hh"
 #include "object.hh"
 #include "ray.hh"
 #include "texture_material.hh"
@@ -15,7 +15,7 @@ public:
         , radius_(radius)
     {}
 
-    HitInfo hit(Ray ray);
+    std::optional<Vector3> hit(Ray ray);
 
     Vector3 normal(Vector3 point);
 

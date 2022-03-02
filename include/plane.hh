@@ -15,7 +15,7 @@ public:
         , normal_(normal)
     {}
 
-    std::optional<HitInfo> hit(Ray ray);
+    std::optional<Vector3> hit(Ray ray);
 
     Vector3 normal(Vector3 point);
 

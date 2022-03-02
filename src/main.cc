@@ -14,8 +14,8 @@
 #include "uniform_texture.hh"
 #include "vector3.hh"
 
-const size_t img_width = 640;
-const size_t img_height = 480;
+const size_t img_width = 1920;
+const size_t img_height = 1080;
 
 bool is_shadowed(const Scene &scene, const Ray &light_ray,
                  std::shared_ptr<Object> object)
@@ -157,20 +157,33 @@ int make_image(Camera &cam, Scene &sc)
     {
         for (double x = 0; x < img_width; x++)
         {
-            Ray ray = cam.get_ray(x / img_width, y / img_height);
-            auto trace = find_closest_obj(sc, ray);
+            Color col;
+            for (double n = -8; n < 8; n++)
+            {
+                double x_pixel = x / img_width;
+                double y_pixel = y / img_height;
+                double x_distance = x_pixel - (x + 1) / img_width;
+                double y_distance = y_pixel - (y + 1) / img_height;
+                Ray ray = cam.get_ray(x_pixel + x_distance * (n / 4),
+                                      y_pixel + y_distance * ((int)n % 4));
+                auto trace = find_closest_obj(sc, ray);
 
-            if (std::get<0>(trace) == nullptr)
-            {
-                img.set(default_color, x, y);
+                if (std::get<0>(trace) == nullptr)
+                {
+                    col = col + default_color * 0.0625;
+                }
+                else
+                {
+                    col = col
+                        + get_color(std::get<0>(trace), sc,
+                                    std::get<1>(trace).value(),
+                                    cam.get_ray(x / img_width, y / img_height)
+                                        .direction(),
+                                    5)
+                            * 0.0625;
+                }
             }
-            else
-            {
-                Color c = get_color(
-                    std::get<0>(trace), sc, std::get<1>(trace).value(),
-                    cam.get_ray(x / img_width, y / img_height).direction(), 5);
-                img.set(c, x, y);
-            }
+            img.set(col, x, y);
         }
     }
     img.save();
@@ -180,7 +193,7 @@ int make_image(Camera &cam, Scene &sc)
 
 int main(int argc, char *argv[])
 {
-    double fov_w = 90.0;
+    double fov_w = 67.5;
     double fov_h = 120.0;
     double dist_to_screen = 1;
 

@@ -138,7 +138,7 @@ int make_gif(Camera &cam, Scene &sc, int frames)
             }
         }
         cam.change_pos(Vector3(0, frame < 50 ? 0.05 : -0.05, 0));
-        sc.objects_[1]->move(Vector3(0, frame < frames / 2 ? 0.05 : -0.05, 0));
+        sc.objects_[1]->move(Vector3(0, frame < frames / 2 ? 0.1 : -0.1, 0));
         sc.objects_[0]->move(Vector3(frame < frames / 2 ? 0.05 : -0.05, 0, 0));
         std::cout << "frame: " << frame << std::endl;
         gif.write_frame();
@@ -181,7 +181,7 @@ int make_image(Camera &cam, Scene &sc)
 int main(int argc, char *argv[])
 {
     double fov_w = 90.0;
-    double fov_h = 110.0;
+    double fov_h = 120.0;
     double dist_to_screen = 1;
 
     Vector3 camCenter(0, 0, 0);
@@ -217,14 +217,13 @@ int main(int argc, char *argv[])
     Plane plancher = Plane(Vector3(0, -1, 0), Vector3(0, 1, 0),
                            std::make_shared<Uniform_Texture>(gray_tex));
 
-    Sphere gray_sphere = Sphere(Vector3(0, 0, 10), 0.5,
-                                std::make_shared<Uniform_Texture>(gray_tex));
+    Plane mur = Plane(Vector3(-5, 0, 0), Vector3(1, 0, 0).normalized(),
+                      std::make_shared<Uniform_Texture>(gray_tex));
 
     sc.objects_.push_back(std::make_shared<Sphere>(green_boulasse));
     sc.objects_.push_back(std::make_shared<Sphere>(red_boulasse));
     sc.objects_.push_back(std::make_shared<Plane>(plancher));
-    red_boulasse = red_boulasse;
-    gray_sphere = gray_sphere;
+    sc.objects_.push_back(std::make_shared<Plane>(mur));
 
     if (argc > 1)
     {

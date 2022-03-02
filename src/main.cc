@@ -36,8 +36,30 @@ bool is_shadowed(const Scene &scene, const Ray &light_ray,
     return is_shadowed;
 }
 
-Color diffused_specular(std::shared_ptr<Object> object, const Scene &scene,
-                        const Vector3 &hit_point, const Vector3 &direction)
+Hit_Info find_closest_obj(const Scene &sc, Ray ray)
+{
+    float min_dist = std::numeric_limits<float>::max();
+    std::optional<Vector3> hit = std::nullopt;
+    std::shared_ptr<Object> object = nullptr;
+    for (size_t i = 0; i < sc.objects_.size(); i++)
+    {
+        auto new_hit = sc.objects_[i]->hit(ray);
+        if (new_hit.has_value())
+        {
+            float new_dist = (new_hit.value() - ray.origin()).squaredNorm();
+            if (new_dist < min_dist)
+            {
+                min_dist = new_dist;
+                object = sc.objects_[i];
+                hit = new_hit;
+            }
+        }
+    }
+    return Hit_Info(hit, ray.direction(), object);
+}
+
+Color get_color(std::shared_ptr<Object> object, const Scene &scene,
+                const Vector3 &hit_point, const Vector3 &direction, int n = 5)
 {
     auto material = object->get_texture(hit_point);
     Color res;
@@ -60,7 +82,20 @@ Color diffused_specular(std::shared_ptr<Object> object, const Scene &scene,
             - 2 * object->normal(hit_point)
                 * dot(object->normal(hit_point), direction);
 
-        res = res + diffused_color;
+        // Reflection ray
+        Ray ray = Ray(hit_point + S * 0.001, S);
+        auto hit_info = find_closest_obj(scene, ray);
+        if (n > 0 && hit_info.get_obj() != nullptr)
+        {
+            res = res + diffused_color * 0.5
+                + get_color(hit_info.get_obj(), scene, hit_info.get_location(),
+                            S, n - 1)
+                    * 0.5;
+        }
+        else
+        {
+            res = res + diffused_color * 0.5;
+        }
 
         float dotp = dot(S, light_ray.direction());
         if (dotp < 0)
@@ -74,30 +109,6 @@ Color diffused_specular(std::shared_ptr<Object> object, const Scene &scene,
     return res;
 }
 
-Hit_Info trace_ray(double x, double y, const Scene &sc, Camera &cam)
-{
-    Ray ray = cam.get_ray(x / img_width, y / img_height);
-    float min_dist = std::numeric_limits<float>::max();
-    std::shared_ptr<Object> object = nullptr;
-    std::optional<Vector3> hit = std::nullopt;
-    // finds objects with closest point
-    for (size_t i = 0; i < sc.objects_.size(); i++)
-    {
-        auto new_hit = sc.objects_[i]->hit(ray);
-        if (new_hit.has_value())
-        {
-            float new_dist = (new_hit.value() - cam.get_center()).squaredNorm();
-            if (new_dist < min_dist)
-            {
-                min_dist = new_dist;
-                object = sc.objects_[i];
-                hit = new_hit;
-            }
-        }
-    }
-    return Hit_Info(hit, ray.direction(), object);
-}
-
 int make_gif(Camera &cam, Scene &sc, int frames)
 {
     Gif gif = Gif("raytrace.gif", img_width, img_height, frames);
@@ -109,7 +120,8 @@ int make_gif(Camera &cam, Scene &sc, int frames)
         {
             for (double x = 0; x < img_width; x++)
             {
-                auto hit_info = trace_ray(x, y, sc, cam);
+                Ray ray = cam.get_ray(x / img_width, y / img_height);
+                auto hit_info = find_closest_obj(sc, ray);
 
                 if (hit_info.get_obj() == nullptr)
                 {
@@ -117,15 +129,15 @@ int make_gif(Camera &cam, Scene &sc, int frames)
                 }
                 else
                 {
-                    gif.set(diffused_specular(hit_info.get_obj(), sc,
-                                              hit_info.get_location(),
-                                              hit_info.get_dir()),
-                            x, y);
+                    Color c = get_color(hit_info.get_obj(), sc,
+                                        hit_info.get_location(),
+                                        hit_info.get_dir(), 5);
+                    gif.set(c, x, y);
                 }
             }
         }
-        // cam.change_pos(Vector3(0,frame < 50 ? 0.05 : -0.05,0));
-        sc.objects_[1]->move(Vector3(0, frame < frames / 2 ? 0.05 : -0.05, 0));
+        cam.change_pos(Vector3(0, frame < 50 ? 0.05 : -0.05, 0));
+        sc.objects_[1]->move(Vector3(0, frame < frames / 2 ? 0.1 : -0.1, 0));
         sc.objects_[0]->move(Vector3(frame < frames / 2 ? 0.05 : -0.05, 0, 0));
         std::cout << "frame: " << frame << std::endl;
         gif.write_frame();
@@ -138,25 +150,37 @@ int make_gif(Camera &cam, Scene &sc, int frames)
 int make_image(Camera &cam, Scene &sc)
 {
     Image img = Image("bite.ppm", img_width, img_height);
-    Color default_color(0, 255, 255);
+    Color default_color(0, 125, 255);
 
     for (double y = 0; y < img_height; y++)
     {
         for (double x = 0; x < img_width; x++)
         {
-            auto hit_info = trace_ray(x, y, sc, cam);
+            Color col;
+            for (double n = -8; n < 8; n++)
+            {
+                double x_pixel = x / img_width;
+                double y_pixel = y / img_height;
+                double x_distance = x_pixel - (x + 1) / img_width;
+                double y_distance = y_pixel - (y + 1) / img_height;
+                Ray ray = cam.get_ray(x_pixel + x_distance * (n / 4),
+                                      y_pixel + y_distance * ((int)n % 4));
+                auto hit_info = find_closest_obj(sc, ray);
 
-            if (hit_info.get_obj() == nullptr)
-            {
-                img.set(default_color, x, y);
+                if (hit_info.get_obj() == nullptr)
+                {
+                    col = col + default_color * 0.0625;
+                }
+                else
+                {
+                    col = col
+                        + get_color(hit_info.get_obj(), sc,
+                                    hit_info.get_location(), hit_info.get_dir(),
+                                    5)
+                            * 0.0625;
+                }
             }
-            else
-            {
-                img.set(diffused_specular(hit_info.get_obj(), sc,
-                                          hit_info.get_location(),
-                                          hit_info.get_dir()),
-                        x, y);
-            }
+            img.set(col, x, y);
         }
     }
     img.save();
@@ -167,7 +191,7 @@ int make_image(Camera &cam, Scene &sc)
 int main(int argc, char *argv[])
 {
     double fov_w = 90.0;
-    double fov_h = 110.0;
+    double fov_h = 120.0;
     double dist_to_screen = 1;
 
     Vector3 camCenter(0, 0, 0);
@@ -203,14 +227,13 @@ int main(int argc, char *argv[])
     Plane plancher = Plane(Vector3(0, -1, 0), Vector3(0, 1, 0),
                            std::make_shared<Uniform_Texture>(gray_tex));
 
-    Sphere gray_sphere = Sphere(Vector3(0, 0, 10), 0.5,
-                                std::make_shared<Uniform_Texture>(gray_tex));
+    Plane mur = Plane(Vector3(-5, 0, 0), Vector3(1, 0, 0).normalized(),
+                      std::make_shared<Uniform_Texture>(gray_tex));
 
     sc.objects_.push_back(std::make_shared<Sphere>(green_boulasse));
     sc.objects_.push_back(std::make_shared<Sphere>(red_boulasse));
     sc.objects_.push_back(std::make_shared<Plane>(plancher));
-    red_boulasse = red_boulasse;
-    gray_sphere = gray_sphere;
+    sc.objects_.push_back(std::make_shared<Plane>(mur));
 
     if (argc > 1)
     {

@@ -22,6 +22,11 @@ public:
         GifBegin(&writer_, path, width, height, 2, 8, true);
     }
 
+    ~Gif()
+    {
+        free(data_);
+    }
+
     size_t width()
     {
         return width_;

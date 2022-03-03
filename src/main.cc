@@ -16,26 +16,8 @@
 const size_t img_width = 640;
 const size_t img_height = 480;
 
-const int anti_aliasing = 4;
+const int anti_aliasing = 2;
 const int sqrt_anti_aliasing = sqrt(anti_aliasing);
-
-bool is_shadowed(const Scene &scene, const Ray &light_ray,
-                 std::shared_ptr<Object> object)
-{
-    bool is_shadowed = false;
-
-    for (auto other_object : scene.objects_)
-    {
-        if (other_object == object)
-            continue;
-        if (other_object->hit(light_ray).has_value())
-        {
-            is_shadowed = true;
-            break;
-        }
-    }
-    return is_shadowed;
-}
 
 Hit_Info find_closest_obj(const Scene &sc, Ray ray)
 {
@@ -59,6 +41,14 @@ Hit_Info find_closest_obj(const Scene &sc, Ray ray)
     return Hit_Info(hit, ray.direction(), object);
 }
 
+bool is_shadowed(const Scene &scene, const Ray &light_ray,
+                 std::shared_ptr<Object> object)
+{
+    auto other_object = find_closest_obj(scene, light_ray).get_obj();
+
+    return other_object.get() != object.get();
+}
+
 Color get_color(std::shared_ptr<Object> object, const Scene &scene,
                 const Vector3 &hit_point, const Vector3 &direction, int n = 5)
 {
@@ -68,12 +58,14 @@ Color get_color(std::shared_ptr<Object> object, const Scene &scene,
     {
         // ray cast from point to light
         Ray light_ray(hit_point, (light->get_pos() - hit_point).normalized());
+        Ray shadow_ray(light->get_pos(),
+                       (hit_point - light->get_pos()).normalized());
 
         // checks if another object is in the way of the light
-        bool shadowed = is_shadowed(scene, light_ray, object);
+        bool shadowed = is_shadowed(scene, shadow_ray, object);
         if (shadowed)
         {
-            return object->get_texture(hit_point).get_color() * 0.5;
+            // return object->get_texture(hit_point).get_color() * 0.5;
             continue;
         }
 

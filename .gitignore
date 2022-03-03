@@ -34,7 +34,7 @@
 #images
 *.ppm
 *.gif
-
+*.png
 
 bin/
 

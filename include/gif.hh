@@ -5,6 +5,7 @@
 #include <fstream>
 #include <string>
 
+#include "color.hh"
 #include "gif.h"
 
 class Gif

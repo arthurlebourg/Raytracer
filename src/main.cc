@@ -2,8 +2,6 @@
 #include <limits>
 #include <tuple>
 
-#include "color.hh"
-#include "gif.h"
 #include "gif.hh"
 #include "hit_info.hh"
 #include "image.hh"
@@ -12,11 +10,14 @@
 #include "ray.hh"
 #include "scene.hh"
 #include "sphere.hh"
+#include "triangle.hh"
 #include "uniform_texture.hh"
-#include "vector3.hh"
 
 const size_t img_width = 640;
 const size_t img_height = 480;
+
+const int anti_aliasing = 4;
+const int sqrt_anti_aliasing = sqrt(anti_aliasing);
 
 bool is_shadowed(const Scene &scene, const Ray &light_ray,
                  std::shared_ptr<Object> object)
@@ -63,7 +64,7 @@ Color get_color(std::shared_ptr<Object> object, const Scene &scene,
 {
     auto material = object->get_texture(hit_point);
     Color res;
-    for (auto light : scene.lights_)
+    for (auto &light : scene.lights_)
     {
         // ray cast from point to light
         Ray light_ray(hit_point, (light->get_pos() - hit_point).normalized());
@@ -71,7 +72,10 @@ Color get_color(std::shared_ptr<Object> object, const Scene &scene,
         // checks if another object is in the way of the light
         bool shadowed = is_shadowed(scene, light_ray, object);
         if (shadowed)
+        {
+            return object->get_texture(hit_point).get_color() * 0.5;
             continue;
+        }
 
         Color diffused_color = material.get_color()
             * material.get_diffusion_coeff()
@@ -157,19 +161,20 @@ int make_image(Camera &cam, Scene &sc)
         for (double x = 0; x < img_width; x++)
         {
             Color col;
-            for (double n = -8; n < 8; n++)
+            for (double n = -anti_aliasing / 2; n < anti_aliasing / 2; n++)
             {
                 double x_pixel = x / img_width;
                 double y_pixel = y / img_height;
                 double x_distance = x_pixel - (x + 1) / img_width;
                 double y_distance = y_pixel - (y + 1) / img_height;
-                Ray ray = cam.get_ray(x_pixel + x_distance * (n / 4),
-                                      y_pixel + y_distance * ((int)n % 4));
+                Ray ray = cam.get_ray(
+                    x_pixel + x_distance * (n / sqrt_anti_aliasing),
+                    y_pixel + y_distance * ((int)n % sqrt_anti_aliasing));
                 auto hit_info = find_closest_obj(sc, ray);
 
                 if (hit_info.get_obj() == nullptr)
                 {
-                    col = col + default_color * 0.0625;
+                    col = col + default_color * (1.0 / anti_aliasing);
                 }
                 else
                 {
@@ -177,7 +182,7 @@ int make_image(Camera &cam, Scene &sc)
                         + get_color(hit_info.get_obj(), sc,
                                     hit_info.get_location(), hit_info.get_dir(),
                                     5)
-                            * 0.0625;
+                            * (1.0 / anti_aliasing);
                 }
             }
             img.set(col, x, y);
@@ -217,6 +222,8 @@ int main(int argc, char *argv[])
         Uniform_Texture(Material(Color(255, 0, 0), 1, 100));
     Uniform_Texture gray_tex =
         Uniform_Texture(Material(Color(125, 125, 125), 1, 10));
+    Uniform_Texture blue_tex =
+        Uniform_Texture(Material(Color(0, 0, 255), 1, 10));
 
     Sphere green_boulasse = Sphere(
         Vector3(2, -1, 5), 2, std::make_shared<Uniform_Texture>(green_tex));
@@ -228,12 +235,17 @@ int main(int argc, char *argv[])
                            std::make_shared<Uniform_Texture>(gray_tex));
 
     Plane mur = Plane(Vector3(-5, 0, 0), Vector3(1, 0, 0).normalized(),
-                      std::make_shared<Uniform_Texture>(gray_tex));
+                      std::make_shared<Uniform_Texture>(blue_tex));
+
+    Triangle illuminati =
+        Triangle(Vector3(3, 0, 2), Vector3(3, 2, 2), Vector3(1, 2, 2),
+                 std::make_shared<Uniform_Texture>(red_tex));
 
     sc.objects_.push_back(std::make_shared<Sphere>(green_boulasse));
     sc.objects_.push_back(std::make_shared<Sphere>(red_boulasse));
     sc.objects_.push_back(std::make_shared<Plane>(plancher));
     sc.objects_.push_back(std::make_shared<Plane>(mur));
+    sc.objects_.push_back(std::make_shared<Triangle>(illuminati));
 
     if (argc > 1)
     {

@@ -16,6 +16,10 @@ public:
         data_ = static_cast<Color *>(calloc(width * height, sizeof(Color)));
     }
 
+    ~Image()
+    {
+        free(data_);
+    }
     size_t width()
     {
         return width_;

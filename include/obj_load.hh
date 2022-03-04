@@ -38,6 +38,7 @@ public:
     {
         std::vector<Vector3> vertex;
         std::ifstream input(path);
+        std::cout << "file opened" << std::endl;
         Uniform_Texture green_tex =
             Uniform_Texture(Material(Color(0, 255, 0), 1, 100));
 

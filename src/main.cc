@@ -228,6 +228,8 @@ void make_image_threads(Camera cam, Scene sc, double miny, double maxy,
             }
             res[(int)(y * img_width + x)] = col;
         }
+        if (miny == 0)
+            std::cout << y << "/" << maxy << std::endl;
     }
 }
 
@@ -237,7 +239,7 @@ int main(int argc, char *argv[])
     double fov_h = 120.0;
     double dist_to_screen = 1;
 
-    Vector3 camCenter(1, 0, 2);
+    Vector3 camCenter(2, 0, -3);
     Vector3 camFocus(0, 0, 1);
     Vector3 camUp(0, 1, 0);
 
@@ -247,7 +249,7 @@ int main(int argc, char *argv[])
               << cam.get_vertical() << std::endl;
     Scene sc = Scene(cam, 5);
 
-    Vector3 light_pos(5, 5, 5);
+    Vector3 light_pos(5, 5, -5);
     float luminosty = 1;
     Point_Light light(luminosty, light_pos);
     sc.lights_.push_back(std::make_shared<Point_Light>(light));

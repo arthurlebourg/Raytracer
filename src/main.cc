@@ -6,6 +6,7 @@
 #include "hit_info.hh"
 #include "image.hh"
 #include "metaball.hh"
+#include "obj_load.hh"
 #include "plane.hh"
 #include "point_light.hh"
 #include "ray.hh"
@@ -17,7 +18,7 @@
 const size_t img_width = 640;
 const size_t img_height = 480;
 
-const int anti_aliasing = 2;
+const int anti_aliasing = 4;
 const int sqrt_anti_aliasing = sqrt(anti_aliasing);
 
 Hit_Info find_closest_obj(const Scene &sc, Ray ray)
@@ -192,7 +193,7 @@ int main(int argc, char *argv[])
     double fov_h = 120.0;
     double dist_to_screen = 1;
 
-    Vector3 camCenter(0, 0, 0);
+    Vector3 camCenter(2, 0, 4);
     Vector3 camFocus(0, 0, 1);
     Vector3 camUp(0, 1, 0);
 
@@ -234,11 +235,6 @@ int main(int argc, char *argv[])
         Triangle(Vector3(3, 0, 2), Vector3(3, 2, 2), Vector3(1, 2, 2),
                  std::make_shared<Uniform_Texture>(red_tex));
 
-    // sc.objects_.push_back(std::make_shared<Sphere>(green_boulasse));
-    // sc.objects_.push_back(std::make_shared<Sphere>(red_boulasse));
-    sc.objects_.push_back(std::make_shared<Plane>(plancher));
-    sc.objects_.push_back(std::make_shared<Plane>(mur));
-    // sc.objects_.push_back(std::make_shared<Triangle>(illuminati));
     green_boulasse = green_boulasse;
     red_boulasse = red_boulasse;
     illuminati = illuminati;
@@ -259,6 +255,17 @@ int main(int argc, char *argv[])
         metaball.render(std::make_shared<Uniform_Texture>(red_tex));
     std::cout << "nb triangle : " << triangles.size() << "\n";
     sc.objects_.insert(sc.objects_.end(), triangles.begin(), triangles.end());
+    /*
+    sc.objects_.push_back(std::make_shared<Sphere>(green_boulasse));
+    sc.objects_.push_back(std::make_shared<Sphere>(red_boulasse));
+    */
+    sc.objects_.push_back(std::make_shared<Plane>(plancher));
+    sc.objects_.push_back(std::make_shared<Plane>(mur));
+
+    for (Triangle t : obj.get_triangles())
+    {
+        sc.objects_.push_back(std::make_shared<Triangle>(t));
+    }
 
     if (argc > 1)
     {

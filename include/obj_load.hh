@@ -5,6 +5,7 @@
 #include <vector>
 
 #include "triangle.hh"
+#include "uniform_texture.hh"
 
 std::string *split_str(std::string &str, char delim)
 {

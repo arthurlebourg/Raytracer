@@ -1,5 +1,7 @@
+#include <future>
 #include <iostream>
 #include <limits>
+#include <thread>
 #include <tuple>
 
 #include "gif.hh"
@@ -17,6 +19,7 @@
 
 const size_t img_width = 640;
 const size_t img_height = 480;
+const int max_threads = std::thread::hardware_concurrency();
 
 const int anti_aliasing = 4;
 const int sqrt_anti_aliasing = sqrt(anti_aliasing);
@@ -175,16 +178,57 @@ int make_image(Camera &cam, Scene &sc)
                     col = col
                         + get_color(hit_info.get_obj(), sc,
                                     hit_info.get_location(), hit_info.get_dir(),
-                                    5)
+                                    2)
                             * (1.0 / anti_aliasing);
                 }
             }
             img.set(col, x, y);
+            std::cout << y * img_width + x << " / " << img_width * img_height
+                      << std::endl;
         }
     }
     img.save();
 
     return 0;
+}
+
+void make_image_threads(Camera cam, Scene sc, double miny, double maxy,
+                        Color *res)
+{
+    Color default_color(0, 125, 255);
+
+    for (double y = miny; y < maxy; y++)
+    {
+        for (double x = 0; x < img_width; x++)
+        {
+            Color col;
+            for (double n = -anti_aliasing / 2; n < anti_aliasing / 2; n++)
+            {
+                double x_pixel = x / img_width;
+                double y_pixel = y / img_height;
+                double x_distance = x_pixel - (x + 1) / img_width;
+                double y_distance = y_pixel - (y + 1) / img_height;
+                Ray ray = cam.get_ray(
+                    x_pixel + x_distance * (n / sqrt_anti_aliasing),
+                    y_pixel + y_distance * ((int)n % sqrt_anti_aliasing));
+                auto hit_info = find_closest_obj(sc, ray);
+
+                if (hit_info.get_obj() == nullptr)
+                {
+                    col = col + default_color * (1.0 / anti_aliasing);
+                }
+                else
+                {
+                    col = col
+                        + get_color(hit_info.get_obj(), sc,
+                                    hit_info.get_location(), hit_info.get_dir(),
+                                    2)
+                            * (1.0 / anti_aliasing);
+                }
+            }
+            res[(int)(y * img_width + x)] = col;
+        }
+    }
 }
 
 int main(int argc, char *argv[])
@@ -193,7 +237,7 @@ int main(int argc, char *argv[])
     double fov_h = 120.0;
     double dist_to_screen = 1;
 
-    Vector3 camCenter(2, 0, 4);
+    Vector3 camCenter(1, 0, 2);
     Vector3 camFocus(0, 0, 1);
     Vector3 camUp(0, 1, 0);
 
@@ -255,6 +299,7 @@ int main(int argc, char *argv[])
         metaball.render(std::make_shared<Uniform_Texture>(red_tex));
     std::cout << "nb triangle : " << triangles.size() << "\n";
     sc.objects_.insert(sc.objects_.end(), triangles.begin(), triangles.end());
+
     /*
     sc.objects_.push_back(std::make_shared<Sphere>(green_boulasse));
     sc.objects_.push_back(std::make_shared<Sphere>(red_boulasse));
@@ -262,14 +307,40 @@ int main(int argc, char *argv[])
     sc.objects_.push_back(std::make_shared<Plane>(plancher));
     sc.objects_.push_back(std::make_shared<Plane>(mur));
 
-    for (Triangle t : obj.get_triangles())
-    {
-        sc.objects_.push_back(std::make_shared<Triangle>(t));
-    }
 
     if (argc > 1)
     {
         return make_gif(cam, sc, 100);
     }
-    return make_image(cam, sc);
+    if (max_threads == 0)
+        return make_image(cam, sc);
+
+    std::cout << "Engaging on " << max_threads << " threads" << std::endl;
+    double y_num = img_height / max_threads;
+    std::vector<std::thread> threads;
+    Color *colors =
+        static_cast<Color *>(calloc(img_width * img_height, sizeof(Color)));
+    for (int i = 0; i < max_threads; i++)
+    {
+        std::cout << i + 1 << " sur " << max_threads << std::endl;
+        threads.push_back(std::thread(make_image_threads, cam, sc, i * y_num,
+                                      (i + 1) * y_num, colors));
+    }
+    Image img = Image("bite.ppm", img_width, img_height);
+    for (int i = 0; i < max_threads; i++)
+    {
+        threads[i].join();
+        std::cout << "finished thread: " << i << std::endl;
+    }
+    for (double y = 0; y < img_height; y++)
+    {
+        for (double x = 0; x < img_width; x++)
+        {
+            img.set(colors[(int)(y * img_width + x)], x, y);
+        }
+    }
+    img.save();
+    std::cout << "image saved" << std::endl;
+
+    return 0;
 }

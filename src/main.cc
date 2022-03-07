@@ -1,4 +1,3 @@
-#include <future>
 #include <iostream>
 #include <limits>
 #include <thread>
@@ -192,7 +191,7 @@ int make_image(Camera &cam, Scene &sc)
 }
 
 void make_image_threads(Camera cam, Scene sc, double miny, double maxy,
-                        Color *res)
+                        Image *img)
 {
     Color default_color(0, 125, 255);
 
@@ -221,11 +220,12 @@ void make_image_threads(Camera cam, Scene sc, double miny, double maxy,
                     col = col
                         + get_color(hit_info.get_obj(), sc,
                                     hit_info.get_location(), hit_info.get_dir(),
-                                    2)
+                                    5)
                             * (1.0 / anti_aliasing);
                 }
             }
-            res[(int)(y * img_width + x)] = col;
+            img->set(col, x, y);
+            // res[(int)(y * img_width + x)] = col;
         }
         if (miny == 0)
             std::cout << y << "/" << maxy << std::endl;
@@ -238,7 +238,7 @@ int main(int argc, char *argv[])
     double fov_h = 120.0;
     double dist_to_screen = 1;
 
-    Vector3 camCenter(2, 0, -3);
+    Vector3 camCenter(10, 0, 10);
     Vector3 camFocus(0, 0, 1);
     Vector3 camUp(0, 1, 0);
 
@@ -248,7 +248,7 @@ int main(int argc, char *argv[])
               << cam.get_vertical() << std::endl;
     Scene sc = Scene(cam, 5);
 
-    Vector3 light_pos(5, 5, -5);
+    Vector3 light_pos(5, 5, 5);
     float luminosty = 1;
     Point_Light light(luminosty, light_pos);
     sc.lights_.push_back(std::make_shared<Point_Light>(light));
@@ -273,28 +273,26 @@ int main(int argc, char *argv[])
     Plane plancher = Plane(Vector3(0, -2, 0), Vector3(0, 1, 0),
                            std::make_shared<Uniform_Texture>(gray_tex));
 
-    Plane mur = Plane(Vector3(-5, 0, 0), Vector3(1, 0, 0).normalized(),
+    Plane mur = Plane(Vector3(-8, 0, 0), Vector3(1, 0, 0).normalized(),
                       std::make_shared<Uniform_Texture>(blue_tex));
 
     Triangle illuminati =
         Triangle(Vector3(3, 0, 2), Vector3(3, 2, 2), Vector3(1, 2, 2),
                  std::make_shared<Uniform_Texture>(red_tex));
-    /*
     sc.objects_.push_back(std::make_shared<Sphere>(green_boulasse));
     sc.objects_.push_back(std::make_shared<Sphere>(red_boulasse));
-    */
     sc.objects_.push_back(std::make_shared<Plane>(plancher));
     sc.objects_.push_back(std::make_shared<Plane>(mur));
 
-    // sc.objects_.push_back(std::make_shared<Triangle>(illuminati));
-    std::cout << "loading" << std::endl;
+    sc.objects_.push_back(std::make_shared<Triangle>(illuminati));
+    // std::cout << "loading" << std::endl;
 
-    OBJLoad obj("models/amogus.objet");
+    // OBJLoad obj("models/amogus_hands.objet");
 
-    for (Triangle t : obj.get_triangles())
+    /*for (Triangle t : obj.get_triangles())
     {
         sc.objects_.push_back(std::make_shared<Triangle>(t));
-    }
+    }*/
 
     std::cout << "loaded" << std::endl;
 
@@ -308,26 +306,19 @@ int main(int argc, char *argv[])
     std::cout << "Engaging on " << max_threads << " threads" << std::endl;
     double y_num = img_height / max_threads;
     std::vector<std::thread> threads;
-    Color *colors =
-        static_cast<Color *>(calloc(img_width * img_height, sizeof(Color)));
-    for (int i = 0; i < max_threads; i++)
+    Image img = Image("bite.ppm", img_width, img_height);
+    for (int i = 0; i < max_threads - 1; i++)
     {
         std::cout << i + 1 << " sur " << max_threads << std::endl;
         threads.push_back(std::thread(make_image_threads, cam, sc, i * y_num,
-                                      (i + 1) * y_num, colors));
+                                      (i + 1) * y_num, &img));
     }
-    Image img = Image("bite.ppm", img_width, img_height);
-    for (int i = 0; i < max_threads; i++)
+    make_image_threads(cam, sc, (max_threads - 1) * y_num, max_threads * y_num,
+                       &img);
+    for (int i = 0; i < max_threads - 1; i++)
     {
         threads[i].join();
         std::cout << "finished thread: " << i << std::endl;
-    }
-    for (double y = 0; y < img_height; y++)
-    {
-        for (double x = 0; x < img_width; x++)
-        {
-            img.set(colors[(int)(y * img_width + x)], x, y);
-        }
     }
     img.save();
     std::cout << "image saved" << std::endl;

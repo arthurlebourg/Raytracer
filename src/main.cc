@@ -11,6 +11,7 @@
 #include "point_light.hh"
 #include "ray.hh"
 #include "scene.hh"
+#include "skybox_texture.hh"
 #include "sphere.hh"
 #include "triangle.hh"
 #include "uniform_texture.hh"
@@ -22,21 +23,22 @@ const int max_threads = std::thread::hardware_concurrency();
 const int anti_aliasing = 4;
 const int sqrt_anti_aliasing = sqrt(anti_aliasing);
 
-Hit_Info find_closest_obj(const Scene &sc, Ray ray)
+Hit_Info find_closest_obj(const std::vector<std::shared_ptr<Object>> &objects,
+                          Ray ray)
 {
     float min_dist = std::numeric_limits<float>::max();
     std::optional<Vector3> hit = std::nullopt;
     std::shared_ptr<Object> object = nullptr;
-    for (size_t i = 0; i < sc.objects_.size(); i++)
+    for (size_t i = 0; i < objects.size(); i++)
     {
-        auto new_hit = sc.objects_[i]->hit(ray);
+        auto new_hit = objects[i]->hit(ray);
         if (new_hit.has_value())
         {
             float new_dist = (new_hit.value() - ray.origin()).squaredNorm();
             if (new_dist < min_dist)
             {
                 min_dist = new_dist;
-                object = sc.objects_[i];
+                object = objects[i];
                 hit = new_hit;
             }
         }
@@ -47,7 +49,7 @@ Hit_Info find_closest_obj(const Scene &sc, Ray ray)
 bool is_shadowed(const Scene &scene, const Ray &light_ray,
                  std::shared_ptr<Object> object)
 {
-    auto other_object = find_closest_obj(scene, light_ray).get_obj();
+    auto other_object = find_closest_obj(scene.objects_, light_ray).get_obj();
 
     return other_object.get() != object.get();
 }
@@ -83,7 +85,7 @@ Color get_color(std::shared_ptr<Object> object, const Scene &scene,
 
         // Reflection ray
         Ray ray = Ray(hit_point + S * 0.001, S);
-        auto hit_info = find_closest_obj(scene, ray);
+        auto hit_info = find_closest_obj(scene.objects_, ray);
         if (n > 0 && hit_info.get_obj() != nullptr)
         {
             res = res + diffused_color * 0.5
@@ -108,6 +110,93 @@ Color get_color(std::shared_ptr<Object> object, const Scene &scene,
     return res;
 }
 
+Color skybox(Ray ray, double skybox_dist)
+{
+    Skybox_Texture tex = Skybox_Texture();
+
+    Plane west =
+        Plane(Vector3(-skybox_dist, 0, 0), Vector3(1, 0, 0).normalized(),
+              std::make_shared<Skybox_Texture>(tex));
+
+    Plane east =
+        Plane(Vector3(skybox_dist, 0, 0), Vector3(-1, 0, 0).normalized(),
+              std::make_shared<Skybox_Texture>(tex));
+
+    Plane north =
+        Plane(Vector3(0, 0, skybox_dist), Vector3(0, 0, -1).normalized(),
+              std::make_shared<Skybox_Texture>(tex));
+
+    Plane south =
+        Plane(Vector3(0, 0, -skybox_dist), Vector3(0, 0, 1).normalized(),
+              std::make_shared<Skybox_Texture>(tex));
+
+    Plane top =
+        Plane(Vector3(0, skybox_dist, 0), Vector3(0, -1, 0).normalized(),
+              std::make_shared<Skybox_Texture>(tex));
+
+    Plane bot =
+        Plane(Vector3(0, -skybox_dist, 0), Vector3(0, 1, 0).normalized(),
+              std::make_shared<Skybox_Texture>(tex));
+
+    std::vector<std::shared_ptr<Object>> skybox;
+
+    skybox.push_back(std::make_shared<Plane>(west));
+    skybox.push_back(std::make_shared<Plane>(east));
+    skybox.push_back(std::make_shared<Plane>(north));
+    skybox.push_back(std::make_shared<Plane>(south));
+    skybox.push_back(std::make_shared<Plane>(top));
+    skybox.push_back(std::make_shared<Plane>(bot));
+
+    Hit_Info hit = find_closest_obj(skybox, ray);
+
+    Material material = hit.get_obj()->get_texture(hit.get_location());
+
+    Color c = material.get_color();
+
+    return c;
+    // float r = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
+    // Color default_color = r > 0.98 ? Color(255,255,255) : Color(0, 0, 0);
+}
+
+void make_image_threads(Camera cam, Scene sc, double miny, double maxy,
+                        Image *img)
+{
+    for (double y = miny; y < maxy; y++)
+    {
+        for (double x = 0; x < img_width; x++)
+        {
+            Color col;
+            for (double n = -anti_aliasing / 2; n < anti_aliasing / 2; n++)
+            {
+                double x_pixel = x / img_width;
+                double y_pixel = y / img_height;
+                double x_distance = x_pixel - (x + 1) / img_width;
+                double y_distance = y_pixel - (y + 1) / img_height;
+                Ray ray = cam.get_ray(
+                    x_pixel + x_distance * (n / sqrt_anti_aliasing),
+                    y_pixel + y_distance * ((int)n % sqrt_anti_aliasing));
+                auto hit_info = find_closest_obj(sc.objects_, ray);
+
+                if (hit_info.get_obj() == nullptr)
+                {
+                    col = col + skybox(ray, 1000) * (1.0 / anti_aliasing);
+                }
+                else
+                {
+                    col = col
+                        + get_color(hit_info.get_obj(), sc,
+                                    hit_info.get_location(), hit_info.get_dir(),
+                                    5)
+                            * (1.0 / anti_aliasing);
+                }
+            }
+            img->set(col, x, y);
+        }
+        if (miny == 0)
+            std::cout << y << "/" << maxy << std::endl;
+    }
+}
+
 int make_gif(Camera &cam, Scene &sc, int frames)
 {
     Gif gif = Gif("raytrace.gif", img_width, img_height, frames);
@@ -120,7 +209,7 @@ int make_gif(Camera &cam, Scene &sc, int frames)
             for (double x = 0; x < img_width; x++)
             {
                 Ray ray = cam.get_ray(x / img_width, y / img_height);
-                auto hit_info = find_closest_obj(sc, ray);
+                auto hit_info = find_closest_obj(sc.objects_, ray);
 
                 if (hit_info.get_obj() == nullptr)
                 {
@@ -146,94 +235,9 @@ int make_gif(Camera &cam, Scene &sc, int frames)
     return 0;
 }
 
-int make_image(Camera &cam, Scene &sc)
-{
-    Image img = Image("bite.ppm", img_width, img_height);
-    Color default_color(0, 125, 255);
-
-    for (double y = 0; y < img_height; y++)
-    {
-        for (double x = 0; x < img_width; x++)
-        {
-            Color col;
-            for (double n = -anti_aliasing / 2; n < anti_aliasing / 2; n++)
-            {
-                double x_pixel = x / img_width;
-                double y_pixel = y / img_height;
-                double x_distance = x_pixel - (x + 1) / img_width;
-                double y_distance = y_pixel - (y + 1) / img_height;
-                Ray ray = cam.get_ray(
-                    x_pixel + x_distance * (n / sqrt_anti_aliasing),
-                    y_pixel + y_distance * ((int)n % sqrt_anti_aliasing));
-                auto hit_info = find_closest_obj(sc, ray);
-
-                if (hit_info.get_obj() == nullptr)
-                {
-                    col = col + default_color * (1.0 / anti_aliasing);
-                }
-                else
-                {
-                    col = col
-                        + get_color(hit_info.get_obj(), sc,
-                                    hit_info.get_location(), hit_info.get_dir(),
-                                    2)
-                            * (1.0 / anti_aliasing);
-                }
-            }
-            img.set(col, x, y);
-            std::cout << y * img_width + x << " / " << img_width * img_height
-                      << std::endl;
-        }
-    }
-    img.save();
-
-    return 0;
-}
-
-void make_image_threads(Camera cam, Scene sc, double miny, double maxy,
-                        Image *img)
-{
-    Color default_color(0, 125, 255);
-
-    for (double y = miny; y < maxy; y++)
-    {
-        for (double x = 0; x < img_width; x++)
-        {
-            Color col;
-            for (double n = -anti_aliasing / 2; n < anti_aliasing / 2; n++)
-            {
-                double x_pixel = x / img_width;
-                double y_pixel = y / img_height;
-                double x_distance = x_pixel - (x + 1) / img_width;
-                double y_distance = y_pixel - (y + 1) / img_height;
-                Ray ray = cam.get_ray(
-                    x_pixel + x_distance * (n / sqrt_anti_aliasing),
-                    y_pixel + y_distance * ((int)n % sqrt_anti_aliasing));
-                auto hit_info = find_closest_obj(sc, ray);
-
-                if (hit_info.get_obj() == nullptr)
-                {
-                    col = col + default_color * (1.0 / anti_aliasing);
-                }
-                else
-                {
-                    col = col
-                        + get_color(hit_info.get_obj(), sc,
-                                    hit_info.get_location(), hit_info.get_dir(),
-                                    5)
-                            * (1.0 / anti_aliasing);
-                }
-            }
-            img->set(col, x, y);
-            // res[(int)(y * img_width + x)] = col;
-        }
-        if (miny == 0)
-            std::cout << y << "/" << maxy << std::endl;
-    }
-}
-
 int main(int argc, char *argv[])
 {
+    srand(static_cast<unsigned>(time(0)));
     double fov_w = 90.0;
     double fov_h = 120.0;
     double dist_to_screen = 1;
@@ -244,8 +248,6 @@ int main(int argc, char *argv[])
 
     Camera cam = Camera(camCenter, camFocus, camUp, fov_w / 2, fov_h / 2,
                         dist_to_screen);
-    std::cout << cam.get_horizontal() << std::endl
-              << cam.get_vertical() << std::endl;
     Scene sc = Scene(cam, 5);
 
     Vector3 light_pos(5, 5, 5);
@@ -282,7 +284,7 @@ int main(int argc, char *argv[])
     sc.objects_.push_back(std::make_shared<Sphere>(green_boulasse));
     sc.objects_.push_back(std::make_shared<Sphere>(red_boulasse));
     sc.objects_.push_back(std::make_shared<Plane>(plancher));
-    sc.objects_.push_back(std::make_shared<Plane>(mur));
+    // sc.objects_.push_back(std::make_shared<Plane>(mur));
 
     sc.objects_.push_back(std::make_shared<Triangle>(illuminati));
     // std::cout << "loading" << std::endl;
@@ -301,8 +303,10 @@ int main(int argc, char *argv[])
         return make_gif(cam, sc, 100);
     }
     if (max_threads == 0)
-        return make_image(cam, sc);
-
+    {
+        std::cerr << "error threads" << std::endl;
+        return 1;
+    }
     std::cout << "Engaging on " << max_threads << " threads" << std::endl;
     double y_num = img_height / max_threads;
     std::vector<std::thread> threads;

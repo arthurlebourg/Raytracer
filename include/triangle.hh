@@ -27,6 +27,13 @@ public:
         C_ = C_ + vec;
     }
 
+    void rescale(float scale)
+    {
+        A_ = A_ * scale;
+        B_ = B_ * scale;
+        C_ = C_ * scale;
+    }
+
 private:
     Vector3 A_;
     Vector3 B_;

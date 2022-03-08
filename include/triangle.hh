@@ -27,6 +27,15 @@ public:
         C_ = C_ + vec;
     }
 
+    void set_position(Vector3 vec)
+    {
+        Vector3 AB = B_ - A_;
+        Vector3 AC = C_ - A_;
+        A_ = vec;
+        B_ = vec + AB;
+        C_ = vec + AC;
+    }
+
 private:
     Vector3 A_;
     Vector3 B_;

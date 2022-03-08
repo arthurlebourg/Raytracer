@@ -16,6 +16,8 @@ public:
 
     virtual void move(Vector3 vec) = 0;
 
+    virtual void set_position(Vector3 vec) = 0;
+
     Material get_texture(Vector3 point)
     {
         return texture_->get_Material(point);

@@ -235,6 +235,50 @@ int make_gif(Camera &cam, Scene &sc, int frames)
     return 0;
 }
 
+void make_video(Camera cam, Scene sc, int frames_begin, int frames_end,
+                Color *res)
+{
+    for (int frame = frames_begin; frame < frames_end; frame++)
+    {
+        for (double y = 0; y < img_height; y++)
+        {
+            for (double x = 0; x < img_width; x++)
+            {
+                Color col;
+                for (double n = -anti_aliasing / 2; n < anti_aliasing / 2; n++)
+                {
+                    double x_pixel = x / img_width;
+                    double y_pixel = y / img_height;
+                    double x_distance = x_pixel - (x + 1) / img_width;
+                    double y_distance = y_pixel - (y + 1) / img_height;
+                    Ray ray = cam.get_ray(
+                        x_pixel + x_distance * (n / sqrt_anti_aliasing),
+                        y_pixel + y_distance * ((int)n % sqrt_anti_aliasing));
+                    auto hit_info = find_closest_obj(sc.objects_, ray);
+
+                    if (hit_info.get_obj() == nullptr)
+                    {
+                        col = col + skybox(ray, 1000) * (1.0 / anti_aliasing);
+                    }
+                    else
+                    {
+                        col = col
+                            + get_color(hit_info.get_obj(), sc,
+                                        hit_info.get_location(),
+                                        hit_info.get_dir(), 5)
+                                * (1.0 / anti_aliasing);
+                    }
+                }
+                if (frame < 60)
+                    sc.spheres_[1].set_position(Vector3(4, 3, 0));
+
+                res[(int)(y * img_width + x) + frame * img_width * img_height] =
+                    col;
+            }
+        }
+    }
+}
+
 int main(int argc, char *argv[])
 {
     srand(static_cast<unsigned>(time(0)));
@@ -272,22 +316,30 @@ int main(int argc, char *argv[])
     Sphere red_boulasse = Sphere(Vector3(-4, 0, 8), 2,
                                  std::make_shared<Uniform_Texture>(red_tex));
 
+    Sphere blue_boulasse = Sphere(Vector3(4, 4, 8), 2,
+                                  std::make_shared<Uniform_Texture>(blue_tex));
+
     Plane plancher = Plane(Vector3(0, -2, 0), Vector3(0, 1, 0),
                            std::make_shared<Uniform_Texture>(gray_tex));
 
-    Plane mur = Plane(Vector3(-8, 0, 0), Vector3(1, 0, 0).normalized(),
+    /*Plane mur = Plane(Vector3(-8, 0, 0), Vector3(1, 0, 0).normalized(),
                       std::make_shared<Uniform_Texture>(blue_tex));
 
     Triangle illuminati =
         Triangle(Vector3(3, 0, 2), Vector3(3, 2, 2), Vector3(1, 2, 2),
                  std::make_shared<Uniform_Texture>(red_tex));
+     */
     sc.objects_.push_back(std::make_shared<Sphere>(green_boulasse));
     sc.objects_.push_back(std::make_shared<Sphere>(red_boulasse));
+    sc.objects_.push_back(std::make_shared<Sphere>(blue_boulasse));
+    sc.spheres_.push_back(red_boulasse);
+    sc.spheres_.push_back(green_boulasse);
+    sc.spheres_.push_back(blue_boulasse);
     sc.objects_.push_back(std::make_shared<Plane>(plancher));
     // sc.objects_.push_back(std::make_shared<Plane>(mur));
 
-    sc.objects_.push_back(std::make_shared<Triangle>(illuminati));
-    // std::cout << "loading" << std::endl;
+    // sc.objects_.push_back(std::make_shared<Triangle>(illuminati));
+    //  std::cout << "loading" << std::endl;
 
     // OBJLoad obj("models/amogus_hands.objet");
 
@@ -296,24 +348,77 @@ int main(int argc, char *argv[])
         sc.objects_.push_back(std::make_shared<Triangle>(t));
     }*/
 
-    std::cout << "loaded" << std::endl;
-
-    if (argc > 1)
-    {
-        return make_gif(cam, sc, 100);
-    }
     if (max_threads == 0)
     {
         std::cerr << "error threads" << std::endl;
         return 1;
     }
     std::cout << "Engaging on " << max_threads << " threads" << std::endl;
+
+    if (argc > 1)
+    {
+        size_t frames = 120;
+        size_t frames_per_thread = frames / max_threads;
+        std::vector<std::thread> threads;
+        Color *data = static_cast<Color *>(
+            calloc(img_width * img_height * frames, sizeof(Color)));
+        for (int i = 0; i < max_threads - 1; i++)
+        {
+            threads.push_back(std::thread(make_video, cam, sc,
+                                          i * frames_per_thread,
+                                          (i + 1) * frames_per_thread, data));
+            std::cout << i + 1 << std::endl;
+        }
+
+        make_video(cam, sc, (max_threads - 1) * frames_per_thread,
+                   max_threads * frames_per_thread, data);
+
+        std::string ffmpeg_data =
+            "ffmpeg -loglevel quiet -y -f rawvideo -vcodec rawvideo -pix_fmt "
+            "rgb24 -s "
+            + std::to_string(img_width) + std::string("x")
+            + std::to_string(img_height)
+            + std::string(
+                " -r 25 -i - -f mp4 -q:v 5 -an -vcodec mpeg4 penis.mp4");
+
+        FILE *pipeout = popen(ffmpeg_data.c_str(), "w");
+
+        std::cout << "pipe opened" << std::endl;
+
+        unsigned char frame[img_height][img_width][3] = { 0 };
+
+        for (int i = 0; i < max_threads - 1; i++)
+        {
+            threads[i].join();
+            std::cout << "finished thread: " << i << std::endl;
+        }
+
+        for (size_t f = 0; f < frames; f++)
+        {
+            for (size_t y = 0; y < img_height; y++)
+            {
+                for (size_t x = 0; x < img_width; x++)
+                {
+                    Color c = data[((img_height - y - 1) * img_width + x)
+                                   + img_width * img_height * f];
+                    frame[y][x][0] = c.red(); // red
+                    frame[y][x][1] = c.green(); // green
+                    frame[y][x][2] = c.blue(); // blue
+                }
+            }
+            fwrite(frame, 1, img_height * img_width * 3, pipeout);
+        }
+        free(data);
+        fflush(pipeout);
+        pclose(pipeout);
+        return 0;
+    }
+
     double y_num = img_height / max_threads;
     std::vector<std::thread> threads;
     Image img = Image("bite.ppm", img_width, img_height);
     for (int i = 0; i < max_threads - 1; i++)
     {
-        std::cout << i + 1 << " sur " << max_threads << std::endl;
         threads.push_back(std::thread(make_image_threads, cam, sc, i * y_num,
                                       (i + 1) * y_num, &img));
     }

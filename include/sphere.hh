@@ -24,6 +24,11 @@ public:
         pos_ = pos_ + vec;
     }
 
+    void set_position(Vector3 vec)
+    {
+        pos_ = vec;
+    }
+
 private:
     Vector3 pos_;
     float radius_;

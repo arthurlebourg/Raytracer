@@ -250,7 +250,6 @@ void make_video(Scene sc, int frames_begin, int frames_end, Color *res)
 
 int main(int argc, char *argv[])
 {
-    srand(static_cast<unsigned>(time(0)));
     double fov_w = 90.0;
     double fov_h = 120.0;
     double dist_to_screen = 1;
@@ -323,7 +322,7 @@ int main(int argc, char *argv[])
 
     if (argc > 1)
     {
-        size_t frames = 360;
+        size_t frames = 120;
         size_t frames_per_thread = frames / max_threads;
         std::vector<std::thread> threads;
         Color *data = static_cast<Color *>(

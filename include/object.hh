@@ -18,6 +18,8 @@ public:
 
     virtual void set_position(Vector3 vec) = 0;
 
+    virtual std::shared_ptr<Object> clone() = 0;
+
     Material get_texture(Vector3 point)
     {
         return texture_->get_Material(point);

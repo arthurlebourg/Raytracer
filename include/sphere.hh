@@ -15,6 +15,12 @@ public:
         , radius_(radius)
     {}
 
+    Sphere(const Sphere &s)
+        : Object(s.texture_)
+        , pos_(s.pos_)
+        , radius_(s.radius_)
+    {}
+
     std::optional<Vector3> hit(Ray ray);
 
     Vector3 normal(Vector3 point);
@@ -27,6 +33,11 @@ public:
     void set_position(Vector3 vec)
     {
         pos_ = vec;
+    }
+
+    std::shared_ptr<Object> clone()
+    {
+        return std::make_shared<Sphere>(Sphere(*this));
     }
 
 private:

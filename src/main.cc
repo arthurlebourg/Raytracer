@@ -110,44 +110,9 @@ Color get_color(std::shared_ptr<Object> object, const Scene &scene,
     return res;
 }
 
-Color skybox(Ray ray, double skybox_dist)
+Color skybox(Ray ray, const Scene &sc)
 {
-    Skybox_Texture tex = Skybox_Texture();
-
-    Plane west =
-        Plane(Vector3(-skybox_dist, 0, 0), Vector3(1, 0, 0).normalized(),
-              std::make_shared<Skybox_Texture>(tex));
-
-    Plane east =
-        Plane(Vector3(skybox_dist, 0, 0), Vector3(-1, 0, 0).normalized(),
-              std::make_shared<Skybox_Texture>(tex));
-
-    Plane north =
-        Plane(Vector3(0, 0, skybox_dist), Vector3(0, 0, -1).normalized(),
-              std::make_shared<Skybox_Texture>(tex));
-
-    Plane south =
-        Plane(Vector3(0, 0, -skybox_dist), Vector3(0, 0, 1).normalized(),
-              std::make_shared<Skybox_Texture>(tex));
-
-    Plane top =
-        Plane(Vector3(0, skybox_dist, 0), Vector3(0, -1, 0).normalized(),
-              std::make_shared<Skybox_Texture>(tex));
-
-    Plane bot =
-        Plane(Vector3(0, -skybox_dist, 0), Vector3(0, 1, 0).normalized(),
-              std::make_shared<Skybox_Texture>(tex));
-
-    std::vector<std::shared_ptr<Object>> skybox;
-
-    skybox.push_back(std::make_shared<Plane>(west));
-    skybox.push_back(std::make_shared<Plane>(east));
-    skybox.push_back(std::make_shared<Plane>(north));
-    skybox.push_back(std::make_shared<Plane>(south));
-    skybox.push_back(std::make_shared<Plane>(top));
-    skybox.push_back(std::make_shared<Plane>(bot));
-
-    Hit_Info hit = find_closest_obj(skybox, ray);
+    Hit_Info hit = find_closest_obj(sc.skybox_, ray);
 
     Material material = hit.get_obj()->get_texture(hit.get_location());
 
@@ -179,7 +144,7 @@ void make_image_threads(Camera cam, Scene sc, double miny, double maxy,
 
                 if (hit_info.get_obj() == nullptr)
                 {
-                    col = col + skybox(ray, 1000) * (1.0 / anti_aliasing);
+                    col = col + skybox(ray, sc) * (1.0 / anti_aliasing);
                 }
                 else
                 {
@@ -258,7 +223,7 @@ void make_video(Camera cam, Scene sc, int frames_begin, int frames_end,
 
                     if (hit_info.get_obj() == nullptr)
                     {
-                        col = col + skybox(ray, 1000) * (1.0 / anti_aliasing);
+                        col = col + skybox(ray, sc) * (1.0 / anti_aliasing);
                     }
                     else
                     {
@@ -270,7 +235,7 @@ void make_video(Camera cam, Scene sc, int frames_begin, int frames_end,
                     }
                 }
                 if (frame < 60)
-                    sc.spheres_[1].set_position(Vector3(4, 3, 0));
+                    sc.objects_[1]->set_position(Vector3(4, 3, 0));
 
                 res[(int)(y * img_width + x) + frame * img_width * img_height] =
                     col;
@@ -292,7 +257,7 @@ int main(int argc, char *argv[])
 
     Camera cam = Camera(camCenter, camFocus, camUp, fov_w / 2, fov_h / 2,
                         dist_to_screen);
-    Scene sc = Scene(cam, 5);
+    Scene sc = Scene(cam, 5, 1000);
 
     Vector3 light_pos(5, 5, 5);
     float luminosty = 1;
@@ -332,9 +297,6 @@ int main(int argc, char *argv[])
     sc.objects_.push_back(std::make_shared<Sphere>(green_boulasse));
     sc.objects_.push_back(std::make_shared<Sphere>(red_boulasse));
     sc.objects_.push_back(std::make_shared<Sphere>(blue_boulasse));
-    sc.spheres_.push_back(red_boulasse);
-    sc.spheres_.push_back(green_boulasse);
-    sc.spheres_.push_back(blue_boulasse);
     sc.objects_.push_back(std::make_shared<Plane>(plancher));
     // sc.objects_.push_back(std::make_shared<Plane>(mur));
 
@@ -364,7 +326,7 @@ int main(int argc, char *argv[])
             calloc(img_width * img_height * frames, sizeof(Color)));
         for (int i = 0; i < max_threads - 1; i++)
         {
-            threads.push_back(std::thread(make_video, cam, sc,
+            threads.push_back(std::thread(make_video, cam, sc.copy_for_thread(),
                                           i * frames_per_thread,
                                           (i + 1) * frames_per_thread, data));
             std::cout << i + 1 << std::endl;

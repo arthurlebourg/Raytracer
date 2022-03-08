@@ -86,10 +86,10 @@ int Blob::get_table_index(Vector3 corner, float side_length) const
     return index;
 }
 
-std::vector<Triangle>
-Blob::Render(std::shared_ptr<Texture_Material> texture) const
+std::vector<std::shared_ptr<Triangle>>
+Blob::render(std::shared_ptr<Texture_Material> texture) const
 {
-    std::vector<Triangle> triangles;
+    std::vector<std::shared_ptr<Triangle>> triangles;
     // length of sub triangle's edge
     auto sub_length = side_length_ / nb_step_;
 
@@ -104,8 +104,10 @@ Blob::Render(std::shared_ptr<Texture_Material> texture) const
                 auto sub_triangles =
                     get_sub_triangles(corner, sub_length, index, texture);
                 // concatenates sub vector's content to the main one
-                triangles.insert(triangles.end(), sub_triangles.begin(),
-                                 sub_triangles.end());
+                for (auto triangle : sub_triangles)
+                {
+                    triangles.push_back(std::make_shared<Triangle>(triangle));
+                }
             }
         }
     }

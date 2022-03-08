@@ -2,6 +2,7 @@
 #include <limits>
 #include <tuple>
 
+#include "blob.hh"
 #include "gif.hh"
 #include "hit_info.hh"
 #include "image.hh"
@@ -223,7 +224,7 @@ int main(int argc, char *argv[])
     Sphere red_boulasse = Sphere(Vector3(-4, 0, 8), 2,
                                  std::make_shared<Uniform_Texture>(red_tex));
 
-    Plane plancher = Plane(Vector3(0, -1, 0), Vector3(0, 1, 0),
+    Plane plancher = Plane(Vector3(0, -5, 0), Vector3(0, 1, 0),
                            std::make_shared<Uniform_Texture>(gray_tex));
 
     Plane mur = Plane(Vector3(-5, 0, 0), Vector3(1, 0, 0).normalized(),
@@ -233,11 +234,24 @@ int main(int argc, char *argv[])
         Triangle(Vector3(3, 0, 2), Vector3(3, 2, 2), Vector3(1, 2, 2),
                  std::make_shared<Uniform_Texture>(red_tex));
 
-    sc.objects_.push_back(std::make_shared<Sphere>(green_boulasse));
-    sc.objects_.push_back(std::make_shared<Sphere>(red_boulasse));
+    // sc.objects_.push_back(std::make_shared<Sphere>(green_boulasse));
+    // sc.objects_.push_back(std::make_shared<Sphere>(red_boulasse));
     sc.objects_.push_back(std::make_shared<Plane>(plancher));
     sc.objects_.push_back(std::make_shared<Plane>(mur));
-    sc.objects_.push_back(std::make_shared<Triangle>(illuminati));
+    // sc.objects_.push_back(std::make_shared<Triangle>(illuminati));
+    green_boulasse = green_boulasse;
+    red_boulasse = red_boulasse;
+    illuminati = illuminati;
+
+    Vector3 blob_corner(-3, -3, 2);
+    float blob_length = 6.0;
+    int blob_step = 20;
+    float blob_thresh = 1.0;
+
+    Blob blob(blob_corner, blob_length, blob_step, blob_thresh);
+    auto triangles = blob.render(std::make_shared<Uniform_Texture>(red_tex));
+    std::cout << "nb triangle : " << triangles.size() << "\n";
+    sc.objects_.insert(sc.objects_.end(), triangles.begin(), triangles.end());
 
     if (argc > 1)
     {

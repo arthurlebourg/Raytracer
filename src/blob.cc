@@ -3,6 +3,7 @@
 #include "tri_table.hh"
 
 // Returns the appropriate vertex from the edge indexes in the sub cube
+// coordinates are
 Vector3 edge_to_vect(int edge)
 {
     switch (edge)
@@ -39,7 +40,7 @@ Vector3 edge_to_vect(int edge)
 
 /*
     returns the list of triangles from the potential points inside the sub cube
-    ( corner + side length) represents the sub cube
+    (corner + side length) represents the sub cube
     index is the place to look for in tri_table
 */
 std::vector<Triangle>
@@ -60,7 +61,7 @@ get_sub_triangles(Vector3 corner, float side_length, int index,
     return triangles;
 }
 
-int Blob::get_table_index(Vector3 corner, float side_length) const
+int Blob::get_table_index(Vector3 corner, float side_length)
 {
     std::vector<Vector3> potentials;
     auto x = corner.x();
@@ -80,14 +81,14 @@ int Blob::get_table_index(Vector3 corner, float side_length) const
     int index = 0;
     for (size_t i = 0; i < potentials.size(); i++)
     {
-        if (potential_func_(potentials[i]) > threshold_)
+        if (evaluate_potential(potentials[i]) > threshold_)
             index |= (1 << i);
     }
     return index;
 }
 
 std::vector<std::shared_ptr<Triangle>>
-Blob::render(std::shared_ptr<Texture_Material> texture) const
+Blob::render(std::shared_ptr<Texture_Material> texture)
 {
     std::vector<std::shared_ptr<Triangle>> triangles;
     // length of sub triangle's edge

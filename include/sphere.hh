@@ -24,6 +24,16 @@ public:
         pos_ = pos_ + vec;
     }
 
+    float get_radius()
+    {
+        return radius_;
+    }
+
+    Vector3 get_center()
+    {
+        return pos_;
+    }
+
 private:
     Vector3 pos_;
     float radius_;

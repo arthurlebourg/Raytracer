@@ -2,10 +2,10 @@
 #include <limits>
 #include <tuple>
 
-#include "blob.hh"
 #include "gif.hh"
 #include "hit_info.hh"
 #include "image.hh"
+#include "metaball.hh"
 #include "plane.hh"
 #include "point_light.hh"
 #include "ray.hh"
@@ -248,8 +248,15 @@ int main(int argc, char *argv[])
     int blob_step = 20;
     float blob_thresh = 1.0;
 
-    Blob blob(blob_corner, blob_length, blob_step, blob_thresh);
-    auto triangles = blob.render(std::make_shared<Uniform_Texture>(red_tex));
+    Metaball metaball(blob_corner, blob_length, blob_step, blob_thresh);
+    // TODO : can we handle multiple texture inside the same blob ?
+    metaball.balls.push_back(Sphere(
+        Vector3(0, 0, 3), 1, std::make_shared<Uniform_Texture>(green_tex)));
+    metaball.balls.push_back(Sphere(
+        Vector3(1.5, 1.5, 1.5), 1, std::make_shared<Uniform_Texture>(red_tex)));
+
+    auto triangles =
+        metaball.render(std::make_shared<Uniform_Texture>(red_tex));
     std::cout << "nb triangle : " << triangles.size() << "\n";
     sc.objects_.insert(sc.objects_.end(), triangles.begin(), triangles.end());
 

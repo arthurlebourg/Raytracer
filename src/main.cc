@@ -8,6 +8,7 @@
 #include "image.hh"
 #include "metaball.hh"
 #include "obj_load.hh"
+#include "metaball.hh"
 #include "plane.hh"
 #include "point_light.hh"
 #include "ray.hh"

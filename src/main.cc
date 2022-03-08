@@ -114,6 +114,9 @@ Color skybox(Ray ray, const Scene &sc)
 {
     Hit_Info hit = find_closest_obj(sc.skybox_, ray);
 
+    if (hit.get_obj() == nullptr)
+        return Color(255, 255, 0);
+
     Material material = hit.get_obj()->get_texture(hit.get_location());
 
     Color c = material.get_color();
@@ -123,8 +126,7 @@ Color skybox(Ray ray, const Scene &sc)
     // Color default_color = r > 0.98 ? Color(255,255,255) : Color(0, 0, 0);
 }
 
-void make_image_threads(Camera cam, Scene sc, double miny, double maxy,
-                        Image *img)
+void make_image_threads(Scene sc, double miny, double maxy, Image *img)
 {
     for (double y = miny; y < maxy; y++)
     {
@@ -137,7 +139,7 @@ void make_image_threads(Camera cam, Scene sc, double miny, double maxy,
                 double y_pixel = y / img_height;
                 double x_distance = x_pixel - (x + 1) / img_width;
                 double y_distance = y_pixel - (y + 1) / img_height;
-                Ray ray = cam.get_ray(
+                Ray ray = sc.camera_.get_ray(
                     x_pixel + x_distance * (n / sqrt_anti_aliasing),
                     y_pixel + y_distance * ((int)n % sqrt_anti_aliasing));
                 auto hit_info = find_closest_obj(sc.objects_, ray);
@@ -162,7 +164,7 @@ void make_image_threads(Camera cam, Scene sc, double miny, double maxy,
     }
 }
 
-int make_gif(Camera &cam, Scene &sc, int frames)
+int make_gif(Scene &sc, int frames)
 {
     Gif gif = Gif("raytrace.gif", img_width, img_height, frames);
     Color default_color(0, 125, 255);
@@ -173,7 +175,7 @@ int make_gif(Camera &cam, Scene &sc, int frames)
         {
             for (double x = 0; x < img_width; x++)
             {
-                Ray ray = cam.get_ray(x / img_width, y / img_height);
+                Ray ray = sc.camera_.get_ray(x / img_width, y / img_height);
                 auto hit_info = find_closest_obj(sc.objects_, ray);
 
                 if (hit_info.get_obj() == nullptr)
@@ -189,7 +191,7 @@ int make_gif(Camera &cam, Scene &sc, int frames)
                 }
             }
         }
-        cam.change_pos(Vector3(0, frame < 50 ? 0.05 : -0.05, 0));
+        sc.camera_.change_pos(Vector3(0, frame < 50 ? 0.05 : -0.05, 0));
         sc.objects_[1]->move(Vector3(0, frame < frames / 2 ? 0.1 : -0.1, 0));
         sc.objects_[0]->move(Vector3(frame < frames / 2 ? 0.05 : -0.05, 0, 0));
         std::cout << "frame: " << frame << std::endl;
@@ -200,8 +202,7 @@ int make_gif(Camera &cam, Scene &sc, int frames)
     return 0;
 }
 
-void make_video(Camera cam, Scene sc, int frames_begin, int frames_end,
-                Color *res)
+void make_video(Scene sc, int frames_begin, int frames_end, Color *res)
 {
     for (int frame = frames_begin; frame < frames_end; frame++)
     {
@@ -216,7 +217,7 @@ void make_video(Camera cam, Scene sc, int frames_begin, int frames_end,
                     double y_pixel = y / img_height;
                     double x_distance = x_pixel - (x + 1) / img_width;
                     double y_distance = y_pixel - (y + 1) / img_height;
-                    Ray ray = cam.get_ray(
+                    Ray ray = sc.camera_.get_ray(
                         x_pixel + x_distance * (n / sqrt_anti_aliasing),
                         y_pixel + y_distance * ((int)n % sqrt_anti_aliasing));
                     auto hit_info = find_closest_obj(sc.objects_, ray);
@@ -234,8 +235,11 @@ void make_video(Camera cam, Scene sc, int frames_begin, int frames_end,
                                 * (1.0 / anti_aliasing);
                     }
                 }
-                if (frame < 60)
-                    sc.objects_[1]->set_position(Vector3(4, 3, 0));
+                sc.objects_[1]->set_position(
+                    Vector3(-2 + frame * 0.2, 4 + frame * 0.1, 0));
+                sc.camera_.set_rotation(Vector3(0, frame, 0));
+                // if (frames_begin == 0)
+                //     std::cout << sc.camera_.get_up() << std::endl;
 
                 res[(int)(y * img_width + x) + frame * img_width * img_height] =
                     col;
@@ -251,7 +255,7 @@ int main(int argc, char *argv[])
     double fov_h = 120.0;
     double dist_to_screen = 1;
 
-    Vector3 camCenter(10, 0, 10);
+    Vector3 camCenter(0, 0, 0);
     Vector3 camFocus(0, 0, 1);
     Vector3 camUp(0, 1, 0);
 
@@ -276,12 +280,12 @@ int main(int argc, char *argv[])
         Uniform_Texture(Material(Color(0, 0, 255), 1, 10));
 
     Sphere green_boulasse = Sphere(
-        Vector3(2, -1, 5), 2, std::make_shared<Uniform_Texture>(green_tex));
+        Vector3(2, 0, 10), 2, std::make_shared<Uniform_Texture>(green_tex));
 
     Sphere red_boulasse = Sphere(Vector3(-4, 0, 8), 2,
                                  std::make_shared<Uniform_Texture>(red_tex));
 
-    Sphere blue_boulasse = Sphere(Vector3(4, 4, 8), 2,
+    Sphere blue_boulasse = Sphere(Vector3(4, 2, 8), 2,
                                   std::make_shared<Uniform_Texture>(blue_tex));
 
     Plane plancher = Plane(Vector3(0, -2, 0), Vector3(0, 1, 0),
@@ -319,20 +323,20 @@ int main(int argc, char *argv[])
 
     if (argc > 1)
     {
-        size_t frames = 120;
+        size_t frames = 360;
         size_t frames_per_thread = frames / max_threads;
         std::vector<std::thread> threads;
         Color *data = static_cast<Color *>(
             calloc(img_width * img_height * frames, sizeof(Color)));
         for (int i = 0; i < max_threads - 1; i++)
         {
-            threads.push_back(std::thread(make_video, cam, sc.copy_for_thread(),
+            threads.push_back(std::thread(make_video, sc.copy_for_thread(),
                                           i * frames_per_thread,
                                           (i + 1) * frames_per_thread, data));
             std::cout << i + 1 << std::endl;
         }
 
-        make_video(cam, sc, (max_threads - 1) * frames_per_thread,
+        make_video(sc, (max_threads - 1) * frames_per_thread,
                    max_threads * frames_per_thread, data);
 
         std::string ffmpeg_data =
@@ -341,7 +345,7 @@ int main(int argc, char *argv[])
             + std::to_string(img_width) + std::string("x")
             + std::to_string(img_height)
             + std::string(
-                " -r 25 -i - -f mp4 -q:v 5 -an -vcodec mpeg4 penis.mp4");
+                " -r 25 -i - -f mp4 -q:v 5 -an -vcodec mpeg4 raytracer.mp4");
 
         FILE *pipeout = popen(ffmpeg_data.c_str(), "w");
 
@@ -381,10 +385,10 @@ int main(int argc, char *argv[])
     Image img = Image("bite.ppm", img_width, img_height);
     for (int i = 0; i < max_threads - 1; i++)
     {
-        threads.push_back(std::thread(make_image_threads, cam, sc, i * y_num,
+        threads.push_back(std::thread(make_image_threads, sc, i * y_num,
                                       (i + 1) * y_num, &img));
     }
-    make_image_threads(cam, sc, (max_threads - 1) * y_num, max_threads * y_num,
+    make_image_threads(sc, (max_threads - 1) * y_num, max_threads * y_num,
                        &img);
     for (int i = 0; i < max_threads - 1; i++)
     {

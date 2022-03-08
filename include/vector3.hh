@@ -6,7 +6,7 @@
 class Vector3
 {
 public:
-    constexpr Vector3(float x, float y, float z) noexcept
+    constexpr Vector3(double x, double y, double z) noexcept
         : x_(x)
         , y_(y)
         , z_(z)
@@ -18,34 +18,34 @@ public:
         , z_(0)
     {}
 
-    float x() const
+    double x() const
     {
         return x_;
     }
 
-    float y() const
+    double y() const
     {
         return y_;
     }
 
-    float z() const
+    double z() const
     {
         return z_;
     }
 
-    float length() const
+    double length() const
     {
         return sqrtf(x_ * x_ + y_ * y_ + z_ * z_);
     }
 
-    float squaredNorm() const
+    double squaredNorm() const
     {
         return x_ * x_ + y_ * y_ + z_ * z_;
     }
 
     Vector3 normalized() const
     {
-        float k = 1.0f / sqrtf(x_ * x_ + y_ * y_ + z_ * z_);
+        double k = 1.0f / sqrtf(x_ * x_ + y_ * y_ + z_ * z_);
         return Vector3(k * x_, k * y_, k * z_);
     }
 
@@ -60,9 +60,9 @@ public:
     }
 
 private:
-    float x_;
-    float y_;
-    float z_;
+    double x_;
+    double y_;
+    double z_;
 };
 
 inline std::ostream &operator<<(std::ostream &os, const Vector3 &vec)
@@ -81,12 +81,12 @@ inline Vector3 operator-(const Vector3 &lhs, const Vector3 &rhs)
     return Vector3(lhs.x() - rhs.x(), lhs.y() - rhs.y(), lhs.z() - rhs.z());
 }
 
-inline Vector3 operator*(float t, const Vector3 &v)
+inline Vector3 operator*(double t, const Vector3 &v)
 {
     return Vector3(t * v.x(), t * v.y(), t * v.z());
 }
 
-inline Vector3 operator*(const Vector3 &v, float t)
+inline Vector3 operator*(const Vector3 &v, double t)
 {
     return Vector3(t * v.x(), t * v.y(), t * v.z());
 }
@@ -96,35 +96,35 @@ inline Vector3 operator*(const Vector3 &lhs, const Vector3 &rhs)
     return Vector3(lhs.x() * rhs.x(), lhs.y() * rhs.y(), lhs.z() * rhs.z());
 }
 
-inline Vector3 operator/(const Vector3 &v, float t)
+inline Vector3 operator/(const Vector3 &v, double t)
 {
-    float k = 1.0f / t;
+    double k = 1.0f / t;
     return Vector3(k * v.x(), k * v.y(), k * v.z());
 }
 
-inline float squaredDistance(const Vector3 &lhs, const Vector3 &rhs)
+inline double squaredDistance(const Vector3 &lhs, const Vector3 &rhs)
 {
     return (lhs.x() - rhs.x()) * (lhs.x() - rhs.x())
         + (lhs.y() - rhs.y()) * (lhs.y() - rhs.y())
         + (lhs.z() - rhs.z()) * (lhs.z() - rhs.z());
 }
 
-inline float distance(const Vector3 &lhs, const Vector3 &rhs)
+inline double distance(const Vector3 &lhs, const Vector3 &rhs)
 {
     return sqrtf((lhs.x() - rhs.x()) * (lhs.x() - rhs.x())
                  + (lhs.y() - rhs.y()) * (lhs.y() - rhs.y())
                  + (lhs.z() - rhs.z()) * (lhs.z() - rhs.z()));
 }
 
-inline float dot(const Vector3 &lhs, const Vector3 &rhs)
+inline double dot(const Vector3 &lhs, const Vector3 &rhs)
 {
     return lhs.x() * rhs.x() + lhs.y() * rhs.y() + lhs.z() * rhs.z();
 }
 
 inline Vector3 cross(const Vector3 &lhs, const Vector3 &rhs)
 {
-    float x = lhs.y() * rhs.z() - lhs.z() * rhs.y();
-    float y = -(lhs.x() * rhs.z() - lhs.z() * rhs.x());
-    float z = lhs.x() * rhs.y() - lhs.y() * rhs.x();
+    double x = lhs.y() * rhs.z() - lhs.z() * rhs.y();
+    double y = -(lhs.x() * rhs.z() - lhs.z() * rhs.x());
+    double z = lhs.x() * rhs.y() - lhs.y() * rhs.x();
     return Vector3(x, y, z);
 }

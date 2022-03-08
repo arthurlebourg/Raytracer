@@ -60,6 +60,7 @@ public:
     std::vector<std::shared_ptr<Object>> objects_;
     std::vector<std::shared_ptr<Object>> skybox_;
     std::vector<std::shared_ptr<Light>> lights_;
+    Camera camera_;
 
     Scene copy_for_thread()
     {
@@ -78,7 +79,6 @@ public:
     }
 
 private:
-    Camera camera_;
     double ns_;
     double skybox_dist_;
 };

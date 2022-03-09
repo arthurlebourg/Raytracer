@@ -266,8 +266,8 @@ int main(int argc, char *argv[])
                         fov_h / 2, dist_to_screen);
     Scene sc = Scene(cam, 5, dist_to_skybox, seed);
 
-    Vector3 light_pos(4, 5, 5);
-    float luminosty = 1;
+    Vector3 light_pos(0, 5, 5);
+    float luminosty = 5;
     Point_Light light(luminosty, light_pos);
     sc.lights_.push_back(std::make_shared<Point_Light>(light));
 
@@ -275,8 +275,9 @@ int main(int argc, char *argv[])
 
     Earth_Texture planete_tex = Earth_Texture(seed);
 
-    Sphere green_boulasse = Sphere(
-        Vector3(60, 0, 300), 600, std::make_shared<Earth_Texture>(planete_tex));
+    Sphere green_boulasse =
+        Sphere(Vector3(-50, -625, 100), 600,
+               std::make_shared<Earth_Texture>(planete_tex));
 
     sc.objects_.push_back(std::make_shared<Sphere>(green_boulasse));
 

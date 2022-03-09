@@ -8,7 +8,6 @@
 #include "image.hh"
 #include "metaball.hh"
 #include "obj_load.hh"
-#include "metaball.hh"
 #include "plane.hh"
 #include "point_light.hh"
 #include "ray.hh"
@@ -302,7 +301,6 @@ int main(int argc, char *argv[])
         metaball.render(std::make_shared<Uniform_Texture>(red_tex));
     std::cout << "nb triangle : " << triangles.size() << "\n";
     sc.objects_.insert(sc.objects_.end(), triangles.begin(), triangles.end());
-
 
     if (argc > 1)
     {

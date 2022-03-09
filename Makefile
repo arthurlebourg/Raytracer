@@ -1,5 +1,5 @@
 CXX      := -c++
-CXXFLAGS := -pedantic-errors -Wall -Wextra -Werror -O3
+CXXFLAGS := -pedantic-errors -Wall -Wextra -Werror -O3 -pthread
 LDFLAGS  := -L/usr/lib -lstdc++ -lm
 OBJ_DIR  := ./build
 BIN_DIR  := ./bin
@@ -31,9 +31,6 @@ build:
 
 debug: CXXFLAGS += -DDEBUG -g
 debug: all
-
-thread: CXXFLAGS += -pthread
-thread: all
 
 exe: all
 	./$(BIN_DIR)/$(TARGET)

@@ -236,12 +236,9 @@ void make_video(Scene sc, int frames_begin, int frames_end, Color *res)
                                 * (1.0 / anti_aliasing);
                     }
                 }
-                sc.objects_[0]->set_position(
-                    Vector3(-50 + frame * 10, -65,
-                            100 + (frame * 0.25) * (frame * 0.25)));
-                // sc.camera_.set_rotation(Vector3(0, frame, 0));
-                //  if (frames_begin == 0)
-                //      std::cout << sc.camera_.get_up() << std::endl;
+                sc.objects_[0]->set_position(Vector3(-50, -625, 100));
+
+                sc.camera_.set_position(Vector3(0, 0, -frame));
 
                 res[(int)(y * img_width + x) + frame * img_width * img_height] =
                     col;
@@ -257,16 +254,16 @@ int main(int argc, char *argv[])
     double fov_w = 90;
     double fov_h = 120.0;
     double dist_to_screen = 1;
-    double dist_to_skybox = 1000;
+    double dist_to_skybox = 5000;
 
-    size_t frames = 100;
+    size_t frames = 220;
 
     Vector3 camCenter(0, 0, 0);
     Vector3 camFocus(0, 0, 1);
-    Vector3 camUp(0, 1, 0);
+    Vector3 camUp(0, 1, 0.2);
 
-    Camera cam = Camera(camCenter, camFocus, camUp, fov_w / 2, fov_h / 2,
-                        dist_to_screen);
+    Camera cam = Camera(camCenter, camFocus, camUp.normalized(), fov_w / 2,
+                        fov_h / 2, dist_to_screen);
     Scene sc = Scene(cam, 5, dist_to_skybox, seed);
 
     Vector3 light_pos(4, 5, 5);
@@ -279,7 +276,7 @@ int main(int argc, char *argv[])
     Earth_Texture planete_tex = Earth_Texture(seed);
 
     Sphere green_boulasse = Sphere(
-        Vector3(60, 0, 300), 60, std::make_shared<Earth_Texture>(planete_tex));
+        Vector3(60, 0, 300), 600, std::make_shared<Earth_Texture>(planete_tex));
 
     sc.objects_.push_back(std::make_shared<Sphere>(green_boulasse));
 
@@ -353,9 +350,9 @@ int main(int argc, char *argv[])
         fflush(pipeout);
         pclose(pipeout);
         std::string ffmpeg_sound = "ffmpeg -loglevel quiet -i raytracer.mp4 -i "
-                                   "sound/amogus.wav -map 0:v -map 1:a "
+                                   "sound/universal.wav -map 0:v -map 1:a "
                                    "-c:v copy "
-                                   "-shortest raytracer_sound.mp4";
+                                   "-shortest sound/raytracer_sound.mp4";
 
         FILE *pipesound = popen(ffmpeg_sound.c_str(), "w");
         fflush(pipesound);

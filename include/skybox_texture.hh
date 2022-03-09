@@ -30,6 +30,10 @@ public:
         double star = sum_octave_bis(
             7, point.x(), point.y(), point.z(), 20, 3, -1, 8,
             [](double x) -> double { return x; }, 0, 255);
+        /*double star = sum_octave_bis( // marrant
+            7, point.x(), point.y(), point.z(), 2, 0.001, -1, 8,
+            [](double x) -> double { return x; }, 0, 255);
+        */
 
         Color stars(star, star, star);
 

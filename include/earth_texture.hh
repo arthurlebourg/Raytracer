@@ -13,16 +13,18 @@ public:
         : seed_(seed)
     {
         noise_.SetNoiseType(FastNoiseLite::NoiseType_OpenSimplex2);
+        noise_.SetSeed(seed);
     }
 
     Material get_Material(Vector3 point)
     {
-        double scale = 5;
         double r =
-            sum_octave(1, point.x(), point.y(), point.z(), 0.5, scale, 0, 1);
-        if (r > 0.5)
-            return Material(Color(0, 255, 0), 1, 1);
-        return Material(Color(0, 0, 255), 1, 1);
+            sum_octave(8, point.x(), point.y(), point.z(), 0.5, 0.5, 0, 1);
+        if (r > 0.85)
+            return Material(Color(187, 170, 128), 1, 1);
+        if (r > 0.55)
+            return Material(Color(64, 96, 40), 1, 1);
+        return Material(Color(25, 77, 150), 1, 1);
     }
 
 private:

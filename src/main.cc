@@ -276,7 +276,7 @@ int main(int argc, char *argv[])
 
     argv = argv;
 
-    Earth_Texture planete_tex = Earth_Texture(2546215);
+    Earth_Texture planete_tex = Earth_Texture(seed);
 
     Sphere green_boulasse = Sphere(
         Vector3(60, 0, 300), 60, std::make_shared<Earth_Texture>(planete_tex));
@@ -352,10 +352,10 @@ int main(int argc, char *argv[])
         free(data);
         fflush(pipeout);
         pclose(pipeout);
-        std::string ffmpeg_sound =
-            "ffmpeg -i raytracer.mp4 -i sound/amogus.wav -map 0:v -map 1:a "
-            "-c:v copy "
-            "-shortest raytracer_sound.mp4";
+        std::string ffmpeg_sound = "ffmpeg -loglevel quiet -i raytracer.mp4 -i "
+                                   "sound/amogus.wav -map 0:v -map 1:a "
+                                   "-c:v copy "
+                                   "-shortest raytracer_sound.mp4";
 
         FILE *pipesound = popen(ffmpeg_sound.c_str(), "w");
         fflush(pipesound);

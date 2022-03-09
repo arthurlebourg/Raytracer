@@ -7,13 +7,6 @@
 #include "fastnoise.hh"
 #include "texture_material.hh"
 
-Color interpolate(Color color1, Color color2, double fraction)
-{
-    return Color((color2.red() - color1.red()) * fraction + color1.red(),
-                 (color2.green() - color1.green()) * fraction + color1.green(),
-                 (color2.blue() - color1.blue()) * fraction + color1.blue());
-}
-
 class Skybox_Texture : public Texture_Material
 {
 public:

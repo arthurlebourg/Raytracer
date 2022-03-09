@@ -48,6 +48,13 @@ public:
         return std::make_shared<Triangle>(Triangle(*this));
     }
 
+    Vector3 get_center()
+    {
+        return Vector3((A_.x() + B_.x() + C_.x()) / 3,
+                       (A_.y() + B_.y() + C_.y()) / 3,
+                       (A_.z() + B_.z() + C_.z()) / 3);
+    }
+
 private:
     Vector3 A_;
     Vector3 B_;

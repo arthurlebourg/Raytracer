@@ -3,6 +3,7 @@
 #include <thread>
 #include <tuple>
 
+#include "earth_texture.hh"
 #include "gif.hh"
 #include "hit_info.hh"
 #include "image.hh"
@@ -16,8 +17,8 @@
 #include "triangle.hh"
 #include "uniform_texture.hh"
 
-const size_t img_width = 640;
-const size_t img_height = 480;
+const size_t img_width = 1280;
+const size_t img_height = 960;
 const int max_threads = std::thread::hardware_concurrency();
 
 const int anti_aliasing = 4;
@@ -235,11 +236,12 @@ void make_video(Scene sc, int frames_begin, int frames_end, Color *res)
                                 * (1.0 / anti_aliasing);
                     }
                 }
-                sc.objects_[1]->set_position(
-                    Vector3(-2 + frame * 0.2, 4 + frame * 0.1, 0));
-                sc.camera_.set_rotation(Vector3(0, frame, 0));
-                // if (frames_begin == 0)
-                //     std::cout << sc.camera_.get_up() << std::endl;
+                sc.objects_[0]->set_position(
+                    Vector3(-50 + frame * 10, -65,
+                            100 + (frame * 0.25) * (frame * 0.25)));
+                // sc.camera_.set_rotation(Vector3(0, frame, 0));
+                //  if (frames_begin == 0)
+                //      std::cout << sc.camera_.get_up() << std::endl;
 
                 res[(int)(y * img_width + x) + frame * img_width * img_height] =
                     col;
@@ -250,9 +252,14 @@ void make_video(Scene sc, int frames_begin, int frames_end, Color *res)
 
 int main(int argc, char *argv[])
 {
-    double fov_w = 90.0;
+    std::srand(time(NULL));
+    double seed = std::rand();
+    double fov_w = 90;
     double fov_h = 120.0;
     double dist_to_screen = 1;
+    double dist_to_skybox = 1000;
+
+    size_t frames = 100;
 
     Vector3 camCenter(0, 0, 0);
     Vector3 camFocus(0, 0, 1);
@@ -260,51 +267,21 @@ int main(int argc, char *argv[])
 
     Camera cam = Camera(camCenter, camFocus, camUp, fov_w / 2, fov_h / 2,
                         dist_to_screen);
-    Scene sc = Scene(cam, 5, 1000);
+    Scene sc = Scene(cam, 5, dist_to_skybox, seed);
 
-    Vector3 light_pos(5, 5, 5);
+    Vector3 light_pos(4, 5, 5);
     float luminosty = 1;
     Point_Light light(luminosty, light_pos);
     sc.lights_.push_back(std::make_shared<Point_Light>(light));
 
     argv = argv;
 
-    Uniform_Texture green_tex =
-        Uniform_Texture(Material(Color(0, 255, 0), 1, 100));
-    Uniform_Texture red_tex =
-        Uniform_Texture(Material(Color(255, 0, 0), 1, 100));
-    Uniform_Texture gray_tex =
-        Uniform_Texture(Material(Color(125, 125, 125), 1, 10));
-    Uniform_Texture blue_tex =
-        Uniform_Texture(Material(Color(0, 0, 255), 1, 10));
+    Earth_Texture planete_tex = Earth_Texture(2546215);
 
     Sphere green_boulasse = Sphere(
-        Vector3(2, 0, 10), 2, std::make_shared<Uniform_Texture>(green_tex));
+        Vector3(60, 0, 300), 60, std::make_shared<Earth_Texture>(planete_tex));
 
-    Sphere red_boulasse = Sphere(Vector3(-4, 0, 8), 2,
-                                 std::make_shared<Uniform_Texture>(red_tex));
-
-    Sphere blue_boulasse = Sphere(Vector3(4, 2, 8), 2,
-                                  std::make_shared<Uniform_Texture>(blue_tex));
-
-    Plane plancher = Plane(Vector3(0, -2, 0), Vector3(0, 1, 0),
-                           std::make_shared<Uniform_Texture>(gray_tex));
-
-    /*Plane mur = Plane(Vector3(-8, 0, 0), Vector3(1, 0, 0).normalized(),
-                      std::make_shared<Uniform_Texture>(blue_tex));
-
-    Triangle illuminati =
-        Triangle(Vector3(3, 0, 2), Vector3(3, 2, 2), Vector3(1, 2, 2),
-                 std::make_shared<Uniform_Texture>(red_tex));
-     */
     sc.objects_.push_back(std::make_shared<Sphere>(green_boulasse));
-    sc.objects_.push_back(std::make_shared<Sphere>(red_boulasse));
-    sc.objects_.push_back(std::make_shared<Sphere>(blue_boulasse));
-    sc.objects_.push_back(std::make_shared<Plane>(plancher));
-    // sc.objects_.push_back(std::make_shared<Plane>(mur));
-
-    // sc.objects_.push_back(std::make_shared<Triangle>(illuminati));
-    //  std::cout << "loading" << std::endl;
 
     // OBJLoad obj("models/amogus_hands.objet");
 
@@ -322,7 +299,6 @@ int main(int argc, char *argv[])
 
     if (argc > 1)
     {
-        size_t frames = 120;
         size_t frames_per_thread = frames / max_threads;
         std::vector<std::thread> threads;
         Color *data = static_cast<Color *>(
@@ -376,6 +352,14 @@ int main(int argc, char *argv[])
         free(data);
         fflush(pipeout);
         pclose(pipeout);
+        std::string ffmpeg_sound =
+            "ffmpeg -i raytracer.mp4 -i sound/amogus.wav -map 0:v -map 1:a "
+            "-c:v copy "
+            "-shortest raytracer_sound.mp4";
+
+        FILE *pipesound = popen(ffmpeg_sound.c_str(), "w");
+        fflush(pipesound);
+        pclose(pipesound);
         return 0;
     }
 

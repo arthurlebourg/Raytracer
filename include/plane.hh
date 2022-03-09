@@ -40,6 +40,11 @@ public:
         return std::make_shared<Plane>(Plane(*this));
     }
 
+    Vector3 get_center()
+    {
+        return pos_;
+    }
+
 private:
     Vector3 pos_;
     Vector3 normal_;

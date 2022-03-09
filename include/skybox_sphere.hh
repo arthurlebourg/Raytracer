@@ -41,6 +41,11 @@ public:
         return std::make_shared<Skybox_Sphere>(Skybox_Sphere(*this));
     }
 
+    Vector3 get_center()
+    {
+        return pos_;
+    }
+
 private:
     Vector3 pos_;
     float radius_;

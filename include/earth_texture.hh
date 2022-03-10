@@ -20,7 +20,7 @@ public:
     {
         double r =
             sum_octave(8, point.x(), point.y(), point.z(), 0.5, 0.5, 0, 1);
-        if (r > 0.85)
+        if (r > 0.75)
             return Material(Color(187, 170, 128), 1, 1);
         if (r > 0.55)
             return Material(Color(64, 96, 40), 1, 1);

@@ -20,18 +20,22 @@ public:
 
     Material get_Material(Vector3 point)
     {
-        double star = sum_octave_bis(
+        double star =
+            sum_octave(2, point.x(), point.y(), point.z(), 0.1, 0.7, 0, 1);
+        if (star > 0.95)
+            return Material(Color(255, 255, 255), 1, 1);
+        /*double star = sum_octave_bis(
             7, point.x(), point.y(), point.z(), 20, 3, -1, 8,
             [](double x) -> double { return x; }, 0, 255);
+        Color stars(star, star, star);
+        */
         /*double star = sum_octave_bis( // marrant
             7, point.x(), point.y(), point.z(), 2, 0.001, -1, 8,
             [](double x) -> double { return x; }, 0, 255);
         */
 
-        Color stars(star, star, star);
-
         double cloud =
-            sum_octave(16, point.x(), point.y(), point.z(), 0.5, 0.07, 0, 1);
+            sum_octave(16, point.x(), point.y(), point.z(), 0.5, 0.007, 0, 1);
         /*double cloud = sum_octave_bis(
             8, point.x(), point.y(), point.z(),
             0, 1, -1, 4,
@@ -41,8 +45,8 @@ public:
         */
         Color space_blue(3, 4, 94);
         Color space_pink(200, 116, 178);
-        Color default_color = stars
-            + interpolate(space_pink, space_blue, cloud) * (cloud * cloud);
+        Color default_color =
+            interpolate(space_pink, space_blue, cloud) * (cloud * cloud);
         return Material(default_color, 1, 1);
     }
 

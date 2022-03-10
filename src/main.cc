@@ -256,7 +256,7 @@ int main(int argc, char *argv[])
     double dist_to_screen = 1;
     double dist_to_skybox = 5000;
 
-    size_t frames = 220;
+    size_t frames = 500;
 
     Vector3 camCenter(0, 0, 0);
     Vector3 camFocus(0, 0, 1);
@@ -266,8 +266,8 @@ int main(int argc, char *argv[])
                         fov_h / 2, dist_to_screen);
     Scene sc = Scene(cam, 5, dist_to_skybox, seed);
 
-    Vector3 light_pos(0, 5, 5);
-    float luminosty = 5;
+    Vector3 light_pos(0, 500, 5);
+    float luminosty = 2;
     Point_Light light(luminosty, light_pos);
     sc.lights_.push_back(std::make_shared<Point_Light>(light));
 
@@ -350,10 +350,11 @@ int main(int argc, char *argv[])
         free(data);
         fflush(pipeout);
         pclose(pipeout);
-        std::string ffmpeg_sound = "ffmpeg -loglevel quiet -i raytracer.mp4 -i "
-                                   "sound/universal.wav -map 0:v -map 1:a "
-                                   "-c:v copy "
-                                   "-shortest sound/raytracer_sound.mp4";
+        std::string ffmpeg_sound =
+            "ffmpeg -loglevel quiet -y -i raytracer.mp4 -i "
+            "sound/universal.wav -map 0:v -map 1:a "
+            "-c:v copy "
+            "-shortest sound/raytracer_sound.mp4";
 
         FILE *pipesound = popen(ffmpeg_sound.c_str(), "w");
         fflush(pipesound);

@@ -2,36 +2,86 @@
 
 #include "tri_table.hh"
 
-// Returns the appropriate vertex from the edge indexes in the sub cube
-// coordinates are
-Vector3 edge_to_vect(int edge)
+Vector3 Blob::get_vertex_pos(Vector3 pt1, Vector3 pt2)
 {
+    float v1 = evaluate_potential(pt1);
+    float v2 = evaluate_potential(pt2);
+
+    float t = (threshold_ - v1) / (v2 - v1);
+    return pt1 + t * (pt2 - pt1);
+}
+
+Vector3 Blob::edge_to_vect(int edge, Vector3 corner, float side_length)
+{
+    auto x = corner.x();
+    auto y = corner.y();
+    auto z = corner.z();
+
+    Vector3 intermediate;
+    Vector3 pt1;
+    Vector3 pt2;
     switch (edge)
     {
     case 0:
-        return Vector3(0.5, 1, 1);
+        pt1 = Vector3(x, y + side_length, z + side_length);
+        pt2 = Vector3(x + side_length, y + side_length, z + side_length);
+        intermediate = get_vertex_pos(pt1, pt2);
+        return Vector3(intermediate.x(), pt1.y(), pt1.z());
     case 1:
-        return Vector3(1, 1, 0.5);
+        pt1 = Vector3(x + side_length, y + side_length, z);
+        pt2 = Vector3(x + side_length, y + side_length, z + side_length);
+        intermediate = get_vertex_pos(pt1, pt2);
+        return Vector3(pt1.x(), pt1.y(), intermediate.z());
     case 2:
-        return Vector3(0.5, 1, 0);
+        pt1 = Vector3(x, y + side_length, z);
+        pt2 = Vector3(x + side_length, y + side_length, z);
+        intermediate = get_vertex_pos(pt1, pt2);
+        return Vector3(intermediate.x(), pt1.y(), pt1.z());
     case 3:
-        return Vector3(0, 1, 0.5);
+        pt1 = Vector3(x, y + side_length, z);
+        pt2 = Vector3(x, y + side_length, z + side_length);
+        intermediate = get_vertex_pos(pt1, pt2);
+        return Vector3(pt1.x(), pt1.y(), intermediate.z());
     case 4:
-        return Vector3(0.5, 0, 1);
+        pt1 = Vector3(x, y, z + side_length);
+        pt2 = Vector3(x + side_length, y, z + side_length);
+        intermediate = get_vertex_pos(pt1, pt2);
+        return Vector3(intermediate.x(), pt1.y(), pt1.z());
     case 5:
-        return Vector3(1, 0, 0.5);
+        pt1 = Vector3(x + side_length, y, z);
+        pt2 = Vector3(x + side_length, y, z + side_length);
+        intermediate = get_vertex_pos(pt1, pt2);
+        return Vector3(pt1.x(), pt1.y(), intermediate.z());
     case 6:
-        return Vector3(0.5, 0, 0);
+        pt1 = Vector3(x, y, z);
+        pt2 = Vector3(x + side_length, y, z);
+        intermediate = get_vertex_pos(pt1, pt2);
+        return Vector3(intermediate.x(), pt1.y(), pt1.z());
     case 7:
-        return Vector3(0, 0, 0.5);
+        pt1 = Vector3(x, y, z);
+        pt2 = Vector3(x, y, z + side_length);
+        intermediate = get_vertex_pos(pt1, pt2);
+        return Vector3(pt1.x(), pt1.y(), intermediate.z());
     case 8:
-        return Vector3(0, 0.5, 1);
+        pt1 = Vector3(x, y, z + side_length);
+        pt2 = Vector3(x, y + side_length, z + side_length);
+        intermediate = get_vertex_pos(pt1, pt2);
+        return Vector3(pt1.x(), intermediate.y(), pt1.z());
     case 9:
-        return Vector3(1, 0.5, 1);
+        pt1 = Vector3(x + side_length, y, z + side_length);
+        pt2 = Vector3(x + side_length, y + side_length, z + side_length);
+        intermediate = get_vertex_pos(pt1, pt2);
+        return Vector3(pt1.x(), intermediate.y(), pt1.z());
     case 10:
-        return Vector3(1, 0.5, 0);
+        pt1 = Vector3(x + side_length, y, z);
+        pt2 = Vector3(x + side_length, y + side_length, z);
+        intermediate = get_vertex_pos(pt1, pt2);
+        return Vector3(pt1.x(), intermediate.y(), pt1.z());
     case 11:
-        return Vector3(0, 0.5, 0);
+        pt1 = Vector3(x, y, z);
+        pt2 = Vector3(x, y + side_length, z);
+        intermediate = get_vertex_pos(pt1, pt2);
+        return Vector3(pt1.x(), intermediate.y(), pt1.z());
     // this should never be reached
     default:
         return Vector3(0, 0, 0);
@@ -44,18 +94,17 @@ Vector3 edge_to_vect(int edge)
     index is the place to look for in tri_table
 */
 std::vector<Triangle>
-get_sub_triangles(Vector3 corner, float side_length, int index,
-                  std::shared_ptr<Texture_Material> texture)
+Blob::get_sub_triangles(Vector3 corner, float side_length, int index,
+                        std::shared_ptr<Texture_Material> texture)
 {
     std::vector<Triangle> triangles;
     auto edges = tri_table[index];
     for (int i = 0; edges[i] != -1; i += 3)
     {
         auto triangle =
-            Triangle(edge_to_vect(edges[i]), edge_to_vect(edges[i + 1]),
-                     edge_to_vect(edges[i + 2]), texture);
-        triangle.rescale(side_length);
-        triangle.move(corner);
+            Triangle(edge_to_vect(edges[i], corner, side_length),
+                     edge_to_vect(edges[i + 1], corner, side_length),
+                     edge_to_vect(edges[i + 2], corner, side_length), texture);
         triangles.push_back(triangle);
     }
     return triangles;

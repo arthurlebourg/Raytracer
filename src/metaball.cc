@@ -14,10 +14,6 @@ float Metaball::evaluate_potential(Vector3 point)
 
         float den = x * x + y * y + z * z;
 
-        // when we are in the ball's center we are above the threshold
-        if (den == 0)
-            return 100;
-
         res += num / den;
     }
     return res;

@@ -73,14 +73,16 @@ Color get_color(std::shared_ptr<Object> object, const Scene &scene,
             continue;
         }
 
+        // we need to send the normal according to the visible face
+        auto normal = object->normal(hit_point);
+        if (dot(direction, normal) > 0)
+            normal = -normal;
+
         Color diffused_color = material.get_color()
             * material.get_diffusion_coeff()
-            * dot(object->normal(hit_point), light_ray.direction())
-            * light->get_intensity();
+            * dot(normal, light_ray.direction()) * light->get_intensity();
 
-        Vector3 S = direction
-            - 2 * object->normal(hit_point)
-                * dot(object->normal(hit_point), direction);
+        Vector3 S = direction - 2 * normal * dot(normal, direction);
 
         // Reflection ray
         Ray ray = Ray(hit_point + S * 0.001, S);
@@ -228,8 +230,6 @@ void make_image_threads(Camera cam, Scene sc, double miny, double maxy,
             img->set(col, x, y);
             // res[(int)(y * img_width + x)] = col;
         }
-        if (miny == 0)
-            std::cout << y << "/" << maxy << std::endl;
     }
 }
 
@@ -239,7 +239,7 @@ int main(int argc, char *argv[])
     double fov_h = 120.0;
     double dist_to_screen = 1;
 
-    Vector3 camCenter(10, 0, 10);
+    Vector3 camCenter(0, 0, -4);
     Vector3 camFocus(0, 0, 1);
     Vector3 camUp(0, 1, 0);
 
@@ -249,7 +249,7 @@ int main(int argc, char *argv[])
               << cam.get_vertical() << std::endl;
     Scene sc = Scene(cam, 5);
 
-    Vector3 light_pos(5, 5, 5);
+    Vector3 light_pos(0, 5, 1);
     float luminosty = 1;
     Point_Light light(luminosty, light_pos);
     sc.lights_.push_back(std::make_shared<Point_Light>(light));
@@ -271,10 +271,10 @@ int main(int argc, char *argv[])
     Sphere red_boulasse = Sphere(Vector3(-4, 0, 8), 2,
                                  std::make_shared<Uniform_Texture>(red_tex));
 
-    Plane plancher = Plane(Vector3(0, -5, 0), Vector3(0, 1, 0),
+    Plane plancher = Plane(Vector3(0, -5, 0), Vector3(0, -1, 0),
                            std::make_shared<Uniform_Texture>(gray_tex));
 
-    Plane mur = Plane(Vector3(-8, 0, 0), Vector3(1, 0, 0).normalized(),
+    Plane mur = Plane(Vector3(-12, 0, 0), Vector3(1, 0, 0).normalized(),
                       std::make_shared<Uniform_Texture>(blue_tex));
 
     Triangle illuminati =
@@ -283,19 +283,23 @@ int main(int argc, char *argv[])
 
     green_boulasse = green_boulasse;
     red_boulasse = red_boulasse;
+    mur = mur;
     illuminati = illuminati;
 
-    Vector3 blob_corner(-3, -3, 2);
-    float blob_length = 6.0;
-    int blob_step = 20;
-    float blob_thresh = 1.0;
+    sc.objects_.push_back(std::make_shared<Plane>(plancher));
+    //    sc.objects_.push_back(std::make_shared<Plane>(mur));
+
+    Vector3 blob_corner(-6, 0, 1);
+    float blob_length = 12.0;
+    int blob_step = 40;
+    float blob_thresh = 1;
 
     Metaball metaball(blob_corner, blob_length, blob_step, blob_thresh);
     // TODO : can we handle multiple texture inside the same blob ?
     metaball.balls.push_back(Sphere(
-        Vector3(0, 0, 3), 1, std::make_shared<Uniform_Texture>(green_tex)));
+        Vector3(0, 2, 8), 2, std::make_shared<Uniform_Texture>(green_tex)));
     metaball.balls.push_back(Sphere(
-        Vector3(1.5, 1.5, 1.5), 1, std::make_shared<Uniform_Texture>(red_tex)));
+        Vector3(0, 7, 8), 2, std::make_shared<Uniform_Texture>(red_tex)));
 
     auto triangles =
         metaball.render(std::make_shared<Uniform_Texture>(red_tex));

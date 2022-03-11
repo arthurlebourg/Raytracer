@@ -4,7 +4,6 @@
 #include <tuple>
 
 #include "earth_texture.hh"
-#include "gif.hh"
 #include "hit_info.hh"
 #include "image.hh"
 #include "obj_load.hh"
@@ -123,8 +122,6 @@ Color skybox(Ray ray, const Scene &sc)
     Color c = material.get_color();
 
     return c;
-    // float r = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
-    // Color default_color = r > 0.98 ? Color(255,255,255) : Color(0, 0, 0);
 }
 
 void make_image_threads(Scene sc, double miny, double maxy, Image *img)
@@ -163,44 +160,6 @@ void make_image_threads(Scene sc, double miny, double maxy, Image *img)
         if (miny == 0)
             std::cout << y << "/" << maxy << std::endl;
     }
-}
-
-int make_gif(Scene &sc, int frames)
-{
-    Gif gif = Gif("raytrace.gif", img_width, img_height, frames);
-    Color default_color(0, 125, 255);
-
-    for (int frame = 0; frame < frames; ++frame)
-    {
-        for (double y = 0; y < img_height; y++)
-        {
-            for (double x = 0; x < img_width; x++)
-            {
-                Ray ray = sc.camera_.get_ray(x / img_width, y / img_height);
-                auto hit_info = find_closest_obj(sc.objects_, ray);
-
-                if (hit_info.get_obj() == nullptr)
-                {
-                    gif.set(default_color, x, y);
-                }
-                else
-                {
-                    Color c = get_color(hit_info.get_obj(), sc,
-                                        hit_info.get_location(),
-                                        hit_info.get_dir(), 5);
-                    gif.set(c, x, y);
-                }
-            }
-        }
-        sc.camera_.change_pos(Vector3(0, frame < 50 ? 0.05 : -0.05, 0));
-        sc.objects_[1]->move(Vector3(0, frame < frames / 2 ? 0.1 : -0.1, 0));
-        sc.objects_[0]->move(Vector3(frame < frames / 2 ? 0.05 : -0.05, 0, 0));
-        std::cout << "frame: " << frame << std::endl;
-        gif.write_frame();
-    }
-    gif.save();
-
-    return 0;
 }
 
 void make_video(Scene sc, int frames_begin, int frames_end, Color *res)
@@ -249,8 +208,10 @@ void make_video(Scene sc, int frames_begin, int frames_end, Color *res)
 
 int main(int argc, char *argv[])
 {
+    argv = argv;
     std::srand(time(NULL));
     double seed = std::rand();
+    std::cout << "seed: " << seed << std::endl;
     double fov_w = 90;
     double fov_h = 120.0;
     double dist_to_screen = 1;
@@ -270,8 +231,6 @@ int main(int argc, char *argv[])
     float luminosty = 2;
     Point_Light light(luminosty, light_pos);
     sc.lights_.push_back(std::make_shared<Point_Light>(light));
-
-    argv = argv;
 
     Earth_Texture planete_tex = Earth_Texture(seed);
 
@@ -329,8 +288,8 @@ int main(int argc, char *argv[])
         for (int i = 0; i < max_threads - 1; i++)
         {
             threads[i].join();
-            std::cout << "finished thread: " << i << std::endl;
         }
+        std::cout << "finished threads" << std::endl;
 
         for (size_t f = 0; f < frames; f++)
         {

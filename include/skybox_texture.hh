@@ -13,7 +13,6 @@ public:
     Skybox_Texture(int seed)
         : seed_(seed)
     {
-        std::cout << "skybox seed: " << seed_ << std::endl;
         noise_.SetNoiseType(FastNoiseLite::NoiseType_OpenSimplex2);
         noise_.SetSeed(seed);
     }

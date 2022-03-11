@@ -334,8 +334,8 @@ int main(int argc, char *argv[])
     for (int i = 0; i < max_threads - 1; i++)
     {
         threads[i].join();
-        std::cout << "finished thread: " << i << std::endl;
     }
+    std::cout << "finished threads" << std::endl;
     img.save();
     std::cout << "image saved" << std::endl;
 

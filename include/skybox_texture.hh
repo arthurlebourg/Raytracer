@@ -12,6 +12,13 @@
 class Skybox_Texture : public Texture_Material
 {
 public:
+    Skybox_Texture(int res_x, int res_y, Color *texture_map)
+        : seed_(0)
+        , res_x_(res_x)
+        , res_y_(res_y)
+        , tex(texture_map)
+    {}
+
     Skybox_Texture(int seed, int res_x, int res_y)
         : seed_(seed)
         , res_x_(res_x)
@@ -83,6 +90,11 @@ public:
 
         // return Material(Color(u*255, v*255, 0), 1,1);
         return Material(tex[px], 1, 1);
+    }
+
+    Color *get_texture()
+    {
+        return tex;
     }
 
 private:

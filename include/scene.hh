@@ -28,6 +28,13 @@ public:
         skybox_.push_back(std::make_shared<Skybox_Sphere>(skybox));
     }
 
+    Scene(Camera camera, double ns, std::shared_ptr<Object> skybox)
+        : camera_(camera)
+        , ns_(ns)
+    {
+        skybox_.push_back(skybox);
+    }
+
     double ns() const
     {
         return ns_;
@@ -41,7 +48,7 @@ public:
 
     Scene copy_for_thread()
     {
-        Scene res(camera_, ns_, skybox_dist_, seed_);
+        Scene res(camera_, ns_, skybox_[0]);
 
         for (auto i : objects_)
         {

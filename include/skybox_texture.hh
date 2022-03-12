@@ -32,6 +32,7 @@ public:
         {
             for (size_t x = 0; x < res_x_; x++)
             {
+                // stars
                 double star = sum_octave(2, x, y, 0.1, 10, 0, 1);
                 if (star > 0.95)
                 {
@@ -39,29 +40,48 @@ public:
                     texture.set(Color(255, 255, 255), x, y);
                     continue;
                 }
-                /*double star = sum_octave_bis(
-                  7, point.x(), point.y(), point.z(), 20, 3, -1, 8,
-                  [](double x) -> double { return x; }, 0, 255);
-                  Color stars(star, star, star);
-                 */
-                /*double star = sum_octave_bis( // marrant
-                  7, point.x(), point.y(), point.z(), 2, 0.001, -1, 8,
-                  [](double x) -> double { return x; }, 0, 255);
-                 */
+                // milky way
+                double island_size = (res_x + res_x) / 4;
 
+                double distance_x = std::fabs(y - island_size) / 1.1;
+                double distance_y = std::fabs(x - island_size * 1.25) * 3;
+                double distance = std::sqrt(distance_x * distance_x
+                                            + distance_y * distance_y); // mask
+
+                double max_width = island_size * 0.5 - 10.0;
+                double delta = distance / max_width;
+                double gradient = delta * delta;
+
+                double milky_cloud = sum_octave(8, x, y, 0.5, 1, 0, 1);
+                milky_cloud *= std::fmax(0.0, 1.0 - gradient);
+
+                double milky_stars = sum_octave(1, x * 2, y / 2, 1, 50, 0, 1);
+
+                milky_stars = milky_stars > 0.90 ? milky_stars : 0;
+
+                milky_stars *= std::fmax(0.0, 1.0 - gradient / 20) * 255;
+                if (milky_stars > 225)
+                {
+                    tex[y * res_x_ + x] =
+                        Color(milky_stars, milky_stars, milky_stars);
+                    texture.set(Color(milky_stars, milky_stars, milky_stars), x,
+                                y);
+                    continue;
+                }
+
+                Color default_color = Color(
+                    170 * milky_cloud, 145 * milky_cloud, 115 * milky_cloud);
+
+                // simple nebulae
                 double cloud = sum_octave(16, x, y, 0.5, 0.1, 0, 1);
-                /*double cloud = sum_octave_bis(
-                  8, point.x(), point.y(), point.z(),
-                  0, 1, -1, 4,
-                  [](double x) -> double {return 1/x;},
-                  0, 255);
-                  return Material(Color(cloud, cloud, cloud), 1, 1);
-                 */
                 Color space_blue(3, 4, 94);
                 Color space_pink(200, 116, 178);
-                Color default_color = interpolate(space_pink, space_blue, cloud)
-                    * (cloud * cloud);
+                default_color = default_color
+                    + interpolate(space_pink, space_blue, cloud)
+                        * (cloud * cloud);
+
                 tex[y * res_x_ + x] = default_color;
+
                 texture.set(default_color, x, y);
             }
         }
@@ -145,3 +165,21 @@ private:
         return noise * (high - low) / 2 + (high + low) / 2;
     }
 };
+
+/*double star = sum_octave_bis(
+  7, point.x(), point.y(), point.z(), 20, 3, -1, 8,
+  [](double x) -> double { return x; }, 0, 255);
+  Color stars(star, star, star);
+ */
+/*double star = sum_octave_bis( // marrant
+  7, point.x(), point.y(), point.z(), 2, 0.001, -1, 8,
+  [](double x) -> double { return x; }, 0, 255);
+ */
+
+/*double cloud = sum_octave_bis(
+  8, point.x(), point.y(), point.z(),
+  0, 1, -1, 4,
+  [](double x) -> double {return 1/x;},
+  0, 255);
+  return Material(Color(cloud, cloud, cloud), 1, 1);
+ */

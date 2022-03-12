@@ -213,7 +213,7 @@ int main(int argc, char *argv[])
     double seed = std::rand();
     std::cout << "seed: " << seed << std::endl;
     double fov_w = 90;
-    double fov_h = 120.0;
+    double fov_h = 120;
     double dist_to_screen = 1;
     double dist_to_skybox = 5000;
 
@@ -221,7 +221,7 @@ int main(int argc, char *argv[])
 
     Vector3 camCenter(0, 0, 0);
     Vector3 camFocus(0, 0, 1);
-    Vector3 camUp(0, 1, 0.2);
+    Vector3 camUp(0, 1, 0);
 
     Camera cam = Camera(camCenter, camFocus, camUp.normalized(), fov_w / 2,
                         fov_h / 2, dist_to_screen);
@@ -235,7 +235,8 @@ int main(int argc, char *argv[])
     Earth_Texture planete_tex = Earth_Texture(seed, 200, 200);
 
     Sphere green_boulasse =
-        Sphere(Vector3(-50, 0, 1500), 600,
+        // Sphere(Vector3(-50, 0, 1500), 600,
+        Sphere(Vector3(0, -600, 0), 600,
                std::make_shared<Earth_Texture>(planete_tex));
 
     sc.objects_.push_back(std::make_shared<Sphere>(green_boulasse));

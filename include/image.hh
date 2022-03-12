@@ -5,6 +5,8 @@
 #include <fstream>
 #include <string>
 
+#include "color.hh"
+
 class Image
 {
 public:

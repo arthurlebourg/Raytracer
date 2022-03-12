@@ -42,9 +42,13 @@ public:
     {
         Vector3 normal = (center - point).normalized();
 
+        double y = normal.y() < -1.0 ? -1.0
+            : normal.y() > 1.0       ? 1.0
+                                     : normal.y();
+
         double tmp = atan2(normal.z(), normal.x());
 
-        double test = asin(normal.y());
+        double test = asin(y);
 
         double u = 0.5 + tmp / (2 * pi);
         double v = 0.5 + test / pi;

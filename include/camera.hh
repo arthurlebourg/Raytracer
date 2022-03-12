@@ -45,7 +45,9 @@ public:
 
     void set_position(Vector3 pos);
 
-    void set_rotation(Vector3 angle);
+    void set_rotation_x(double x);
+    void set_rotation_y(double y);
+    void set_rotation_z(double z);
 
 private:
     Vector3 center_;

@@ -197,7 +197,9 @@ void make_video(Scene sc, int frames_begin, int frames_end, Color *res)
                 }
                 sc.objects_[0]->set_position(Vector3(-50, -625, 100));
 
-                sc.camera_.set_position(Vector3(0, 0, -frame));
+                // sc.camera_.set_position(Vector3(0, 0, -frame));
+                sc.camera_.set_rotation_y(frame);
+                // sc.camera_.set_rotation_x(frame);
 
                 res[(int)(y * img_width + x) + frame * img_width * img_height] =
                     col;
@@ -217,7 +219,7 @@ int main(int argc, char *argv[])
     double dist_to_screen = 1;
     double dist_to_skybox = 5000;
 
-    size_t frames = 500;
+    size_t frames = 180;
 
     Vector3 camCenter(0, 0, 0);
     Vector3 camFocus(0, 0, 1);

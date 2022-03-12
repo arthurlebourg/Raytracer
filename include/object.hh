@@ -22,7 +22,7 @@ public:
 
     Material get_texture(Vector3 point)
     {
-        return texture_->get_Material(point - get_center());
+        return texture_->get_Material(point, get_center());
     }
 
     virtual Vector3 get_center() = 0;

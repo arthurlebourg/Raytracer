@@ -19,7 +19,7 @@ public:
         , skybox_dist_(skybox_dist)
         , seed_(seed)
     {
-        Skybox_Texture tex = Skybox_Texture(seed);
+        Skybox_Texture tex = Skybox_Texture(seed, 2000, 2000);
 
         Skybox_Sphere skybox =
             Skybox_Sphere(Vector3(0, 0, 0), skybox_dist,

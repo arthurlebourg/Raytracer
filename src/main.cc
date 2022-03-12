@@ -232,10 +232,10 @@ int main(int argc, char *argv[])
     Point_Light light(luminosty, light_pos);
     sc.lights_.push_back(std::make_shared<Point_Light>(light));
 
-    Earth_Texture planete_tex = Earth_Texture(seed);
+    Earth_Texture planete_tex = Earth_Texture(seed, 200, 200);
 
     Sphere green_boulasse =
-        Sphere(Vector3(-50, -625, 100), 600,
+        Sphere(Vector3(-50, 0, 1500), 600,
                std::make_shared<Earth_Texture>(planete_tex));
 
     sc.objects_.push_back(std::make_shared<Sphere>(green_boulasse));

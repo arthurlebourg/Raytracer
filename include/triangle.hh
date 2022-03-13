@@ -34,7 +34,7 @@ public:
         C_ = C_ * scale;
     }
 
-private:
+protected:
     Vector3 A_;
     Vector3 B_;
     Vector3 C_;

@@ -5,8 +5,8 @@
 #include <optional>
 #include <vector>
 
+#include "smooth_triangle.hh"
 #include "texture_material.hh"
-#include "triangle.hh"
 
 // abstract class for blob
 class Blob
@@ -21,7 +21,7 @@ public:
     {}
 
     // Render the desired forms with triangles
-    std::vector<std::shared_ptr<Triangle>>
+    std::vector<std::shared_ptr<Smooth_Triangle>>
     render(std::shared_ptr<Texture_Material> texture);
 
 protected:
@@ -48,7 +48,7 @@ private:
        cube (corner + side length) represents the sub cube index is the place to
        look for in tri_table
      */
-    std::vector<Triangle>
+    std::vector<Smooth_Triangle>
     get_sub_triangles(Vector3 corner, float side_length, int index,
                       std::shared_ptr<Texture_Material> texture);
 

@@ -93,18 +93,18 @@ Vector3 Blob::edge_to_vect(int edge, Vector3 corner, float side_length)
     (corner + side length) represents the sub cube
     index is the place to look for in tri_table
 */
-std::vector<Triangle>
+std::vector<Smooth_Triangle>
 Blob::get_sub_triangles(Vector3 corner, float side_length, int index,
                         std::shared_ptr<Texture_Material> texture)
 {
-    std::vector<Triangle> triangles;
+    std::vector<Smooth_Triangle> triangles;
     auto edges = tri_table[index];
     for (int i = 0; edges[i] != -1; i += 3)
     {
-        auto triangle =
-            Triangle(edge_to_vect(edges[i], corner, side_length),
-                     edge_to_vect(edges[i + 1], corner, side_length),
-                     edge_to_vect(edges[i + 2], corner, side_length), texture);
+        auto triangle = Smooth_Triangle(
+            edge_to_vect(edges[i], corner, side_length),
+            edge_to_vect(edges[i + 1], corner, side_length),
+            edge_to_vect(edges[i + 2], corner, side_length), texture);
         triangles.push_back(triangle);
     }
     return triangles;
@@ -136,10 +136,10 @@ int Blob::get_table_index(Vector3 corner, float side_length)
     return index;
 }
 
-std::vector<std::shared_ptr<Triangle>>
+std::vector<std::shared_ptr<Smooth_Triangle>>
 Blob::render(std::shared_ptr<Texture_Material> texture)
 {
-    std::vector<std::shared_ptr<Triangle>> triangles;
+    std::vector<std::shared_ptr<Smooth_Triangle>> triangles;
     // length of sub triangle's edge
     auto sub_length = side_length_ / nb_step_;
 
@@ -156,7 +156,8 @@ Blob::render(std::shared_ptr<Texture_Material> texture)
                 // concatenates sub vector's content to the main one
                 for (auto triangle : sub_triangles)
                 {
-                    triangles.push_back(std::make_shared<Triangle>(triangle));
+                    triangles.push_back(
+                        std::make_shared<Smooth_Triangle>(triangle));
                 }
             }
         }

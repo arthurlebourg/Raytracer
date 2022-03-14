@@ -58,10 +58,10 @@ public:
 
         // return Material(Color(u*255, v*255, 0), 1,1);
         Color c(25, 77, 150);
-        double r = tex[px].red() / 255;
-        if (r > 0.75)
+        double r = tex[px].red();
+        if (r > 0.75 * 255)
             c = Color(187, 170, 128);
-        if (r > 0.55)
+        if (r > 0.55 * 255)
             c = Color(64, 96, 40);
         return Material(c, 1, 1);
     }

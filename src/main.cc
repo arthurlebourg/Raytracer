@@ -3,18 +3,7 @@
 #include <thread>
 #include <tuple>
 
-#include "earth_texture.hh"
-#include "hit_info.hh"
-#include "image.hh"
-#include "obj_load.hh"
-#include "plane.hh"
-#include "point_light.hh"
-#include "ray.hh"
-#include "scene.hh"
-#include "skybox_texture.hh"
-#include "sphere.hh"
-#include "triangle.hh"
-#include "uniform_texture.hh"
+#include "scene_maker.hh"
 
 const size_t img_width = 1280;
 const size_t img_height = 960;
@@ -195,7 +184,7 @@ void make_video(Scene sc, int frames_begin, int frames_end, Color *res)
                                 * (1.0 / anti_aliasing);
                     }
                 }
-                sc.objects_[0]->set_position(Vector3(-50, -625, 100));
+                sc.objects_[0]->set_position(Vector3(-50, -625, 600));
 
                 // sc.camera_.set_position(Vector3(0, 0, -frame));
                 sc.camera_.set_rotation_y(frame);
@@ -211,37 +200,9 @@ void make_video(Scene sc, int frames_begin, int frames_end, Color *res)
 int main(int argc, char *argv[])
 {
     argv = argv;
-    std::srand(time(NULL));
-    double seed = std::rand();
-    std::cout << "seed: " << seed << std::endl;
-    double fov_w = 90;
-    double fov_h = 120;
-    double dist_to_screen = 1;
-    double dist_to_skybox = 5000;
-
     size_t frames = 180;
 
-    Vector3 camCenter(0, 0, 0);
-    Vector3 camFocus(0, 0, 1);
-    Vector3 camUp(0, 1, 0);
-
-    Camera cam = Camera(camCenter, camFocus, camUp.normalized(), fov_w / 2,
-                        fov_h / 2, dist_to_screen);
-    Scene sc = Scene(cam, 5, dist_to_skybox, seed);
-
-    Vector3 light_pos(0, 500, 5);
-    float luminosty = 2;
-    Point_Light light(luminosty, light_pos);
-    sc.lights_.push_back(std::make_shared<Point_Light>(light));
-
-    Earth_Texture planete_tex = Earth_Texture(seed, 200, 200);
-
-    Sphere green_boulasse =
-        // Sphere(Vector3(-50, 0, 1500), 600,
-        Sphere(Vector3(0, -600, 0), 600,
-               std::make_shared<Earth_Texture>(planete_tex));
-
-    sc.objects_.push_back(std::make_shared<Sphere>(green_boulasse));
+    Scene sc = make_scene();
 
     // OBJLoad obj("models/amogus_hands.objet");
 

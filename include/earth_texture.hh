@@ -24,17 +24,12 @@ public:
         {
             for (size_t x = 0; x < res_x_; x++)
             {
-                Color c(25, 77, 150);
                 double r = sum_octave(8, x, y, 0.5, 0.5, 0, 1);
-                if (r > 0.75)
-                    c = Color(187, 170, 128);
-                if (r > 0.55)
-                    c = Color(64, 96, 40);
+                Color c = Color(r * 255, r * 255, r * 255);
                 tex[y * res_x_ + x] = c;
                 texture.set(c, x, y);
             }
         }
-
         texture.save();
     }
 
@@ -62,7 +57,13 @@ public:
             std::cout << "bite" << std::endl;
 
         // return Material(Color(u*255, v*255, 0), 1,1);
-        return Material(tex[px], 1, 1);
+        Color c(25, 77, 150);
+        double r = tex[px].red() / 255;
+        if (r > 0.75)
+            c = Color(187, 170, 128);
+        if (r > 0.55)
+            c = Color(64, 96, 40);
+        return Material(c, 1, 1);
     }
 
 private:

@@ -14,3 +14,5 @@
 #include "uniform_texture.hh"
 
 Scene make_scene();
+
+Scene amogus();

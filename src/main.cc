@@ -203,13 +203,7 @@ int main(int argc, char *argv[])
     size_t frames = 180;
 
     Scene sc = make_scene();
-
-    // OBJLoad obj("models/amogus_hands.objet");
-
-    /*for (Triangle t : obj.get_triangles())
-    {
-        sc.objects_.push_back(std::make_shared<Triangle>(t));
-    }*/
+    // Scene sc = amogus();
 
     if (max_threads == 0)
     {

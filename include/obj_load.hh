@@ -7,7 +7,7 @@
 #include "triangle.hh"
 #include "uniform_texture.hh"
 
-std::string *split_str(std::string &str, char delim)
+inline std::string *split_str(std::string &str, char delim)
 {
     static std::string res[4];
     std::string word = "";

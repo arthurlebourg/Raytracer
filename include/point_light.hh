@@ -13,6 +13,11 @@ public:
         , intensity_(intensity)
     {}
 
+    Point_Light(const Point_Light &pt)
+        : pos_(pt.pos_)
+        , intensity_(pt.intensity_)
+    {}
+
     float get_intensity()
     {
         return intensity_;
@@ -21,6 +26,11 @@ public:
     Vector3 get_pos()
     {
         return pos_;
+    }
+
+    std::shared_ptr<Light> clone()
+    {
+        return std::make_shared<Point_Light>(Point_Light(*this));
     }
 
 private:

@@ -5,6 +5,8 @@
 #include <fstream>
 #include <string>
 
+#include "color.hh"
+
 class Image
 {
 public:
@@ -52,17 +54,9 @@ public:
         ofs.close();
     }
 
-    friend std::ostream &operator<<(std::ostream &os, const Image &img);
-
 private:
     std::string path_;
     size_t width_;
     size_t height_;
     Color *data_;
 };
-
-std::ostream &operator<<(std::ostream &os, const Image &img)
-{
-    return os << "path: " << img.path_ << ", width: " << img.width_
-              << ", height: " << img.height_ << std::endl;
-}

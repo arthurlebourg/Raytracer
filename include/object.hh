@@ -16,10 +16,16 @@ public:
 
     virtual void move(Vector3 vec) = 0;
 
+    virtual void set_position(Vector3 vec) = 0;
+
+    virtual std::shared_ptr<Object> clone() = 0;
+
     Material get_texture(Vector3 point)
     {
-        return texture_->get_Material(point);
+        return texture_->get_Material(point, get_center());
     }
+
+    virtual Vector3 get_center() = 0;
 
 protected:
     std::shared_ptr<Texture_Material> texture_;

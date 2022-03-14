@@ -6,16 +6,17 @@
 #include "texture_material.hh"
 #include "vector3.hh"
 
-class Sphere : public Object
+class Skybox_Sphere : public Object
 {
 public:
-    Sphere(Vector3 pos, float radius, std::shared_ptr<Texture_Material> texture)
+    Skybox_Sphere(Vector3 pos, float radius,
+                  std::shared_ptr<Texture_Material> texture)
         : Object(texture)
         , pos_(pos)
         , radius_(radius)
     {}
 
-    Sphere(const Sphere &s)
+    Skybox_Sphere(const Skybox_Sphere &s)
         : Object(s.texture_)
         , pos_(s.pos_)
         , radius_(s.radius_)
@@ -37,7 +38,7 @@ public:
 
     std::shared_ptr<Object> clone()
     {
-        return std::make_shared<Sphere>(Sphere(*this));
+        return std::make_shared<Skybox_Sphere>(Skybox_Sphere(*this));
     }
 
     Vector3 get_center()

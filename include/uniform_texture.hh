@@ -11,8 +11,9 @@ public:
         : mat_(mat)
     {}
 
-    Material get_Material(Vector3 point)
+    Material get_Material(Vector3 point, Vector3 center)
     {
+        center = center;
         point = point;
         return mat_;
     }

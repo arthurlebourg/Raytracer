@@ -39,7 +39,7 @@ public:
 
     void set(Color c, size_t x, size_t y)
     {
-        uint8_t *pixel = &data_[((height_ - y) * width_ + x) * 4];
+        uint8_t *pixel = &data_[((height_ - y - 1) * width_ + x) * 4];
         pixel[0] = c.red();
         pixel[1] = c.green();
         pixel[2] = c.blue();

@@ -15,6 +15,12 @@ public:
         , normal_(normal)
     {}
 
+    Plane(const Plane &p)
+        : Object(p.texture_)
+        , pos_(p.pos_)
+        , normal_(p.normal_)
+    {}
+
     std::optional<Vector3> hit(Ray ray);
 
     Vector3 normal(Vector3 point);
@@ -22,6 +28,21 @@ public:
     void move(Vector3 vec)
     {
         pos_ = pos_ + vec;
+    }
+
+    void set_position(Vector3 vec)
+    {
+        pos_ = vec;
+    }
+
+    std::shared_ptr<Object> clone()
+    {
+        return std::make_shared<Plane>(Plane(*this));
+    }
+
+    Vector3 get_center()
+    {
+        return pos_;
     }
 
 private:

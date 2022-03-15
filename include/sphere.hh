@@ -45,6 +45,11 @@ public:
         return pos_;
     }
 
+    float get_radius()
+    {
+        return radius_;
+    }
+
 private:
     Vector3 pos_;
     float radius_;

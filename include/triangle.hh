@@ -55,7 +55,14 @@ public:
                        (A_.z() + B_.z() + C_.z()) / 3);
     }
 
-private:
+    void rescale(float scale)
+    {
+        A_ = A_ * scale;
+        B_ = B_ * scale;
+        C_ = C_ * scale;
+    }
+
+protected:
     Vector3 A_;
     Vector3 B_;
     Vector3 C_;

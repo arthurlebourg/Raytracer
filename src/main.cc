@@ -133,7 +133,7 @@ int make_gif(Camera &cam, Scene &sc, int frames)
                 {
                     Color c = get_color(hit_info.get_obj(), sc,
                                         hit_info.get_location(),
-                                        hit_info.get_dir(), 5);
+                                        hit_info.get_dir(), 2);
                     gif.set(c, x, y);
                 }
             }
@@ -291,7 +291,7 @@ int main(int argc, char *argv[])
 
     Vector3 blob_corner(-6, 0, 1);
     float blob_length = 12.0;
-    int blob_step = 40;
+    int blob_step = 10;
     float blob_thresh = 1;
 
     Metaball metaball(blob_corner, blob_length, blob_step, blob_thresh);

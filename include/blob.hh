@@ -8,6 +8,14 @@
 #include "smooth_triangle.hh"
 #include "texture_material.hh"
 
+// sub cube to split the blob
+class Sub_Cube
+{
+public:
+    Sub_Cube(Vector3 corner, double side_length);
+    std::vector<Vector3> potentials;
+};
+
 // abstract class for blob
 class Blob
 {
@@ -21,7 +29,7 @@ public:
     {}
 
     // Render the desired forms with triangles
-    std::vector<std::shared_ptr<Smooth_Triangle>>
+    std::vector<std::shared_ptr<Triangle>>
     render(std::shared_ptr<Texture_Material> texture);
 
 protected:
@@ -40,21 +48,19 @@ private:
     Vector3 get_vertex_pos(Vector3 pt1, Vector3 pt2);
 
     // Returns the appropriate vertex from the edge indexes in the sub cube
-    // corner + side_length represents the sub cube
-    Vector3 edge_to_vect(int edge, Vector3 corner, float side_length);
+    Vector3 edge_to_vect(int edge, Sub_Cube sub_cube);
 
     /*
        returns the list of triangles from the potential points inside the sub
-       cube (corner + side length) represents the sub cube index is the place to
-       look for in tri_table
+       index is the place to look for in tri_table
      */
-    std::vector<Smooth_Triangle>
-    get_sub_triangles(Vector3 corner, float side_length, int index,
+    std::vector<Triangle>
+    get_sub_triangles(Sub_Cube sub_cube, int index,
                       std::shared_ptr<Texture_Material> texture);
 
     /*
        Returns the index to look up for in the tri_table
        by evaluating potentials in the sub cube(corner + side_length)
      */
-    int get_table_index(Vector3 corner, float side_length);
+    int get_table_index(Sub_Cube sub_cube);
 };

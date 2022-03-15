@@ -1,5 +1,6 @@
 #include "smooth_triangle.hh"
 
+// TODO: place normal for each vertex
 Smooth_Triangle::Smooth_Triangle(Vector3 A, Vector3 B, Vector3 C,
                                  std::shared_ptr<Texture_Material> texture)
     : Triangle(A, B, C, texture)

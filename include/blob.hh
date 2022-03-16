@@ -20,8 +20,8 @@ public:
 class Blob
 {
 public:
-    Blob(Vector3 lower_left_corner, float side_length, int step,
-         float threshold)
+    Blob(Vector3 lower_left_corner, double side_length, int step,
+         double threshold)
         : corner_(lower_left_corner)
         , nb_step_(step)
         , side_length_(side_length)
@@ -35,11 +35,11 @@ public:
 protected:
     Vector3 corner_;
     int nb_step_;
-    float side_length_;
-    float threshold_;
+    double side_length_;
+    double threshold_;
 
 private:
-    virtual float evaluate_potential(Vector3 point) = 0;
+    virtual double evaluate_potential(Vector3 point) = 0;
 
     /*
         get the postition on which the triangle vertex will be placed between

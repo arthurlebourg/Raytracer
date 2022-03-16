@@ -6,7 +6,7 @@
 class Material
 {
 public:
-    Material(Color color, float kd, float ks)
+    Material(Color color, double kd, double ks)
         : color_(color)
         , kd_(kd)
         , ks_(ks)
@@ -17,20 +17,20 @@ public:
         return color_;
     }
 
-    float get_diffusion_coeff()
+    double get_diffusion_coeff()
     {
         return kd_;
     }
 
-    float ks()
+    double ks()
     {
         return ks_;
     }
 
 private:
     Color color_;
-    float kd_;
-    float ks_;
+    double kd_;
+    double ks_;
 };
 
 class Texture_Material

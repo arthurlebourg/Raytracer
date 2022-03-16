@@ -21,10 +21,10 @@ Sub_Cube::Sub_Cube(Vector3 corner, double side_length)
 
 Vector3 Blob::get_vertex_pos(Vector3 pt1, Vector3 pt2)
 {
-    float v1 = evaluate_potential(pt1);
-    float v2 = evaluate_potential(pt2);
+    double v1 = evaluate_potential(pt1);
+    double v2 = evaluate_potential(pt2);
 
-    float t = (threshold_ - v1) / (v2 - v1);
+    double t = (threshold_ - v1) / (v2 - v1);
     return pt1 + t * (pt2 - pt1);
 }
 
@@ -138,12 +138,15 @@ Blob::render(std::shared_ptr<Texture_Material> texture)
     std::vector<std::shared_ptr<Triangle>> triangles;
     // length of sub cube's edge
     auto sub_length = side_length_ / nb_step_;
+    std::cout << "penis" << std::endl;
 
-    for (auto i = corner_.x(); i < nb_step_; i += sub_length)
+    for (auto i = corner_.x(); i < corner_.x() + side_length_; i += sub_length)
     {
-        for (auto j = corner_.y(); j < nb_step_; j += sub_length)
+        for (auto j = corner_.y(); j < corner_.y() + side_length_;
+             j += sub_length)
         {
-            for (auto k = corner_.z(); k < nb_step_; k += sub_length)
+            for (auto k = corner_.z(); k < corner_.z() + side_length_;
+                 k += sub_length)
             {
                 Vector3 corner(i, j, k);
                 Sub_Cube sub_cube(corner, sub_length);

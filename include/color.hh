@@ -45,7 +45,7 @@ inline std::ostream &operator<<(std::ostream &os, Color &col)
               << ", B: " << (int)col.blue() << ")" << std::endl;
 }
 
-inline Color operator+(const Color &c, float t)
+inline Color operator+(const Color &c, double t)
 {
     int red = t + c.red();
     int green = t + c.green();
@@ -65,7 +65,7 @@ inline Color operator+(const Color &lhs, const Color &rhs)
                  blue > 255 ? 255 : blue);
 }
 
-inline Color operator*(const Color &c, float t)
+inline Color operator*(const Color &c, double t)
 {
     if (t <= 0)
         return Color(0, 0, 0);

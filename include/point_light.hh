@@ -8,7 +8,7 @@
 class Point_Light : public Light
 {
 public:
-    Point_Light(float intensity, Vector3 pos)
+    Point_Light(double intensity, Vector3 pos)
         : pos_(pos)
         , intensity_(intensity)
     {}
@@ -18,7 +18,7 @@ public:
         , intensity_(pt.intensity_)
     {}
 
-    float get_intensity()
+    double get_intensity()
     {
         return intensity_;
     }
@@ -35,5 +35,5 @@ public:
 
 private:
     Vector3 pos_;
-    float intensity_;
+    double intensity_;
 };

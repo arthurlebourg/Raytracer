@@ -3,7 +3,7 @@
 Hit_Info find_closest_obj(const std::vector<std::shared_ptr<Object>> &objects,
                           Ray ray)
 {
-    float min_dist = std::numeric_limits<float>::max();
+    double min_dist = std::numeric_limits<double>::max();
     std::optional<Vector3> hit = std::nullopt;
     std::shared_ptr<Object> object = nullptr;
     for (size_t i = 0; i < objects.size(); i++)
@@ -11,7 +11,7 @@ Hit_Info find_closest_obj(const std::vector<std::shared_ptr<Object>> &objects,
         auto new_hit = objects[i]->hit(ray);
         if (new_hit.has_value())
         {
-            float new_dist = (new_hit.value() - ray.origin()).squaredNorm();
+            double new_dist = (new_hit.value() - ray.origin()).squaredNorm();
             if (new_dist < min_dist)
             {
                 min_dist = new_dist;
@@ -51,14 +51,16 @@ Color get_color(std::shared_ptr<Object> object, const Scene &scene,
             continue;
         }
 
+        Vector3 normal = object->normal(hit_point);
+        if (dot(normal, direction) > 0)
+            normal = -normal;
+
         Color diffused_color = material.get_color()
             * material.get_diffusion_coeff()
-            * dot(object->normal(hit_point), light_ray.direction())
-            * light->get_intensity();
+            * dot(normal, light_ray.direction()) * light->get_intensity();
 
-        Vector3 S = direction
-            - 2 * object->normal(hit_point)
-                * dot(object->normal(hit_point), direction);
+        Vector3 S =
+            direction - 2 * normal * dot(object->normal(hit_point), direction);
 
         // Reflection ray
         Ray ray = Ray(hit_point + S * 0.001, S);
@@ -75,11 +77,11 @@ Color get_color(std::shared_ptr<Object> object, const Scene &scene,
             res = res + diffused_color * 0.5;
         }
 
-        float dotp = dot(S, light_ray.direction());
+        double dotp = dot(S, light_ray.direction());
         if (dotp < 0)
             continue;
 
-        float spec =
+        double spec =
             material.ks() * pow(dotp, scene.ns()) * light->get_intensity();
 
         res = res + spec;

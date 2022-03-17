@@ -1,7 +1,5 @@
 #include "blob.hh"
 
-#include "tri_table.hh"
-
 Sub_Cube::Sub_Cube(Vector3 corner, double side_length)
 {
     auto x = corner.x();
@@ -138,7 +136,6 @@ Blob::render(std::shared_ptr<Texture_Material> texture)
     std::vector<std::shared_ptr<Triangle>> triangles;
     // length of sub cube's edge
     auto sub_length = side_length_ / nb_step_;
-    std::cout << "penis" << std::endl;
 
     for (auto i = corner_.x(); i < corner_.x() + side_length_; i += sub_length)
     {

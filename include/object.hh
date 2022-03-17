@@ -25,7 +25,7 @@ public:
         return texture_->get_Material(point, get_center());
     }
 
-    void set_texture(std::shared_ptr<Texture_Material> texture);
+    void set_texture(std::shared_ptr<Texture_Material> texture)
     {
         texture_ = texture;
     }

@@ -41,7 +41,7 @@ double Planet::evaluate_potential(Vector3 point)
     double density = dist_from_center / (maxD + 1) - 0.5;
 
     double res =
-        sum_octave(0, 8, point.x(), point.y(), point.z(), 1, 0.5, -0.5, 0.5);
+        sum_octave(0, 16, point.x(), point.y(), point.z(), 1, 2, -0.5, 0.5);
 
     return density + res;
 }

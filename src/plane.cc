@@ -3,12 +3,12 @@
 std::optional<Vector3> Plane::hit(Ray ray)
 {
     Vector3 d = ray.direction();
-    float denominator = dot(d, normal_);
+    double denominator = dot(d, normal_);
 
     if (abs(denominator) < (2 ^ -52))
         return std::nullopt; // direction and plane parallel, no intersection
 
-    float t = dot(pos_ - ray.origin(), normal_) / denominator;
+    double t = dot(pos_ - ray.origin(), normal_) / denominator;
     if (t < 0)
         return std::nullopt; // plane behind ray's origin
 

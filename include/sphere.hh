@@ -9,7 +9,8 @@
 class Sphere : public Object
 {
 public:
-    Sphere(Vector3 pos, float radius, std::shared_ptr<Texture_Material> texture)
+    Sphere(Vector3 pos, double radius,
+           std::shared_ptr<Texture_Material> texture)
         : Object(texture)
         , pos_(pos)
         , radius_(radius)
@@ -45,12 +46,12 @@ public:
         return pos_;
     }
 
-    float get_radius()
+    double get_radius()
     {
         return radius_;
     }
 
 private:
     Vector3 pos_;
-    float radius_;
+    double radius_;
 };

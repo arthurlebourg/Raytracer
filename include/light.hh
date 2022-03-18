@@ -7,7 +7,7 @@
 class Light
 {
 public:
-    virtual float get_intensity() = 0;
+    virtual double get_intensity() = 0;
 
     virtual Vector3 get_pos() = 0;
 

@@ -102,7 +102,8 @@ int main(int argc, char *argv[])
     argv = argv;
     size_t frames = 180;
 
-    Scene sc = make_scene();
+    // Scene sc = make_scene();
+    Scene sc = planet();
     // Scene sc = amogus();
 
     if (max_threads == 0)

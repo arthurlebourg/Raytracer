@@ -25,6 +25,11 @@ public:
         return texture_->get_Material(point, get_center());
     }
 
+    void set_texture(std::shared_ptr<Texture_Material> texture)
+    {
+        texture_ = texture;
+    }
+
     virtual Vector3 get_center() = 0;
 
 protected:

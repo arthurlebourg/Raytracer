@@ -9,7 +9,7 @@
 class Skybox_Sphere : public Object
 {
 public:
-    Skybox_Sphere(Vector3 pos, float radius,
+    Skybox_Sphere(Vector3 pos, double radius,
                   std::shared_ptr<Texture_Material> texture)
         : Object(texture)
         , pos_(pos)
@@ -48,5 +48,5 @@ public:
 
 private:
     Vector3 pos_;
-    float radius_;
+    double radius_;
 };

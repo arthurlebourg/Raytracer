@@ -5,6 +5,7 @@
 #include "image.hh"
 #include "obj_load.hh"
 #include "plane.hh"
+#include "planet.hh"
 #include "point_light.hh"
 #include "ray.hh"
 #include "scene.hh"
@@ -16,3 +17,5 @@
 Scene make_scene();
 
 Scene amogus();
+
+Scene planet();

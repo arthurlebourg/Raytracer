@@ -55,7 +55,7 @@ public:
                        (A_.z() + B_.z() + C_.z()) / 3);
     }
 
-    void rescale(float scale)
+    void rescale(double scale)
     {
         A_ = A_ * scale;
         B_ = B_ * scale;

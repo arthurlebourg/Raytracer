@@ -37,7 +37,7 @@ double Planet::evaluate_potential(Vector3 point)
     double density = dist_from_center / (maxD + 1) - 0.5;
 
     double res =
-        sum_octave(0, 16, point.x(), point.y(), point.z(), 1, 50, -0.5, 0.5);
+        sum_octave(0, 16, point.x(), point.y(), point.z(), 0.25, 1, -0.5, 0.5);
 
     return density + res;
 }
@@ -49,29 +49,31 @@ Planet::get_sub_triangles(Sub_Cube sub_cube, int index,
     texture = texture;
     std::vector<Triangle> triangles;
     auto edges = tri_table[index];
-    Uniform_Texture grass_tex =
-        Uniform_Texture(Material(Color(0, 255, 0), 1, 1));
-    grass_tex = grass_tex;
-    Uniform_Texture dirt_tex =
-        Uniform_Texture(Material(Color(155, 118, 83), 1, 1));
     for (int i = 0; edges[i] != -1; i += 3)
     {
-        auto triangle = Triangle(edge_to_vect(edges[i], sub_cube),
-                                 edge_to_vect(edges[i + 1], sub_cube),
-                                 edge_to_vect(edges[i + 2], sub_cube),
-                                 std::make_shared<Uniform_Texture>(dirt_tex));
+        auto triangle =
+            Triangle(edge_to_vect(edges[i], sub_cube),
+                     edge_to_vect(edges[i + 1], sub_cube),
+                     edge_to_vect(edges[i + 2], sub_cube), grass_tex_);
 
-        Vector3 sphere_normal = triangle.get_center() - center_;
+        Vector3 dst_to_center = triangle.get_center() - center_;
         double slope =
-            dot(sphere_normal, triangle.normal(triangle.get_center()));
+            dot(dst_to_center, triangle.normal(triangle.get_center()));
         if (slope < 0)
             slope = -slope;
 
         if (slope
-                / (sphere_normal.length()
+                / (dst_to_center.length()
                    * triangle.normal(triangle.get_center()).length())
-            > 0.5)
-            triangle.set_texture(std::make_shared<Uniform_Texture>(grass_tex));
+            < 0.5)
+            triangle.set_texture(dirt_tex_);
+
+        double ratio = dst_to_center.length() / radius_;
+        std::cout << ratio << std::endl;
+        if (ratio > 1)
+            triangle.set_texture(snow_tex_);
+        if (ratio < 0.8)
+            triangle.set_texture(water_tex_);
         triangles.push_back(triangle);
     }
     return triangles;

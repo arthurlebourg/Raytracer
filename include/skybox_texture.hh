@@ -106,7 +106,7 @@ public:
         size_t px = height + (width * res_x_);
 
         if (px > res_x_ * res_y_)
-            std::cout << "bite" << std::endl;
+            std::cout << "texture out of bound skybox" << std::endl;
 
         // return Material(Color(u*255, v*255, 0), 1,1);
         return Material(tex[px], 1, 1);

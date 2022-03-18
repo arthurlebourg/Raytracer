@@ -95,7 +95,7 @@ void make_video(Scene sc, int frames_begin, int frames_end, Color *res)
                                 * (1.0 / anti_aliasing);
                     }
                 }
-                sc.objects_[0]->set_position(Vector3(-50, -625, 600));
+                // sc.objects_[0]->set_position(Vector3(-50, -625, 600));
 
                 // sc.camera_.set_position(Vector3(0, 0, -frame));
                 sc.camera_.set_rotation_y(frame);

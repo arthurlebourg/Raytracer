@@ -39,9 +39,26 @@ Color get_color(std::shared_ptr<Object> object, const Scene &scene,
 {
     auto material = object->get_texture(hit_point);
     Color res;
-    if (object->is_skybox())
+    if (object->is_transparent())
     {
-        return material.get_color();
+        double radius = (object->get_center() - hit_point).length();
+        auto hit_info = find_closest_obj(
+            scene.objects_, Ray(hit_point + direction * 0.01, direction));
+
+        Color transparent =
+            get_color(hit_info.get_obj(), scene, hit_info.get_location(),
+                      direction, n - 1);
+
+        Vector3 vect_through = hit_info.get_location() - hit_point;
+
+        double dist_through = vect_through.length();
+
+        double ratio = dist_through / (radius * 2);
+
+        if (ratio > 1)
+            return transparent;
+
+        return material.get_color() * (ratio) + transparent * (1 - ratio);
     }
     for (auto &light : scene.lights_)
     {
@@ -70,52 +87,20 @@ Color get_color(std::shared_ptr<Object> object, const Scene &scene,
         Vector3 S =
             direction - 2 * normal * dot(object->normal(hit_point), direction);
 
-        if (object->is_transparent())
+        Ray ray = Ray(hit_point + S * 0.001, S);
+
+        auto hit_info = find_closest_obj(scene.objects_, ray);
+        if (n > 0 && hit_info.get_obj() != nullptr)
         {
-            auto hit_info = find_closest_obj(
-                scene.objects_, Ray(hit_point + direction * 0.0001, direction));
-            n++;
-            if (n > 0 && hit_info.get_obj() != nullptr)
-            {
-                Color transparent =
-                    get_color(hit_info.get_obj(), scene,
-                              hit_info.get_location(), direction, n - 1)
-                    * 0.5;
+            Color reflected = get_color(hit_info.get_obj(), scene,
+                                        hit_info.get_location(), S, n - 1)
+                * 0.5;
 
-                transparent = transparent;
-
-                Vector3 vect_through = hit_info.get_location() - hit_point;
-
-                double dist_through = vect_through.length();
-
-                // res = res + diffused_color * 0.5 + reflected * 0.5;
-                double radius = (object->get_center() - hit_point).length();
-                double val = dist_through / (radius * 2);
-                Color tmp(val * 255, val * 255, val * 255);
-                res = tmp;
-            }
-            else
-            {
-                res = res + diffused_color * 0.5;
-            }
+            res = res + diffused_color * 0.5 + reflected * 0.5;
         }
         else
         {
-            Ray ray = Ray(hit_point + S * 0.001, S);
-
-            auto hit_info = find_closest_obj(scene.objects_, ray);
-            if (n > 0 && hit_info.get_obj() != nullptr)
-            {
-                Color reflected = get_color(hit_info.get_obj(), scene,
-                                            hit_info.get_location(), S, n - 1)
-                    * 0.5;
-
-                res = res + diffused_color * 0.5 + reflected * 0.5;
-            }
-            else
-            {
-                res = res + diffused_color * 0.5;
-            }
+            res = res + diffused_color * 0.5;
         }
 
         double dotp = dot(S, light_ray.direction());

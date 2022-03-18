@@ -123,14 +123,21 @@ Scene sample_atmosphere()
                         fov_h / 2, dist_to_screen);
     Scene sc = Scene(cam, 5, dist_to_skybox, seed);
 
-    Vector3 light_pos(0, 0, 5);
+    Vector3 light_pos(0, 5, -5);
     double luminosty = 2;
     Point_Light light(luminosty, light_pos);
     sc.lights_.push_back(std::make_shared<Point_Light>(light));
 
+    Earth_Texture planete_tex = Earth_Texture(seed, 200, 200);
+
+    Sphere green_boulasse = Sphere(
+        Vector3(0, 0, 20), 10, std::make_shared<Earth_Texture>(planete_tex));
+
+    sc.objects_.push_back(std::make_shared<Sphere>(green_boulasse));
+
     Uniform_Texture tex = Uniform_Texture(Material(Color(255, 255, 255), 1, 1));
 
-    Atmosphere atmos(Vector3(0, 0, 20), 10,
+    Atmosphere atmos(Vector3(0, 0, 20), 12,
                      std::make_shared<Uniform_Texture>(tex));
 
     sc.objects_.push_back(std::make_shared<Atmosphere>(atmos));

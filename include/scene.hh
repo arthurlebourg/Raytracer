@@ -26,7 +26,6 @@ public:
 
         skybox_ = std::make_shared<Sphere>(skybox);
         skybox_->set_skybox(true);
-        std::cout << "helo " << skybox_->is_skybox() << std::endl;
         objects_.push_back(skybox_);
     }
 

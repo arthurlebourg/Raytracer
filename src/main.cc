@@ -33,15 +33,26 @@ void make_image_threads(Scene sc, double miny, double maxy, Image *img)
 
                 if (hit_info.get_obj() == nullptr)
                 {
-                    col = col + skybox(ray, sc) * (1.0 / anti_aliasing);
+                    col = col + Color(255, 255, 0) * (1.0 / anti_aliasing);
                 }
                 else
                 {
-                    col = col
-                        + get_color(hit_info.get_obj(), sc,
-                                    hit_info.get_location(), hit_info.get_dir(),
-                                    5)
-                            * (1.0 / anti_aliasing);
+                    if (hit_info.get_obj()->is_skybox())
+                    {
+                        col = col
+                            + hit_info.get_obj()
+                                    ->get_texture(hit_info.get_location())
+                                    .get_color()
+                                * (1.0 / anti_aliasing);
+                    }
+                    else
+                    {
+                        col = col
+                            + get_color(hit_info.get_obj(), sc,
+                                        hit_info.get_location(),
+                                        hit_info.get_dir(), 5)
+                                * (1.0 / anti_aliasing);
+                    }
                 }
             }
             img->set(col, x, y);
@@ -73,7 +84,7 @@ void make_video(Scene sc, int frames_begin, int frames_end, Color *res)
 
                     if (hit_info.get_obj() == nullptr)
                     {
-                        col = col + skybox(ray, sc) * (1.0 / anti_aliasing);
+                        col = col + Color(255, 255, 0) * (1.0 / anti_aliasing);
                     }
                     else
                     {
@@ -103,8 +114,9 @@ int main(int argc, char *argv[])
     size_t frames = 180;
 
     // Scene sc = make_scene();
-    Scene sc = planet();
+    // Scene sc = planet();
     // Scene sc = amogus();
+    Scene sc = sample_atmosphere();
 
     if (max_threads == 0)
     {

@@ -7,8 +7,8 @@
 #include "camera.hh"
 #include "light.hh"
 #include "object.hh"
-#include "skybox_sphere.hh"
 #include "skybox_texture.hh"
+#include "sphere.hh"
 
 class Scene
 {
@@ -21,18 +21,20 @@ public:
     {
         Skybox_Texture tex = Skybox_Texture(seed, 2000, 2000);
 
-        Skybox_Sphere skybox =
-            Skybox_Sphere(Vector3(0, 0, 0), skybox_dist,
-                          std::make_shared<Skybox_Texture>(tex));
+        Sphere skybox = Sphere(Vector3(0, 0, 0), skybox_dist,
+                               std::make_shared<Skybox_Texture>(tex));
 
-        skybox_.push_back(std::make_shared<Skybox_Sphere>(skybox));
+        skybox_ = std::make_shared<Sphere>(skybox);
+        skybox_->set_skybox(true);
+        std::cout << "helo " << skybox_->is_skybox() << std::endl;
+        objects_.push_back(skybox_);
     }
 
     Scene(Camera camera, double ns, std::shared_ptr<Object> skybox)
         : camera_(camera)
         , ns_(ns)
     {
-        skybox_.push_back(skybox);
+        objects_.push_back(skybox);
     }
 
     double ns() const
@@ -42,13 +44,12 @@ public:
 
     // since we are using abstract classes we need pointers to them
     std::vector<std::shared_ptr<Object>> objects_;
-    std::vector<std::shared_ptr<Object>> skybox_;
     std::vector<std::shared_ptr<Light>> lights_;
     Camera camera_;
 
     Scene copy_for_thread()
     {
-        Scene res(camera_, ns_, skybox_[0]);
+        Scene res(camera_, ns_, skybox_);
 
         for (auto i : objects_)
         {
@@ -66,4 +67,5 @@ private:
     double ns_;
     double skybox_dist_;
     double seed_;
+    std::shared_ptr<Object> skybox_;
 };

@@ -34,7 +34,18 @@ public:
 
     virtual Vector3 get_center() = 0;
 
+    void set_skybox(bool b)
+    {
+        is_skybox_ = b;
+    }
+
+    bool is_skybox()
+    {
+        return is_skybox_;
+    }
+
 protected:
+    bool is_skybox_ = false;
     std::shared_ptr<Texture_Material> texture_;
     Object(std::shared_ptr<Texture_Material> texture)
         : texture_(texture)

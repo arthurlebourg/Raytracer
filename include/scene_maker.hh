@@ -1,5 +1,6 @@
 #pragma once
 
+#include "atmosphere.hh"
 #include "earth_texture.hh"
 #include "hit_info.hh"
 #include "image.hh"
@@ -19,3 +20,5 @@ Scene make_scene();
 Scene amogus();
 
 Scene planet();
+
+Scene sample_atmosphere();

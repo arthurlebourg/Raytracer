@@ -41,6 +41,11 @@ public:
         return std::make_shared<Sphere>(Sphere(*this));
     }
 
+    bool is_transparent()
+    {
+        return false;
+    }
+
     Vector3 get_center()
     {
         return pos_;

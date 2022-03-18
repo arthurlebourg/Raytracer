@@ -20,6 +20,8 @@ public:
 
     virtual std::shared_ptr<Object> clone() = 0;
 
+    virtual bool is_transparent() = 0;
+
     Material get_texture(Vector3 point)
     {
         return texture_->get_Material(point, get_center());

@@ -1,24 +1,25 @@
 #pragma once
 
+#include "hit_info.hh"
 #include "object.hh"
 #include "ray.hh"
 #include "texture_material.hh"
 #include "vector3.hh"
 
-class Plane : public Object
+class Atmosphere : public Object
 {
 public:
-    Plane(Vector3 pos, Vector3 normal,
-          std::shared_ptr<Texture_Material> texture)
+    Atmosphere(Vector3 pos, double radius,
+               std::shared_ptr<Texture_Material> texture)
         : Object(texture)
         , pos_(pos)
-        , normal_(normal)
+        , radius_(radius)
     {}
 
-    Plane(const Plane &p)
-        : Object(p.texture_)
-        , pos_(p.pos_)
-        , normal_(p.normal_)
+    Atmosphere(const Atmosphere &s)
+        : Object(s.texture_)
+        , pos_(s.pos_)
+        , radius_(s.radius_)
     {}
 
     std::optional<Vector3> hit(Ray ray);
@@ -37,12 +38,12 @@ public:
 
     std::shared_ptr<Object> clone()
     {
-        return std::make_shared<Plane>(Plane(*this));
+        return std::make_shared<Atmosphere>(Atmosphere(*this));
     }
 
     bool is_transparent()
     {
-        return false;
+        return true;
     }
 
     Vector3 get_center()
@@ -50,7 +51,12 @@ public:
         return pos_;
     }
 
+    double get_radius()
+    {
+        return radius_;
+    }
+
 private:
     Vector3 pos_;
-    Vector3 normal_;
+    double radius_;
 };

@@ -1,5 +1,38 @@
 #include "raytracer.hh"
 
+#include "atmosphere.hh"
+
+size_t numInScatteringPoints = 5;
+
+double calculate_light_atmosphere(Atmosphere *a, const Scene &sc, Ray ray,
+                                  double length)
+{
+    Vector3 inScatterPoint = ray.origin();
+    double step_size = length / (numInScatteringPoints - 1);
+    double inScatteredLight = 0;
+    for (size_t i = 0; i < numInScatteringPoints; i++)
+    {
+        Ray light_ray(inScatterPoint,
+                      (inScatterPoint - sc.lights_[0]->get_pos()).normalized());
+        auto hit_info =
+            find_closest_obj(sc.objects_,
+                             Ray(inScatterPoint + light_ray.direction() * 0.01,
+                                 light_ray.direction()));
+        double sunRayLength =
+            (hit_info.get_location() - inScatterPoint).length();
+        double sunRayOpticalDepth = a->opticalDepth(
+            inScatterPoint, light_ray.direction(), sunRayLength);
+        double viewRayOpticalDepth =
+            a->opticalDepth(inScatterPoint, -ray.direction(), step_size * i);
+        double transmittance = exp(-(sunRayOpticalDepth + viewRayOpticalDepth));
+        double localDensity = a->densityAtPoint(inScatterPoint);
+
+        inScatteredLight += localDensity * transmittance * step_size;
+        inScatterPoint = inScatterPoint + ray.direction() * step_size;
+    }
+    return inScatteredLight;
+}
+
 Hit_Info find_closest_obj(const std::vector<std::shared_ptr<Object>> &objects,
                           Ray ray, bool transparent_allowed)
 {
@@ -41,7 +74,6 @@ Color get_color(std::shared_ptr<Object> object, const Scene &scene,
     Color res;
     if (object->is_transparent())
     {
-        double radius = (object->get_center() - hit_point).length();
         auto hit_info = find_closest_obj(
             scene.objects_, Ray(hit_point + direction * 0.01, direction));
 
@@ -53,12 +85,16 @@ Color get_color(std::shared_ptr<Object> object, const Scene &scene,
 
         double dist_through = vect_through.length();
 
+        double radius = (object->get_center() - hit_point).length();
         double ratio = dist_through / (radius * 2);
 
         if (ratio > 1)
             return transparent;
 
-        return material.get_color() * (ratio) + transparent * (1 - ratio);
+        double light = calculate_light_atmosphere(
+            dynamic_cast<Atmosphere *>(object.get()), scene,
+            Ray(hit_point, direction), dist_through);
+        return transparent * (1 - light) + light;
     }
     for (auto &light : scene.lights_)
     {

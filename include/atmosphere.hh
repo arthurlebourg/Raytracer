@@ -9,11 +9,12 @@
 class Atmosphere : public Object
 {
 public:
-    Atmosphere(Vector3 pos, double radius,
+    Atmosphere(Vector3 pos, double radius, double planet_radius,
                std::shared_ptr<Texture_Material> texture)
         : Object(texture)
         , pos_(pos)
         , radius_(radius)
+        , planet_radius_(planet_radius)
     {}
 
     Atmosphere(const Atmosphere &s)
@@ -56,7 +57,34 @@ public:
         return radius_;
     }
 
+    double densityAtPoint(Vector3 point)
+    {
+        double height_above_surface = (point - pos_).length() - planet_radius_;
+        double height01 = height_above_surface / (radius_ - planet_radius_);
+        double localDensity = exp(-height01 + densityFallOff) * (1 - height01);
+        return localDensity;
+    }
+
+    double opticalDepth(Vector3 origin, Vector3 dir, double length)
+    {
+        Vector3 densitySamplePoint = origin;
+        double step_size = length / (numOpticalDepthPoints - 1);
+        double opticalDepth = 0;
+
+        for (size_t i = 0; i < numOpticalDepthPoints; i++)
+        {
+            double localDensity = densityAtPoint(densitySamplePoint);
+            opticalDepth += localDensity;
+            densitySamplePoint = densitySamplePoint + dir * step_size;
+        }
+
+        return opticalDepth;
+    }
+
 private:
+    double densityFallOff = 5;
+    size_t numOpticalDepthPoints = 5;
     Vector3 pos_;
     double radius_;
+    double planet_radius_;
 };

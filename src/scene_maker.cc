@@ -128,16 +128,25 @@ Scene sample_atmosphere()
     Point_Light light(luminosty, light_pos);
     sc.lights_.push_back(std::make_shared<Point_Light>(light));
 
-    Earth_Texture planete_tex = Earth_Texture(seed, 200, 200);
+    /*Earth_Texture planete_tex = Earth_Texture(seed, 200, 200);
 
     Sphere green_boulasse = Sphere(
         Vector3(0, 0, 20), 10, std::make_shared<Earth_Texture>(planete_tex));
 
     sc.objects_.push_back(std::make_shared<Sphere>(green_boulasse));
+    */
+    Planet green_boulasse =
+        Planet(Vector3(-100, -100, 100), 200, 15, 0.5, seed);
 
     Uniform_Texture tex = Uniform_Texture(Material(Color(255, 255, 255), 1, 1));
+    auto triangles =
+        green_boulasse.render(std::make_shared<Uniform_Texture>(tex));
 
-    Atmosphere atmos(Vector3(0, 0, 20), 12,
+    std::cout << "size : " << triangles.size() << std::endl;
+
+    sc.objects_.insert(sc.objects_.end(), triangles.begin(), triangles.end());
+
+    Atmosphere atmos(Vector3(0, 0, 200), 125, 100,
                      std::make_shared<Uniform_Texture>(tex));
 
     sc.objects_.push_back(std::make_shared<Atmosphere>(atmos));

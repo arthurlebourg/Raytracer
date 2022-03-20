@@ -29,7 +29,7 @@ void make_image_threads(Scene sc, double miny, double maxy, Image *img)
                 Ray ray = sc.camera_.get_ray(
                     x_pixel + x_distance * (n / sqrt_anti_aliasing),
                     y_pixel + y_distance * ((int)n % sqrt_anti_aliasing));
-                auto hit_info = find_closest_obj(sc.objects_, ray);
+                auto hit_info = find_closest_obj(sc.objects_, ray, true);
 
                 if (hit_info.get_obj() == nullptr)
                 {
@@ -50,7 +50,7 @@ void make_image_threads(Scene sc, double miny, double maxy, Image *img)
                         col = col
                             + get_color(hit_info.get_obj(), sc,
                                         hit_info.get_location(),
-                                        hit_info.get_dir(), 5)
+                                        hit_info.get_dir().normalized(), 1)
                                 * (1.0 / anti_aliasing);
                     }
                 }
@@ -66,6 +66,15 @@ void make_video(Scene sc, int frames_begin, int frames_end, Color *res)
 {
     for (int frame = frames_begin; frame < frames_end; frame++)
     {
+        // sc.objects_[0]->set_position(Vector3(-50, -625, 600));
+
+        sc.lights_[0]->set_position(Vector3(300, 300 - 3 * frame, 100));
+
+        // sc.camera_.set_position(Vector3(0, 0, -frame));
+        // sc.camera_.set_rotation_y(frame);
+        // sc.camera_.set_rotation_x(frame);
+        if (frames_begin == 0)
+            std::cout << frame << "/" << frames_end << std::endl;
         for (double y = 0; y < img_height; y++)
         {
             for (double x = 0; x < img_width; x++)
@@ -80,7 +89,7 @@ void make_video(Scene sc, int frames_begin, int frames_end, Color *res)
                     Ray ray = sc.camera_.get_ray(
                         x_pixel + x_distance * (n / sqrt_anti_aliasing),
                         y_pixel + y_distance * ((int)n % sqrt_anti_aliasing));
-                    auto hit_info = find_closest_obj(sc.objects_, ray);
+                    auto hit_info = find_closest_obj(sc.objects_, ray, true);
 
                     if (hit_info.get_obj() == nullptr)
                     {
@@ -88,18 +97,24 @@ void make_video(Scene sc, int frames_begin, int frames_end, Color *res)
                     }
                     else
                     {
-                        col = col
-                            + get_color(hit_info.get_obj(), sc,
-                                        hit_info.get_location(),
-                                        hit_info.get_dir(), 5)
-                                * (1.0 / anti_aliasing);
+                        if (hit_info.get_obj()->is_skybox())
+                        {
+                            col = col
+                                + hit_info.get_obj()
+                                        ->get_texture(hit_info.get_location())
+                                        .get_color()
+                                    * (1.0 / anti_aliasing);
+                        }
+                        else
+                        {
+                            col = col
+                                + get_color(hit_info.get_obj(), sc,
+                                            hit_info.get_location(),
+                                            hit_info.get_dir().normalized(), 1)
+                                    * (1.0 / anti_aliasing);
+                        }
                     }
                 }
-                // sc.objects_[0]->set_position(Vector3(-50, -625, 600));
-
-                // sc.camera_.set_position(Vector3(0, 0, -frame));
-                sc.camera_.set_rotation_y(frame);
-                // sc.camera_.set_rotation_x(frame);
 
                 res[(int)(y * img_width + x) + frame * img_width * img_height] =
                     col;
@@ -148,7 +163,10 @@ int main(int argc, char *argv[])
             + std::to_string(img_width) + std::string("x")
             + std::to_string(img_height)
             + std::string(
-                " -r 25 -i - -f mp4 -q:v 5 -an -vcodec mpeg4 raytracer.mp4");
+                //" -r 25 -i - -f webm -q:v 5 -an -vcodec libvpx-vp9
+                // raytracer.webm");
+                " -r 25 -i - -f mp4 -q:v 5 -an -vcodec mpeg4 "
+                "raytracer.mp4"); // mobile only
 
         FILE *pipeout = popen(ffmpeg_data.c_str(), "w");
 

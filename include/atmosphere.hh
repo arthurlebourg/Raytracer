@@ -15,13 +15,22 @@ public:
         , pos_(pos)
         , radius_(radius)
         , planet_radius_(planet_radius)
-    {}
+    {
+        scatteringCoef = Vector3(pow(400.0 / 700.0, 4.0) * scatterForce_,
+                                 pow(400.0 / 530.0, 4.0) * scatterForce_,
+                                 pow(400.0 / 440.0, 4.0) * scatterForce_);
+    }
 
     Atmosphere(const Atmosphere &s)
         : Object(s.texture_)
         , pos_(s.pos_)
         , radius_(s.radius_)
-    {}
+        , planet_radius_(s.planet_radius_)
+    {
+        scatteringCoef = Vector3(pow(400.0 / 700.0, 4.0) * scatterForce_,
+                                 pow(400.0 / 530.0, 4.0) * scatterForce_,
+                                 pow(400.0 / 440.0, 4.0) * scatterForce_);
+    }
 
     std::optional<Vector3> hit(Ray ray);
 
@@ -61,12 +70,18 @@ public:
     {
         double height_above_surface = (point - pos_).length() - planet_radius_;
         double height01 = height_above_surface / (radius_ - planet_radius_);
-        double localDensity = exp(-height01 + densityFallOff) * (1 - height01);
+        double localDensity = exp(-height01 * densityFallOff) * (1 - height01);
+        // if (localDensity < 0)
+        //     return 0;
+        if (height01 > 1.000001)
+            std::cout << "couille dans paté: " << height01 << std::endl;
         return localDensity;
     }
 
     double opticalDepth(Vector3 origin, Vector3 dir, double length)
     {
+        // if (length > 2* radius_)
+        //     std::cout << length << std::endl;
         Vector3 densitySamplePoint = origin;
         double step_size = length / (numOpticalDepthPoints - 1);
         double opticalDepth = 0;
@@ -79,11 +94,17 @@ public:
         }
 
         return opticalDepth;
+        return opticalDepth / numOpticalDepthPoints;
     }
 
+    Vector3 scatteringCoef =
+        Vector3(pow(400.0 / 700.0, 4.0) * 5, pow(400.0 / 530.0, 4.0) * 5,
+                pow(400.0 / 440.0, 4.0) * 5);
+
 private:
-    double densityFallOff = 5;
-    size_t numOpticalDepthPoints = 5;
+    double densityFallOff = 8;
+    double scatterForce_ = 2;
+    size_t numOpticalDepthPoints = 10;
     Vector3 pos_;
     double radius_;
     double planet_radius_;

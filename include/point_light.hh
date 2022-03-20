@@ -28,6 +28,11 @@ public:
         return pos_;
     }
 
+    void set_position(Vector3 vec)
+    {
+        pos_ = vec;
+    }
+
     std::shared_ptr<Light> clone()
     {
         return std::make_shared<Point_Light>(Point_Light(*this));

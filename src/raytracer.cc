@@ -2,35 +2,51 @@
 
 #include "atmosphere.hh"
 
-size_t numInScatteringPoints = 5;
+size_t numInScatteringPoints = 10;
 
-double calculate_light_atmosphere(Atmosphere *a, const Scene &sc, Ray ray,
-                                  double length)
+Vector3 calculate_light_atmosphere(Atmosphere *a, const Scene &sc, Ray ray,
+                                   double length, Vector3 originalColor)
 {
     Vector3 inScatterPoint = ray.origin();
     double step_size = length / (numInScatteringPoints - 1);
-    double inScatteredLight = 0;
+    Vector3 inScatteredLight;
+    double viewRayOpticalDepth = 0;
+
     for (size_t i = 0; i < numInScatteringPoints; i++)
     {
+        inScatterPoint = ray.origin() + ray.direction() * step_size * i;
         Ray light_ray(inScatterPoint,
-                      (inScatterPoint - sc.lights_[0]->get_pos()).normalized());
-        auto hit_info =
-            find_closest_obj(sc.objects_,
-                             Ray(inScatterPoint + light_ray.direction() * 0.01,
-                                 light_ray.direction()));
+                      (sc.lights_[0]->get_pos() - inScatterPoint).normalized());
+        auto hit_info = find_closest_obj(sc.objects_, light_ray, true);
+
+        if (!hit_info.get_obj()->is_transparent())
+            continue;
+
         double sunRayLength =
             (hit_info.get_location() - inScatterPoint).length();
+
         double sunRayOpticalDepth = a->opticalDepth(
             inScatterPoint, light_ray.direction(), sunRayLength);
-        double viewRayOpticalDepth =
+
+        viewRayOpticalDepth =
             a->opticalDepth(inScatterPoint, -ray.direction(), step_size * i);
-        double transmittance = exp(-(sunRayOpticalDepth + viewRayOpticalDepth));
+
+        Vector3 transmittance =
+            Vector3(exp(-(sunRayOpticalDepth + viewRayOpticalDepth)
+                        * a->scatteringCoef.x()),
+                    exp(-(sunRayOpticalDepth + viewRayOpticalDepth)
+                        * a->scatteringCoef.y()),
+                    exp(-(sunRayOpticalDepth + viewRayOpticalDepth)
+                        * a->scatteringCoef.z()));
+
         double localDensity = a->densityAtPoint(inScatterPoint);
 
-        inScatteredLight += localDensity * transmittance * step_size;
-        inScatterPoint = inScatterPoint + ray.direction() * step_size;
+        inScatteredLight = inScatteredLight
+            + a->scatteringCoef * localDensity * transmittance * step_size;
     }
-    return inScatteredLight;
+    double originalColorTransmittance = 1; // exp(-viewRayOpticalDepth);
+    return originalColor * originalColorTransmittance
+        + inScatteredLight / numInScatteringPoints;
 }
 
 Hit_Info find_closest_obj(const std::vector<std::shared_ptr<Object>> &objects,
@@ -74,28 +90,34 @@ Color get_color(std::shared_ptr<Object> object, const Scene &scene,
     Color res;
     if (object->is_transparent())
     {
+        const double epsilon = 0.0001;
+        auto behind_atmosphere = find_closest_obj(
+            scene.objects_, Ray(hit_point + direction * epsilon, direction),
+            false);
+
+        Color base_color =
+            get_color(behind_atmosphere.get_obj(), scene,
+                      behind_atmosphere.get_location(), direction, n - 1);
+
         auto hit_info = find_closest_obj(
-            scene.objects_, Ray(hit_point + direction * 0.01, direction));
+            scene.objects_, Ray(hit_point + direction * epsilon, direction),
+            true);
 
-        Color transparent =
-            get_color(hit_info.get_obj(), scene, hit_info.get_location(),
-                      direction, n - 1);
+        double dist_through = (hit_info.get_location() - hit_point).length();
 
-        Vector3 vect_through = hit_info.get_location() - hit_point;
+        double r = base_color.red();
+        double g = base_color.green();
+        double b = base_color.blue();
+        Vector3 base_color_vec = Vector3(r / 255, g / 255, b / 255);
 
-        double dist_through = vect_through.length();
-
-        double radius = (object->get_center() - hit_point).length();
-        double ratio = dist_through / (radius * 2);
-
-        if (ratio > 1)
-            return transparent;
-
-        double light = calculate_light_atmosphere(
+        Vector3 light = calculate_light_atmosphere(
             dynamic_cast<Atmosphere *>(object.get()), scene,
-            Ray(hit_point, direction), dist_through);
-        return transparent * (1 - light) + light;
+            Ray(hit_point + direction * epsilon, direction),
+            dist_through - epsilon * 2, base_color_vec);
+
+        return Color(light.x() * 255, light.y() * 255, light.z() * 255);
     }
+
     for (auto &light : scene.lights_)
     {
         // ray cast from point to light
@@ -121,11 +143,12 @@ Color get_color(std::shared_ptr<Object> object, const Scene &scene,
 
         // Reflection ray
         Vector3 S =
-            direction - 2 * normal * dot(object->normal(hit_point), direction);
+            (direction - 2 * normal * dot(object->normal(hit_point), direction))
+                .normalized();
 
         Ray ray = Ray(hit_point + S * 0.001, S);
 
-        auto hit_info = find_closest_obj(scene.objects_, ray);
+        auto hit_info = find_closest_obj(scene.objects_, ray, true);
         if (n > 0 && hit_info.get_obj() != nullptr)
         {
             Color reflected = get_color(hit_info.get_obj(), scene,

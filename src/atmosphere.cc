@@ -12,10 +12,10 @@ std::optional<Vector3> Atmosphere::hit(Ray ray)
 
     Vector3 oc = pos_ - ray.origin();
     double b = dot(oc, ray.direction());
-    if (b < 0) // check if obj is behind cam
+    /*if (b < 0) // check if obj is behind cam
     {
         return std::nullopt;
-    }
+    }*/
     double a = dot(ray.direction(), ray.direction());
     double c = oc.squaredNorm() - (radius_ * radius_);
     double discriminant = b * b - a * c;

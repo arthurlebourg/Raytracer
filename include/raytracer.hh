@@ -7,7 +7,7 @@
 #include "vector3.hh"
 
 Hit_Info find_closest_obj(const std::vector<std::shared_ptr<Object>> &objects,
-                          Ray ray, bool transparent_allowed = true);
+                          Ray ray, bool transparent_allowed);
 
 bool is_shadowed(const Scene &scene, const Ray &light_ray,
                  std::shared_ptr<Object> object);

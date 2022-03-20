@@ -6,8 +6,8 @@
 #include "raytracer.hh"
 #include "scene_maker.hh"
 
-const size_t img_width = 1280;
-const size_t img_height = 960;
+const size_t img_width = 1440;
+const size_t img_height = 1080;
 const int max_threads = std::thread::hardware_concurrency();
 
 const int anti_aliasing = 4;

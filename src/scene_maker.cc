@@ -1,5 +1,5 @@
 #include "scene_maker.hh"
-
+/*
 Scene make_scene()
 {
     std::srand(time(NULL));
@@ -66,7 +66,7 @@ Scene amogus()
 
     return sc;
 }
-
+*/
 Scene planet()
 {
     std::srand(time(NULL));
@@ -96,11 +96,16 @@ Scene planet()
     Planet green_boulasse =
         Planet(Vector3(-100, -100, 100), 200, 25, 0.5, seed);
 
+    Globbing_Volume planet_volume(
+        std::make_shared<Object>(green_boulasse.englobing_volume_));
     auto triangles =
         green_boulasse.render(std::make_shared<Uniform_Texture>(planete_tex));
 
     std::cout << "size : " << triangles.size() << std::endl;
 
-    sc.objects_.insert(sc.objects_.end(), triangles.begin(), triangles.end());
+    planet_volume.add_objects(triangles);
+
+    sc.volumes_.push_back(planet_volume);
+
     return sc;
 }

@@ -29,7 +29,16 @@ void make_image_threads(Scene sc, double miny, double maxy, Image *img)
                 Ray ray = sc.camera_.get_ray(
                     x_pixel + x_distance * (n / sqrt_anti_aliasing),
                     y_pixel + y_distance * ((int)n % sqrt_anti_aliasing));
-                auto hit_info = find_closest_obj(sc.objects_, ray);
+
+                Hit_Info hit_info;
+                for (auto volume : sc.volumes_)
+                {
+                    if (volume.area_->hit(ray).has_value())
+                    {
+                        hit_info = find_closest_obj(volume.objects_, ray);
+                        break;
+                    }
+                }
 
                 if (hit_info.get_obj() == nullptr)
                 {
@@ -69,7 +78,16 @@ void make_video(Scene sc, int frames_begin, int frames_end, Color *res)
                     Ray ray = sc.camera_.get_ray(
                         x_pixel + x_distance * (n / sqrt_anti_aliasing),
                         y_pixel + y_distance * ((int)n % sqrt_anti_aliasing));
-                    auto hit_info = find_closest_obj(sc.objects_, ray);
+
+                    Hit_Info hit_info;
+                    for (auto volume : sc.volumes_)
+                    {
+                        if (volume.area_->hit(ray).has_value())
+                        {
+                            hit_info = find_closest_obj(volume.objects_, ray);
+                            break;
+                        }
+                    }
 
                     if (hit_info.get_obj() == nullptr)
                     {
@@ -84,7 +102,8 @@ void make_video(Scene sc, int frames_begin, int frames_end, Color *res)
                                 * (1.0 / anti_aliasing);
                     }
                 }
-                sc.objects_[0]->set_position(Vector3(-50, -625, 600));
+                sc.volumes_[0].objects_[0]->set_position(
+                    Vector3(-50, -625, 600));
 
                 // sc.camera_.set_position(Vector3(0, 0, -frame));
                 sc.camera_.set_rotation_y(frame);

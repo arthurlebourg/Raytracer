@@ -7,6 +7,10 @@
 class Hit_Info
 {
 public:
+    Hit_Info()
+        : obj_(nullptr)
+    {}
+
     Hit_Info(std::optional<Vector3> hit_location, Vector3 direction,
              std::shared_ptr<Object> obj)
         : hit_location_(hit_location)

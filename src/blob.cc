@@ -17,6 +17,18 @@ Sub_Cube::Sub_Cube(Vector3 corner, double side_length)
     potentials.emplace_back(x, y, z);
 }
 
+Blob::Blob(Vector3 lower_left_corner, double side_length, int step,
+           double threshold)
+    : corner_(lower_left_corner)
+    , nb_step_(step)
+    , side_length_(side_length)
+    , threshold_(threshold)
+{
+    auto center = lower_left_corner + (side_length / 2);
+    auto radius = distance(lower_left_corner, center);
+    Sphere englobing_volume_(center, radius, nullptr);
+}
+
 Vector3 Blob::get_vertex_pos(Vector3 pt1, Vector3 pt2)
 {
     double v1 = evaluate_potential(pt1);

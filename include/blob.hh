@@ -6,6 +6,7 @@
 #include <vector>
 
 #include "smooth_triangle.hh"
+#include "sphere.hh"
 #include "texture_material.hh"
 #include "tri_table.hh"
 
@@ -22,29 +23,14 @@ class Blob
 {
 public:
     Blob(Vector3 lower_left_corner, double side_length, int step,
-         double threshold)
-        : corner_(lower_left_corner)
-        , nb_step_(step)
-        , side_length_(side_length)
-        , threshold_(threshold)
-    {}
-
-    // Render the desired forms with triangles
-    std::vector<std::shared_ptr<Triangle>>
-    render(std::shared_ptr<Texture_Material> texture);
+         double threshold);
+    Sphere englobing_volume_;
 
 protected:
     Vector3 corner_;
     int nb_step_;
     double side_length_;
     double threshold_;
-    // Returns the appropriate vertex from the edge indexes in the sub cube
-    Vector3 edge_to_vect(int edge, Sub_Cube sub_cube);
-    /*
-       Returns the index to look up for in the tri_table
-       by evaluating potentials in the sub cube(corner + side_length)
-     */
-    int get_table_index(Sub_Cube sub_cube);
 
 private:
     virtual double evaluate_potential(Vector3 point) = 0;
@@ -62,4 +48,16 @@ private:
     std::vector<Triangle>
     get_sub_triangles(Sub_Cube sub_cube, int index,
                       std::shared_ptr<Texture_Material> texture);
+
+    // Returns the appropriate vertex from the edge indexes in the sub cube
+    Vector3 edge_to_vect(int edge, Sub_Cube sub_cube);
+    /*
+       Returns the index to look up for in the tri_table
+       by evaluating potentials in the sub cube(corner + side_length)
+     */
+    int get_table_index(Sub_Cube sub_cube);
+
+    // Render the desired forms with triangles
+    std::vector<std::shared_ptr<Triangle>>
+    render(std::shared_ptr<Texture_Material> texture);
 };

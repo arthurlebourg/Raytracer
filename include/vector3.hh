@@ -76,6 +76,16 @@ inline Vector3 operator+(const Vector3 &lhs, const Vector3 &rhs)
     return Vector3(lhs.x() + rhs.x(), lhs.y() + rhs.y(), lhs.z() + rhs.z());
 }
 
+inline Vector3 operator+(double t, const Vector3 &v)
+{
+    return Vector3(t + v.x(), t + v.y(), t + v.z());
+}
+
+inline Vector3 operator+(const Vector3 &v, double t)
+{
+    return Vector3(t + v.x(), t + v.y(), t + v.z());
+}
+
 inline Vector3 operator-(const Vector3 &lhs, const Vector3 &rhs)
 {
     return Vector3(lhs.x() - rhs.x(), lhs.y() - rhs.y(), lhs.z() - rhs.z());

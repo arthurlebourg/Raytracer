@@ -1,14 +1,13 @@
 #pragma once
 
 #include <cstring>
-#include <memory>
 #include <vector>
 
 #include "camera.hh"
 #include "light.hh"
-#include "object.hh"
 #include "skybox_sphere.hh"
 #include "skybox_texture.hh"
+#include "volume.hh"
 
 class Scene
 {
@@ -41,8 +40,8 @@ public:
     }
 
     // since we are using abstract classes we need pointers to them
-    std::vector<std::shared_ptr<Object>> objects_;
     std::vector<std::shared_ptr<Object>> skybox_;
+    std::vector<Globbing_Volume> volumes_;
     std::vector<std::shared_ptr<Light>> lights_;
     Camera camera_;
 
@@ -50,9 +49,12 @@ public:
     {
         Scene res(camera_, ns_, skybox_[0]);
 
-        for (auto i : objects_)
+        for (auto i : volumes_)
         {
-            res.objects_.push_back(i->clone());
+            Globbing_Volume v(i.area_->clone());
+            for (auto elm : i.objects_)
+                v.objects_.push_back(elm->clone());
+            res.volumes_.push_back(v);
         }
         for (auto i : lights_)
         {

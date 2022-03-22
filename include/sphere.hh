@@ -9,6 +9,12 @@
 class Sphere : public Object
 {
 public:
+    Sphere()
+        : Object(nullptr)
+        , pos_(Vector3())
+        , radius_(0)
+    {}
+
     Sphere(Vector3 pos, double radius,
            std::shared_ptr<Texture_Material> texture)
         : Object(texture)
@@ -49,6 +55,11 @@ public:
     double get_radius()
     {
         return radius_;
+    }
+
+    void set_radius(double r)
+    {
+        radius_ = r;
     }
 
 private:

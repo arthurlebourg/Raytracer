@@ -96,8 +96,7 @@ Scene planet()
     Planet green_boulasse =
         Planet(Vector3(-100, -100, 100), 200, 25, 0.5, seed);
 
-    Globbing_Volume planet_volume(
-        std::make_shared<Object>(green_boulasse.englobing_volume_));
+    Globbing_Volume planet_volume(green_boulasse.englobing_volume_);
     auto triangles =
         green_boulasse.render(std::make_shared<Uniform_Texture>(planete_tex));
 

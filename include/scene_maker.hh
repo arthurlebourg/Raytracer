@@ -14,8 +14,8 @@
 #include "triangle.hh"
 #include "uniform_texture.hh"
 
-Scene make_scene();
+// Scene make_scene();
 
-Scene amogus();
+// Scene amogus();
 
 Scene planet();

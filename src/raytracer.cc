@@ -1,23 +1,31 @@
 #include "raytracer.hh"
 
-Hit_Info find_closest_obj(const std::vector<std::shared_ptr<Object>> &objects,
-                          Ray ray)
+Hit_Info find_closest_obj(const Scene &scene, Ray ray)
 {
     double min_dist = std::numeric_limits<double>::max();
     std::optional<Vector3> hit = std::nullopt;
     std::shared_ptr<Object> object = nullptr;
-    for (size_t i = 0; i < objects.size(); i++)
+
+    for (auto volume : scene.volumes_)
     {
-        auto new_hit = objects[i]->hit(ray);
-        if (new_hit.has_value())
+        if (volume.area_.hit(ray).has_value())
         {
-            double new_dist = (new_hit.value() - ray.origin()).squaredNorm();
-            if (new_dist < min_dist)
+            for (auto obj : volume.objects_)
             {
-                min_dist = new_dist;
-                object = objects[i];
-                hit = new_hit;
+                auto new_hit = obj->hit(ray);
+                if (new_hit.has_value())
+                {
+                    double new_dist =
+                        (new_hit.value() - ray.origin()).squaredNorm();
+                    if (new_dist < min_dist)
+                    {
+                        min_dist = new_dist;
+                        object = obj;
+                        hit = new_hit;
+                    }
+                }
             }
+            break;
         }
     }
     return Hit_Info(hit, ray.direction(), object);
@@ -26,7 +34,7 @@ Hit_Info find_closest_obj(const std::vector<std::shared_ptr<Object>> &objects,
 bool is_shadowed(const Scene &scene, const Ray &light_ray,
                  std::shared_ptr<Object> object)
 {
-    auto other_object = find_closest_obj(scene.objects_, light_ray).get_obj();
+    auto other_object = find_closest_obj(scene, light_ray).get_obj();
 
     return other_object.get() != object.get();
 }
@@ -64,7 +72,7 @@ Color get_color(std::shared_ptr<Object> object, const Scene &scene,
 
         // Reflection ray
         Ray ray = Ray(hit_point + S * 0.001, S);
-        auto hit_info = find_closest_obj(scene.objects_, ray);
+        auto hit_info = find_closest_obj(scene, ray);
         if (n > 0 && hit_info.get_obj() != nullptr)
         {
             res = res + diffused_color * 0.5
@@ -91,12 +99,8 @@ Color get_color(std::shared_ptr<Object> object, const Scene &scene,
 
 Color skybox(Ray ray, const Scene &sc)
 {
-    Hit_Info hit = find_closest_obj(sc.skybox_, ray);
-
-    if (hit.get_obj() == nullptr)
-        return Color(255, 255, 0);
-
-    Material material = hit.get_obj()->get_texture(hit.get_location());
+    auto hit_point = sc.skybox_[0]->hit(ray);
+    Material material = sc.skybox_[0]->get_texture(hit_point.value());
 
     Color c = material.get_color();
 

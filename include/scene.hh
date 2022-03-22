@@ -49,12 +49,9 @@ public:
     {
         Scene res(camera_, ns_, skybox_[0]);
 
-        for (auto i : volumes_)
+        for (auto v : volumes_)
         {
-            Globbing_Volume v(i.area_->clone());
-            for (auto elm : i.objects_)
-                v.objects_.push_back(elm->clone());
-            res.volumes_.push_back(v);
+            res.volumes_.push_back(Globbing_Volume(v));
         }
         for (auto i : lights_)
         {

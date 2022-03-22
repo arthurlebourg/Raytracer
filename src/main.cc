@@ -30,15 +30,7 @@ void make_image_threads(Scene sc, double miny, double maxy, Image *img)
                     x_pixel + x_distance * (n / sqrt_anti_aliasing),
                     y_pixel + y_distance * ((int)n % sqrt_anti_aliasing));
 
-                Hit_Info hit_info;
-                for (auto volume : sc.volumes_)
-                {
-                    if (volume.area_->hit(ray).has_value())
-                    {
-                        hit_info = find_closest_obj(volume.objects_, ray);
-                        break;
-                    }
-                }
+                Hit_Info hit_info = find_closest_obj(sc, ray);
 
                 if (hit_info.get_obj() == nullptr)
                 {
@@ -79,15 +71,7 @@ void make_video(Scene sc, int frames_begin, int frames_end, Color *res)
                         x_pixel + x_distance * (n / sqrt_anti_aliasing),
                         y_pixel + y_distance * ((int)n % sqrt_anti_aliasing));
 
-                    Hit_Info hit_info;
-                    for (auto volume : sc.volumes_)
-                    {
-                        if (volume.area_->hit(ray).has_value())
-                        {
-                            hit_info = find_closest_obj(volume.objects_, ray);
-                            break;
-                        }
-                    }
+                    Hit_Info hit_info = find_closest_obj(sc, ray);
 
                     if (hit_info.get_obj() == nullptr)
                     {

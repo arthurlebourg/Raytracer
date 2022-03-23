@@ -48,8 +48,8 @@ public:
         double u = 0.5 + tmp / (2 * pi);
         double v = 0.5 + test / pi;
 
-        int width = u * res_x_;
-        int height = v * res_y_;
+        int width = u * (res_x_ - 1);
+        int height = v * (res_y_ - 1);
 
         size_t px = height + (width * res_x_);
 

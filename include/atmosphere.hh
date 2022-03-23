@@ -16,21 +16,18 @@ public:
         , radius_(radius)
         , planet_radius_(planet_radius)
     {
-        scatteringCoef = Vector3(pow(400.0 / 700.0, 4.0) * scatterForce_,
-                                 pow(400.0 / 530.0, 4.0) * scatterForce_,
-                                 pow(400.0 / 440.0, 4.0) * scatterForce_);
+        scatteringCoef_ = Vector3(pow(400.0 / 700.0, 4.0) * scatterForce_,
+                                  pow(400.0 / 530.0, 4.0) * scatterForce_,
+                                  pow(400.0 / 440.0, 4.0) * scatterForce_);
     }
 
-    Atmosphere(const Atmosphere &s)
-        : Object(s.texture_)
-        , pos_(s.pos_)
-        , radius_(s.radius_)
-        , planet_radius_(s.planet_radius_)
-    {
-        scatteringCoef = Vector3(pow(400.0 / 700.0, 4.0) * scatterForce_,
-                                 pow(400.0 / 530.0, 4.0) * scatterForce_,
-                                 pow(400.0 / 440.0, 4.0) * scatterForce_);
-    }
+    Atmosphere(const Atmosphere &a)
+        : Object(a.texture_)
+        , scatteringCoef_(a.scatteringCoef_)
+        , pos_(a.pos_)
+        , radius_(a.radius_)
+        , planet_radius_(a.planet_radius_)
+    {}
 
     std::optional<Vector3> hit(Ray ray);
 
@@ -73,8 +70,8 @@ public:
         double localDensity = exp(-height01 * densityFallOff) * (1 - height01);
         // if (localDensity < 0)
         //     return 0;
-        if (height01 > 1.000001)
-            std::cout << "couille dans paté: " << height01 << std::endl;
+        // if (height01 > 1.000001)
+        // std::cout << "couille dans paté: " << height01 << std::endl;
         return localDensity;
     }
 
@@ -97,13 +94,15 @@ public:
         return opticalDepth / numOpticalDepthPoints;
     }
 
-    Vector3 scatteringCoef =
-        Vector3(pow(400.0 / 700.0, 4.0) * 5, pow(400.0 / 530.0, 4.0) * 5,
-                pow(400.0 / 440.0, 4.0) * 5);
+    Vector3 get_scattering_coef()
+    {
+        return scatteringCoef_;
+    }
 
 private:
+    Vector3 scatteringCoef_;
     double densityFallOff = 8;
-    double scatterForce_ = 2;
+    double scatterForce_ = 20;
     size_t numOpticalDepthPoints = 10;
     Vector3 pos_;
     double radius_;

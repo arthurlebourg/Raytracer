@@ -24,17 +24,15 @@ public:
         Sphere skybox = Sphere(Vector3(0, 0, 0), skybox_dist,
                                std::make_shared<Skybox_Texture>(tex));
 
-        skybox_ = std::make_shared<Sphere>(skybox);
-        skybox_->set_skybox(true);
-        objects_.push_back(skybox_);
+        std::shared_ptr<Sphere> skybox_ptr = std::make_shared<Sphere>(skybox);
+        skybox_ptr->set_skybox(true);
+        objects_.push_back(skybox_ptr);
     }
 
-    Scene(Camera camera, double ns, std::shared_ptr<Object> skybox)
+    Scene(Camera camera, double ns)
         : camera_(camera)
         , ns_(ns)
-    {
-        objects_.push_back(skybox);
-    }
+    {}
 
     double ns() const
     {
@@ -48,11 +46,16 @@ public:
 
     Scene copy_for_thread()
     {
-        Scene res(camera_, ns_, skybox_);
+        Scene res(camera_, ns_);
 
         for (auto i : objects_)
         {
-            res.objects_.push_back(i->clone());
+            auto clone = i->clone();
+            if (i->is_skybox())
+            {
+                clone->set_skybox(true);
+            }
+            res.objects_.push_back(clone);
         }
         for (auto i : lights_)
         {
@@ -66,5 +69,4 @@ private:
     double ns_;
     double skybox_dist_;
     double seed_;
-    std::shared_ptr<Object> skybox_;
 };

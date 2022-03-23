@@ -100,13 +100,17 @@ public:
         double u = 0.5 + tmp / (2 * pi);
         double v = 0.5 + test / pi;
 
-        int width = u * res_x_;
-        int height = v * res_y_;
+        int width = u * (res_x_ - 1);
+        int height = v * (res_y_ - 1);
 
         size_t px = height + (width * res_x_);
 
         if (px > res_x_ * res_y_)
-            std::cout << "texture out of bound skybox" << std::endl;
+        {
+            std::cout << "texture out of bound skybox:" << width << "/"
+                      << res_x_ << " " << height << "/" << res_y_ << std::endl;
+            return Material(Color(255, 255, 0), 1, 1);
+        }
 
         // return Material(Color(u*255, v*255, 0), 1,1);
         return Material(tex[px], 1, 1);

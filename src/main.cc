@@ -37,7 +37,12 @@ void make_image_threads(Scene sc, double miny, double maxy, Image *img)
                 }
                 else
                 {
-                    if (hit_info.get_obj()->is_skybox())
+                    col = col
+                        + get_color(hit_info.get_obj(), sc,
+                                    hit_info.get_location(),
+                                    hit_info.get_dir().normalized(), 1)
+                            * (1.0 / anti_aliasing);
+                    /*if (hit_info.get_obj()->is_skybox())
                     {
                         col = col
                             + hit_info.get_obj()
@@ -52,7 +57,7 @@ void make_image_threads(Scene sc, double miny, double maxy, Image *img)
                                         hit_info.get_location(),
                                         hit_info.get_dir().normalized(), 1)
                                 * (1.0 / anti_aliasing);
-                    }
+                    }*/
                 }
             }
             img->set(col, x, y);
@@ -66,15 +71,17 @@ void make_video(Scene sc, int frames_begin, int frames_end, Color *res)
 {
     for (int frame = frames_begin; frame < frames_end; frame++)
     {
-        // sc.objects_[0]->set_position(Vector3(-50, -625, 600));
+        sc.objects_[1]->set_position(Vector3(-frame, 0, -frame / 4.0 + 200));
+        sc.objects_[2]->set_position(Vector3(-frame, 0, -frame / 4.0 + 200));
 
-        sc.lights_[0]->set_position(Vector3(300, 300 - 3 * frame, 100));
+        sc.lights_[0]->set_position(Vector3(300, 200, 300 - 3 * frame));
 
-        // sc.camera_.set_position(Vector3(0, 0, -frame));
-        // sc.camera_.set_rotation_y(frame);
-        // sc.camera_.set_rotation_x(frame);
+        sc.camera_.set_rotation_y(-frame / 4.0);
         if (frames_begin == 0)
+        {
             std::cout << frame << "/" << frames_end << std::endl;
+        }
+
         for (double y = 0; y < img_height; y++)
         {
             for (double x = 0; x < img_width; x++)
@@ -97,22 +104,11 @@ void make_video(Scene sc, int frames_begin, int frames_end, Color *res)
                     }
                     else
                     {
-                        if (hit_info.get_obj()->is_skybox())
-                        {
-                            col = col
-                                + hit_info.get_obj()
-                                        ->get_texture(hit_info.get_location())
-                                        .get_color()
-                                    * (1.0 / anti_aliasing);
-                        }
-                        else
-                        {
-                            col = col
-                                + get_color(hit_info.get_obj(), sc,
-                                            hit_info.get_location(),
-                                            hit_info.get_dir().normalized(), 1)
-                                    * (1.0 / anti_aliasing);
-                        }
+                        col = col
+                            + get_color(hit_info.get_obj(), sc,
+                                        hit_info.get_location(),
+                                        hit_info.get_dir().normalized(), 1)
+                                * (1.0 / anti_aliasing);
                     }
                 }
 
@@ -151,7 +147,6 @@ int main(int argc, char *argv[])
             threads.push_back(std::thread(make_video, sc.copy_for_thread(),
                                           i * frames_per_thread,
                                           (i + 1) * frames_per_thread, data));
-            std::cout << i + 1 << std::endl;
         }
 
         make_video(sc, (max_threads - 1) * frames_per_thread,
@@ -166,7 +161,7 @@ int main(int argc, char *argv[])
                 //" -r 25 -i - -f webm -q:v 5 -an -vcodec libvpx-vp9
                 // raytracer.webm");
                 " -r 25 -i - -f mp4 -q:v 5 -an -vcodec mpeg4 "
-                "raytracer.mp4"); // mobile only
+                "img/raytracer_bad_encoding.mp4");
 
         FILE *pipeout = popen(ffmpeg_data.c_str(), "w");
 
@@ -198,6 +193,13 @@ int main(int argc, char *argv[])
         free(data);
         fflush(pipeout);
         pclose(pipeout);
+        std::string ffmpeg_encoding =
+            "ffmpeg -loglevel quiet -y -i img/raytracer_bad_encoding.mp4 "
+            "-strict very raytracer.mp4";
+
+        FILE *pipe_encoding = popen(ffmpeg_encoding.c_str(), "w");
+        fflush(pipe_encoding);
+        pclose(pipe_encoding);
         std::string ffmpeg_sound =
             "ffmpeg -loglevel quiet -y -i raytracer.mp4 -i "
             "sound/universal.wav -map 0:v -map 1:a "

@@ -11,16 +11,14 @@ Vector3 calculate_light_atmosphere(Atmosphere *a, const Scene &sc, Ray ray,
     double step_size = length / (numInScatteringPoints - 1);
     Vector3 inScatteredLight;
     double viewRayOpticalDepth = 0;
+    size_t i = 0;
 
-    for (size_t i = 0; i < numInScatteringPoints; i++)
+    for (; i < numInScatteringPoints; i++)
     {
         inScatterPoint = ray.origin() + ray.direction() * step_size * i;
         Ray light_ray(inScatterPoint,
                       (sc.lights_[0]->get_pos() - inScatterPoint).normalized());
         auto hit_info = find_closest_obj(sc.objects_, light_ray, true);
-
-        if (!hit_info.get_obj()->is_transparent())
-            continue;
 
         double sunRayLength =
             (hit_info.get_location() - inScatterPoint).length();
@@ -33,20 +31,20 @@ Vector3 calculate_light_atmosphere(Atmosphere *a, const Scene &sc, Ray ray,
 
         Vector3 transmittance =
             Vector3(exp(-(sunRayOpticalDepth + viewRayOpticalDepth)
-                        * a->scatteringCoef.x()),
+                        * a->get_scattering_coef().x()),
                     exp(-(sunRayOpticalDepth + viewRayOpticalDepth)
-                        * a->scatteringCoef.y()),
+                        * a->get_scattering_coef().y()),
                     exp(-(sunRayOpticalDepth + viewRayOpticalDepth)
-                        * a->scatteringCoef.z()));
+                        * a->get_scattering_coef().z()));
 
         double localDensity = a->densityAtPoint(inScatterPoint);
 
         inScatteredLight = inScatteredLight
-            + a->scatteringCoef * localDensity * transmittance * step_size;
+            + a->get_scattering_coef() * localDensity * transmittance
+                * step_size;
     }
-    double originalColorTransmittance = 1; // exp(-viewRayOpticalDepth);
-    return originalColor * originalColorTransmittance
-        + inScatteredLight / numInScatteringPoints;
+    double originalColorTransmittance = exp(-viewRayOpticalDepth);
+    return originalColor * originalColorTransmittance + inScatteredLight / i;
 }
 
 Hit_Info find_closest_obj(const std::vector<std::shared_ptr<Object>> &objects,
@@ -77,9 +75,13 @@ Hit_Info find_closest_obj(const std::vector<std::shared_ptr<Object>> &objects,
 bool is_shadowed(const Scene &scene, const Ray &light_ray,
                  std::shared_ptr<Object> object)
 {
+    if (object->is_skybox())
+        return false;
     auto other_object =
         find_closest_obj(scene.objects_, light_ray, false).get_obj();
 
+    if (other_object->is_skybox())
+        return false;
     return other_object.get() != object.get();
 }
 
@@ -129,7 +131,6 @@ Color get_color(std::shared_ptr<Object> object, const Scene &scene,
         bool shadowed = is_shadowed(scene, shadow_ray, object);
         if (shadowed)
         {
-            // return object->get_texture(hit_point).get_color() * 0.5;
             continue;
         }
 

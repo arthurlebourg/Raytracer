@@ -22,7 +22,7 @@ public:
     Sphere area_;
 
     // the only case so far is when we wanna add all triangles rendered by a
-    // blob adding a vector of abstract objects doesn not work
+    // blob adding a vector of abstract objects does not work
     void add_objects(std::vector<std::shared_ptr<Triangle>> objects)
     {
         objects_.insert(objects_.end(), objects.begin(), objects.end());

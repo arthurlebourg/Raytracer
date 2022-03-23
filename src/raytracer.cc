@@ -36,7 +36,7 @@ bool is_shadowed(const Scene &scene, const Ray &light_ray,
 {
     auto other_object = find_closest_obj(scene, light_ray).get_obj();
 
-    return other_object.get() != object.get();
+    return other_object != object;
 }
 
 Color get_color(std::shared_ptr<Object> object, const Scene &scene,
@@ -56,6 +56,9 @@ Color get_color(std::shared_ptr<Object> object, const Scene &scene,
         if (shadowed)
         {
             // return object->get_texture(hit_point).get_color() * 0.5;
+            auto other_object = find_closest_obj(scene, shadow_ray).get_obj();
+
+            return other_object->get_texture(hit_point).get_color();
             continue;
         }
 

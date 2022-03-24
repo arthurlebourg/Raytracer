@@ -88,7 +88,6 @@ bool is_shadowed(const Scene &scene, const Ray &light_ray,
 Color get_color(std::shared_ptr<Object> object, const Scene &scene,
                 const Vector3 &hit_point, const Vector3 &direction, int n)
 {
-    auto material = object->get_texture(hit_point);
     Color res;
     if (object->is_transparent())
     {
@@ -138,9 +137,11 @@ Color get_color(std::shared_ptr<Object> object, const Scene &scene,
         if (dot(normal, direction) > 0)
             normal = -normal;
 
-        Color diffused_color = material.get_color()
-            * material.get_diffusion_coeff()
-            * dot(normal, light_ray.direction()) * light->get_intensity();
+        double light_intensity =
+            dot(normal, light_ray.direction()) * light->get_intensity();
+        Material material = object->get_texture(hit_point, light_intensity);
+        Color diffused_color =
+            material.get_color() * material.get_diffusion_coeff();
 
         // Reflection ray
         Vector3 S =

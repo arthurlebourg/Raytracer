@@ -89,7 +89,7 @@ public:
         texture.save();
     }
 
-    Material get_Material(Vector3 point, Vector3 center)
+    Material get_Material(Vector3 point, Vector3 center, double light_intensity)
     {
         Vector3 normal = (center - point).normalized();
 
@@ -113,7 +113,7 @@ public:
         }
 
         // return Material(Color(u*255, v*255, 0), 1,1);
-        return Material(tex[px], 1, 1);
+        return Material(tex[px] * light_intensity, 1, 1);
     }
 
     Color *get_texture()

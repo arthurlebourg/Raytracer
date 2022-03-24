@@ -22,9 +22,9 @@ public:
 
     virtual bool is_transparent() = 0;
 
-    Material get_texture(Vector3 point)
+    Material get_texture(Vector3 point, double light_intensity)
     {
-        return texture_->get_Material(point, get_center());
+        return texture_->get_Material(point, get_center(), light_intensity);
     }
 
     void set_texture(std::shared_ptr<Texture_Material> texture)

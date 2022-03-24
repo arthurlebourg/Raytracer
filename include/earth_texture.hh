@@ -25,7 +25,7 @@ public:
             for (size_t x = 0; x < res_x_; x++)
             {
                 double r = sum_octave(8, x, y, 0.5, 0.5, 0, 1);
-                Color c = Color(r * 255, r * 255, r * 255);
+                Color c = Color(r * 255, r >= 0.54 && r <= 0.55 ? 255 : 0, 0);
                 tex[y * res_x_ + x] = c;
                 texture.set(c, x, y);
             }
@@ -33,7 +33,7 @@ public:
         texture.save();
     }
 
-    Material get_Material(Vector3 point, Vector3 center)
+    Material get_Material(Vector3 point, Vector3 center, double light_intensity)
     {
         Vector3 normal = (center - point).normalized();
 
@@ -56,14 +56,19 @@ public:
         if (px > res_x_ * res_y_)
             std::cout << "texture out of bound earth" << std::endl;
 
-        // return Material(Color(u*255, v*255, 0), 1,1);
+        if (light_intensity <= 0.1)
+        {
+            Color city_lights(255, 255, 0);
+            return Material(city_lights * tex[px].green(), 1, 1);
+        }
+
         Color c(25, 77, 150);
         double r = tex[px].red();
         if (r > 0.75 * 255)
             c = Color(187, 170, 128);
         if (r > 0.55 * 255)
             c = Color(64, 96, 40);
-        return Material(c, 1, 1);
+        return Material(c * light_intensity, 1, 1);
     }
 
 private:

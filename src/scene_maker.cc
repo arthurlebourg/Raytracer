@@ -119,7 +119,7 @@ Scene sample_atmosphere()
 
     Uniform_Texture tex = Uniform_Texture(Material(Color(255, 255, 255), 1, 1));
 
-    Earth_Texture planete_tex = Earth_Texture(seed, 200, 200);
+    Earth_Texture planete_tex = Earth_Texture(seed, 1000, 1000);
     Sphere green_boulasse = Sphere(
         Vector3(0, 0, 200), 100, std::make_shared<Earth_Texture>(planete_tex));
 

@@ -44,6 +44,8 @@ Vector3 calculate_light_atmosphere(Atmosphere *a, const Scene &sc, Ray ray,
                 * step_size;
     }
     double originalColorTransmittance = exp(-viewRayOpticalDepth);
+    inScatteredLight = inScatteredLight
+        + Vector3(0.2, 0.2, 0.2) * a->get_bluenoise(inScatterPoint);
     return originalColor * originalColorTransmittance + inScatteredLight / i;
 }
 

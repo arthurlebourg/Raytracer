@@ -1,9 +1,11 @@
 #pragma once
 
+#include "blue_noise.hh"
 #include "hit_info.hh"
 #include "object.hh"
 #include "ray.hh"
 #include "texture_material.hh"
+#include "utils.hh"
 #include "vector3.hh"
 
 class Atmosphere : public Object
@@ -15,6 +17,7 @@ public:
         , pos_(pos)
         , radius_(radius)
         , planet_radius_(planet_radius)
+        , noise_(Blue_noise(2000, 2000, 27))
     {
         scatteringCoef_ = Vector3(pow(400.0 / 700.0, 4.0) * scatterForce_,
                                   pow(400.0 / 530.0, 4.0) * scatterForce_,
@@ -27,6 +30,7 @@ public:
         , pos_(a.pos_)
         , radius_(a.radius_)
         , planet_radius_(a.planet_radius_)
+        , noise_(a.noise_)
     {}
 
     std::optional<Vector3> hit(Ray ray);
@@ -56,6 +60,26 @@ public:
     Vector3 get_center()
     {
         return pos_;
+    }
+
+    double get_bluenoise(Vector3 point)
+    {
+        Vector3 normal = (pos_ - point).normalized();
+
+        double y = normal.y() < -1.0 ? -1.0
+            : normal.y() > 1.0       ? 1.0
+                                     : normal.y();
+
+        double tmp = atan2(normal.z(), normal.x());
+
+        double test = asin(y);
+
+        double u = 0.5 + tmp / (2 * pi);
+        double v = 0.5 + test / pi;
+
+        int width = u * (2000 - 1);
+        int height = v * (200 - 1);
+        return noise_.get(width, height).red() / 255.0;
     }
 
     double get_radius()
@@ -107,4 +131,5 @@ private:
     Vector3 pos_;
     double radius_;
     double planet_radius_;
+    Blue_noise noise_;
 };

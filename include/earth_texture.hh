@@ -56,18 +56,18 @@ public:
         if (px > res_x_ * res_y_)
             std::cout << "texture out of bound earth" << std::endl;
 
-        if (light_intensity <= 0.1)
-        {
-            Color city_lights(255, 255, 0);
-            return Material(city_lights * tex[px].green(), 1, 1);
-        }
-
         Color c(25, 77, 150);
         double r = tex[px].red();
         if (r > 0.75 * 255)
             c = Color(187, 170, 128);
         if (r > 0.55 * 255)
             c = Color(64, 96, 40);
+        if (light_intensity <= 0.3)
+        {
+            Color city_lights(255, 255, 0);
+            return Material(c * light_intensity + city_lights * tex[px].green(),
+                            1, 1);
+        }
         return Material(c * light_intensity, 1, 1);
     }
 
@@ -98,5 +98,23 @@ private:
         noise = noise * (high - low) / 2 + (high + low) / 2;
 
         return noise;
+    }
+
+    double sum_octave_bis(size_t w, double x, double y, double ko, double fs,
+                          double v, double alpha,
+                          std::function<double(double)> theta, double low,
+                          double high)
+    {
+        double noise = 0;
+
+        for (double k = 1; k <= w; k++)
+        {
+            double coef = ko + fs * k;
+            double random = theta(noise_.GetNoise(coef * x, coef * y));
+            noise += theta(pow(coef, -v) * (coef * random));
+        }
+
+        noise = pow(noise, alpha);
+        return noise * (high - low) / 2 + (high + low) / 2;
     }
 };

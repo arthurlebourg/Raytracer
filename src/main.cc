@@ -74,7 +74,7 @@ void make_video(Scene sc, int frames_begin, int frames_end, Color *res)
         sc.objects_[1]->set_position(Vector3(-frame, 0, -frame / 4.0 + 200));
         sc.objects_[2]->set_position(Vector3(-frame, 0, -frame / 4.0 + 200));
 
-        sc.lights_[0]->set_position(Vector3(300, 200, 300 - 3 * frame));
+        sc.lights_[0]->set_position(Vector3(300 - frame, 200, 300 - 3 * frame));
 
         sc.camera_.set_rotation_y(-frame / 4.0);
         if (frames_begin == 0)
@@ -122,7 +122,7 @@ void make_video(Scene sc, int frames_begin, int frames_end, Color *res)
 int main(int argc, char *argv[])
 {
     argv = argv;
-    size_t frames = 180;
+    size_t frames = 360;
 
     // Scene sc = make_scene();
     // Scene sc = planet();

@@ -24,7 +24,7 @@ public:
             for (size_t x = 0; x < width; x++)
             {
                 double blue_noise = sum_octave_bis(
-                    7, x, y, 2, 0.0001, -0.05, 6,
+                    7, x * 3, y * 3, 2, 0.001, -1, 8,
                     [](double x) -> double { return x; }, 0, 255);
                 Color c = Color(blue_noise, blue_noise, blue_noise);
                 data_[y * width + x] = c;

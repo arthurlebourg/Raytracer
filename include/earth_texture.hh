@@ -29,10 +29,10 @@ public:
                 // 0.5, 0, 2) : 0;
                 double lights = sum_octave_bis(
                     7, x, y, 2, 1, -0.5, 8,
-                    [](double x) -> double { return x; }, 1, 2);
+                    [](double x) -> double { return x; }, 0, 255);
                 // Color c = Color(terrain * 255, r >= 0.54 && r <= 0.55 ? 255 :
                 // 0, 0);
-                Color c = Color(terrain * 255, terrain > 0.8 ? lights : 0, 0);
+                Color c = Color(terrain * 255, terrain > 0.725 ? lights : 0, 0);
                 tex[y * res_x_ + x] = c;
                 texture.set(c, x, y);
             }
@@ -70,10 +70,11 @@ public:
             c = Color(187, 170, 128);
         if (r > 0.55 * 255)
             c = Color(64, 96, 40);
-        if (light_specular_intensity <= 0.3 && tex[px].green())
+        if (light_specular_intensity <= 0.3 && tex[px].green() > 0)
         {
             Color city_lights(255, 255, 155);
-            return Material(city_lights, 1, 1);
+            double coef = (tex[px].green() / 255.0);
+            return Material(city_lights * coef, 1, 1);
         }
         return Material(c * light_specular_intensity, 1, 1);
     }

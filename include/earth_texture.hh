@@ -40,7 +40,8 @@ public:
         texture.save();
     }
 
-    Material get_Material(Vector3 point, Vector3 center, double light_intensity)
+    Material get_Material(Vector3 point, Vector3 center,
+                          double light_specular_intensity)
     {
         Vector3 normal = (center - point).normalized();
 
@@ -69,12 +70,12 @@ public:
             c = Color(187, 170, 128);
         if (r > 0.55 * 255)
             c = Color(64, 96, 40);
-        if (light_intensity <= 0.3 && tex[px].green())
+        if (light_specular_intensity <= 0.3 && tex[px].green())
         {
             Color city_lights(255, 255, 155);
             return Material(city_lights, 1, 1);
         }
-        return Material(c * light_intensity, 1, 1);
+        return Material(c * light_specular_intensity, 1, 1);
     }
 
 private:

@@ -42,7 +42,7 @@ double Planet::evaluate_potential(Vector3 point)
     return density + res;
 }
 
-void Planet::set_texture(Triangle &triangle)
+void Planet::set_texture(Smooth_Triangle &triangle)
 {
     triangle.set_texture(grass_tex_);
     Vector3 dst_to_center = triangle.get_center() - center_;

@@ -45,5 +45,5 @@ private:
     std::shared_ptr<Uniform_Texture> snow_tex_;
     std::shared_ptr<Uniform_Texture> water_tex_;
 
-    void set_texture(Triangle &triangle);
+    void set_texture(Smooth_Triangle &triangle);
 };

@@ -14,7 +14,7 @@ public:
 
 private:
     double evaluate_potential(Vector3 point);
-    void set_texture(Triangle &triangle)
+    void set_texture(Smooth_Triangle &triangle)
     {
         triangle.set_texture(texture_);
     }

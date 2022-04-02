@@ -14,7 +14,11 @@ class Sub_Cube
 {
 public:
     Sub_Cube(Vector3 corner, double side_length);
+    // coordinates of cube vertexs
     std::vector<Vector3> potentials;
+    // potential values at each vertex
+    std::vector<double> potentials_values;
+    double side_length_;
 };
 
 // abstract class for blob
@@ -30,7 +34,7 @@ public:
     {}
 
     // Render the desired forms with triangles
-    std::vector<std::shared_ptr<Triangle>> render();
+    std::vector<std::shared_ptr<Smooth_Triangle>> render();
 
 protected:
     Vector3 corner_;
@@ -42,22 +46,26 @@ protected:
     /*
        Returns the index to look up for in the tri_table
        by evaluating potentials in the sub cube(corner + side_length)
+       also compute the potential at each cube vertex
      */
-    int get_table_index(Sub_Cube sub_cube);
+    int get_table_index(Sub_Cube &sub_cube);
 
 private:
     virtual double evaluate_potential(Vector3 point) = 0;
-    virtual void set_texture(Triangle &triangle) = 0;
+    virtual void set_texture(Smooth_Triangle &triangle) = 0;
 
     /*
         get the postition on which the triangle vertex will be placed between
         two sub_cube vertex using linear interpolation
+        pt1/2 = postion if sub sub vertex
+        v1/2 = potential value
     */
-    Vector3 get_vertex_pos(Vector3 pt1, Vector3 pt2);
+    Vector3 get_vertex_pos(Vector3 pt1, Vector3 pt2, double v1, double v2);
 
     /*
        returns the list of triangles from the potential points inside the sub
        index is the place to look for in tri_table
      */
-    std::vector<Triangle> get_sub_triangles(Sub_Cube sub_cube, int index);
+    std::vector<Smooth_Triangle> get_sub_triangles(Sub_Cube sub_cube,
+                                                   int index);
 };

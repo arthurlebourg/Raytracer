@@ -30,8 +30,7 @@ public:
     {}
 
     // Render the desired forms with triangles
-    std::vector<std::shared_ptr<Triangle>>
-    render(std::shared_ptr<Texture_Material> texture);
+    std::vector<std::shared_ptr<Triangle>> render();
 
 protected:
     Vector3 corner_;
@@ -48,6 +47,7 @@ protected:
 
 private:
     virtual double evaluate_potential(Vector3 point) = 0;
+    virtual void set_texture(Triangle &triangle) = 0;
 
     /*
         get the postition on which the triangle vertex will be placed between
@@ -59,7 +59,5 @@ private:
        returns the list of triangles from the potential points inside the sub
        index is the place to look for in tri_table
      */
-    std::vector<Triangle>
-    get_sub_triangles(Sub_Cube sub_cube, int index,
-                      std::shared_ptr<Texture_Material> texture);
+    std::vector<Triangle> get_sub_triangles(Sub_Cube sub_cube, int index);
 };

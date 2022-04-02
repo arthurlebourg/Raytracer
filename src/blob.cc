@@ -103,9 +103,7 @@ Vector3 Blob::edge_to_vect(int edge, Sub_Cube sub_cube)
     returns the list of triangles from the potential points inside the sub cube
     index is the place to look for in tri_table
 */
-std::vector<Triangle>
-Blob::get_sub_triangles(Sub_Cube sub_cube, int index,
-                        std::shared_ptr<Texture_Material> texture)
+std::vector<Triangle> Blob::get_sub_triangles(Sub_Cube sub_cube, int index)
 {
     std::vector<Triangle> triangles;
     auto edges = tri_table[index];
@@ -113,7 +111,8 @@ Blob::get_sub_triangles(Sub_Cube sub_cube, int index,
     {
         auto triangle = Triangle(edge_to_vect(edges[i], sub_cube),
                                  edge_to_vect(edges[i + 1], sub_cube),
-                                 edge_to_vect(edges[i + 2], sub_cube), texture);
+                                 edge_to_vect(edges[i + 2], sub_cube), nullptr);
+        set_texture(triangle);
         triangles.push_back(triangle);
     }
     return triangles;
@@ -130,8 +129,7 @@ int Blob::get_table_index(Sub_Cube sub_cube)
     return index;
 }
 
-std::vector<std::shared_ptr<Triangle>>
-Blob::render(std::shared_ptr<Texture_Material> texture)
+std::vector<std::shared_ptr<Triangle>> Blob::render()
 {
     std::vector<std::shared_ptr<Triangle>> triangles;
     // length of sub cube's edge
@@ -148,8 +146,7 @@ Blob::render(std::shared_ptr<Texture_Material> texture)
                 Vector3 corner(i, j, k);
                 Sub_Cube sub_cube(corner, sub_length);
                 auto index = get_table_index(sub_cube);
-                auto sub_triangles =
-                    get_sub_triangles(sub_cube, index, texture);
+                auto sub_triangles = get_sub_triangles(sub_cube, index);
                 // concatenates sub vector's content to the main one
                 for (auto triangle : sub_triangles)
                 {

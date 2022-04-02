@@ -42,70 +42,24 @@ double Planet::evaluate_potential(Vector3 point)
     return density + res;
 }
 
-std::vector<Triangle>
-Planet::get_sub_triangles(Sub_Cube sub_cube, int index,
-                          std::shared_ptr<Texture_Material> texture)
+void Planet::set_texture(Triangle &triangle)
 {
-    texture = texture;
-    std::vector<Triangle> triangles;
-    auto edges = tri_table[index];
-    for (int i = 0; edges[i] != -1; i += 3)
-    {
-        auto triangle =
-            Triangle(edge_to_vect(edges[i], sub_cube),
-                     edge_to_vect(edges[i + 1], sub_cube),
-                     edge_to_vect(edges[i + 2], sub_cube), grass_tex_);
+    triangle.set_texture(grass_tex_);
+    Vector3 dst_to_center = triangle.get_center() - center_;
+    double slope = dot(dst_to_center, triangle.normal(triangle.get_center()));
+    if (slope < 0)
+        slope = -slope;
 
-        Vector3 dst_to_center = triangle.get_center() - center_;
-        double slope =
-            dot(dst_to_center, triangle.normal(triangle.get_center()));
-        if (slope < 0)
-            slope = -slope;
+    if (slope
+            / (dst_to_center.length()
+               * triangle.normal(triangle.get_center()).length())
+        < 0.5)
+        triangle.set_texture(dirt_tex_);
 
-        if (slope
-                / (dst_to_center.length()
-                   * triangle.normal(triangle.get_center()).length())
-            < 0.5)
-            triangle.set_texture(dirt_tex_);
-
-        double ratio = dst_to_center.length() / radius_;
-        std::cout << ratio << std::endl;
-        if (ratio > 1)
-            triangle.set_texture(snow_tex_);
-        if (ratio < 0.8)
-            triangle.set_texture(water_tex_);
-        triangles.push_back(triangle);
-    }
-    return triangles;
-}
-
-std::vector<std::shared_ptr<Triangle>>
-Planet::render(std::shared_ptr<Texture_Material> texture)
-{
-    std::vector<std::shared_ptr<Triangle>> triangles;
-    // length of sub cube's edge
-    auto sub_length = side_length_ / nb_step_;
-
-    for (auto i = corner_.x(); i < corner_.x() + side_length_; i += sub_length)
-    {
-        for (auto j = corner_.y(); j < corner_.y() + side_length_;
-             j += sub_length)
-        {
-            for (auto k = corner_.z(); k < corner_.z() + side_length_;
-                 k += sub_length)
-            {
-                Vector3 corner(i, j, k);
-                Sub_Cube sub_cube(corner, sub_length);
-                auto index = get_table_index(sub_cube);
-                auto sub_triangles =
-                    get_sub_triangles(sub_cube, index, texture);
-                // concatenates sub vector's content to the main one
-                for (auto triangle : sub_triangles)
-                {
-                    triangles.push_back(std::make_shared<Triangle>(triangle));
-                }
-            }
-        }
-    }
-    return triangles;
+    double ratio = dst_to_center.length() / radius_;
+    std::cout << ratio << std::endl;
+    if (ratio > 1)
+        triangle.set_texture(snow_tex_);
+    if (ratio < 0.8)
+        triangle.set_texture(water_tex_);
 }

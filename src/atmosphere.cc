@@ -1,6 +1,6 @@
-#include "sphere.hh"
+#include "atmosphere.hh"
 
-std::optional<Vector3> Sphere::hit(Ray ray)
+std::optional<Vector3> Atmosphere::hit(Ray ray)
 {
     // if ray is inside sphere
     double sq_dst_to_center = (ray.origin() - pos_).squaredNorm();
@@ -30,7 +30,7 @@ std::optional<Vector3> Sphere::hit(Ray ray)
     }
 }
 
-Vector3 Sphere::normal(Vector3 point)
+Vector3 Atmosphere::normal(Vector3 point)
 {
     return (point - pos_).normalized();
 }

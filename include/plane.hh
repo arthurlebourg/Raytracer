@@ -40,6 +40,11 @@ public:
         return std::make_shared<Plane>(Plane(*this));
     }
 
+    bool is_transparent()
+    {
+        return false;
+    }
+
     Vector3 get_center()
     {
         return pos_;

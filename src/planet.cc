@@ -69,7 +69,6 @@ Planet::get_sub_triangles(Sub_Cube sub_cube, int index,
             triangle.set_texture(dirt_tex_);
 
         double ratio = dst_to_center.length() / radius_;
-        std::cout << ratio << std::endl;
         if (ratio > 1)
             triangle.set_texture(snow_tex_);
         if (ratio < 0.8)

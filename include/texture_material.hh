@@ -36,7 +36,8 @@ private:
 class Texture_Material
 {
 public:
-    virtual Material get_Material(Vector3 point, Vector3 center) = 0;
+    virtual Material get_Material(Vector3 point, Vector3 center,
+                                  double light_specular_intensity) = 0;
 
 private:
 };

@@ -24,8 +24,15 @@ public:
         {
             for (size_t x = 0; x < res_x_; x++)
             {
-                double r = sum_octave(8, x, y, 0.5, 0.5, 0, 1);
-                Color c = Color(r * 255, r * 255, r * 255);
+                double terrain = sum_octave(8, x, y, 0.5, 0.5, 0, 1);
+                // double lights = terrain > 0.54 ? sum_octave(2, y, x, 0.5,
+                // 0.5, 0, 2) : 0;
+                double lights = sum_octave_bis(
+                    7, x, y, 2, 1, -0.5, 8,
+                    [](double x) -> double { return x; }, 0, 255);
+                // Color c = Color(terrain * 255, r >= 0.54 && r <= 0.55 ? 255 :
+                // 0, 0);
+                Color c = Color(terrain * 255, terrain > 0.725 ? lights : 0, 0);
                 tex[y * res_x_ + x] = c;
                 texture.set(c, x, y);
             }
@@ -33,7 +40,8 @@ public:
         texture.save();
     }
 
-    Material get_Material(Vector3 point, Vector3 center)
+    Material get_Material(Vector3 point, Vector3 center,
+                          double light_specular_intensity)
     {
         Vector3 normal = (center - point).normalized();
 
@@ -48,22 +56,27 @@ public:
         double u = 0.5 + tmp / (2 * pi);
         double v = 0.5 + test / pi;
 
-        int width = u * res_x_;
-        int height = v * res_y_;
+        int width = u * (res_x_ - 1);
+        int height = v * (res_y_ - 1);
 
         size_t px = height + (width * res_x_);
 
         if (px > res_x_ * res_y_)
-            std::cout << "bite" << std::endl;
+            std::cout << "texture out of bound earth" << std::endl;
 
-        // return Material(Color(u*255, v*255, 0), 1,1);
         Color c(25, 77, 150);
         double r = tex[px].red();
         if (r > 0.75 * 255)
             c = Color(187, 170, 128);
         if (r > 0.55 * 255)
             c = Color(64, 96, 40);
-        return Material(c, 1, 1);
+        if (light_specular_intensity <= 0.3 && tex[px].green() > 0)
+        {
+            Color city_lights(255, 255, 155);
+            double coef = (tex[px].green() / 255.0);
+            return Material(city_lights * coef, 1, 1);
+        }
+        return Material(c * light_specular_intensity, 1, 1);
     }
 
 private:
@@ -93,5 +106,23 @@ private:
         noise = noise * (high - low) / 2 + (high + low) / 2;
 
         return noise;
+    }
+
+    double sum_octave_bis(size_t w, double x, double y, double ko, double fs,
+                          double v, double alpha,
+                          std::function<double(double)> theta, double low,
+                          double high)
+    {
+        double noise = 0;
+
+        for (double k = 1; k <= w; k++)
+        {
+            double coef = ko + fs * k;
+            double random = theta(noise_.GetNoise(coef * x, coef * y));
+            noise += theta(pow(coef, -v) * (coef * random));
+        }
+
+        noise = pow(noise, alpha);
+        return noise * (high - low) / 2 + (high + low) / 2;
     }
 };

@@ -48,6 +48,11 @@ public:
         return std::make_shared<Triangle>(Triangle(*this));
     }
 
+    bool is_transparent()
+    {
+        return false;
+    }
+
     Vector3 get_center()
     {
         return Vector3((A_.x() + B_.x() + C_.x()) / 3,

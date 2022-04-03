@@ -11,11 +11,13 @@ public:
         : mat_(mat)
     {}
 
-    Material get_Material(Vector3 point, Vector3 center)
+    Material get_Material(Vector3 point, Vector3 center,
+                          double light_specular_intensity)
     {
         center = center;
         point = point;
-        return mat_;
+        return Material(mat_.get_color() * light_specular_intensity,
+                        mat_.get_diffusion_coeff(), mat_.ks());
     }
 
 private:

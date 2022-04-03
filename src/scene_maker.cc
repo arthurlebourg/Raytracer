@@ -1,14 +1,15 @@
 #include "scene_maker.hh"
 
+const double fov_w = 90;
+const double fov_h = 110;
+double dist_to_screen = 1;
+double dist_to_skybox = 5000;
+
 Scene make_scene()
 {
     std::srand(time(NULL));
     double seed = std::rand();
     std::cout << "seed: " << seed << std::endl;
-    double fov_w = 90;
-    double fov_h = 120;
-    double dist_to_screen = 1;
-    double dist_to_skybox = 5000;
 
     Vector3 camCenter(0, 0, 0);
     Vector3 camFocus(0, 0, 1);
@@ -39,10 +40,6 @@ Scene amogus()
     std::srand(time(NULL));
     double seed = std::rand();
     std::cout << "seed: " << seed << std::endl;
-    double fov_w = 90;
-    double fov_h = 120;
-    double dist_to_screen = 1;
-    double dist_to_skybox = 5000;
 
     Vector3 camCenter(0, 0, 0);
     Vector3 camFocus(0, 0, 1);
@@ -72,10 +69,6 @@ Scene planet()
     std::srand(time(NULL));
     double seed = std::rand();
     std::cout << "seed: " << seed << std::endl;
-    double fov_w = 90;
-    double fov_h = 120;
-    double dist_to_screen = 1;
-    double dist_to_skybox = 5000;
 
     Vector3 camCenter(0, 0, 0);
     Vector3 camFocus(0, 0, 1);
@@ -102,5 +95,50 @@ Scene planet()
     std::cout << "size : " << triangles.size() << std::endl;
 
     sc.objects_.insert(sc.objects_.end(), triangles.begin(), triangles.end());
+    return sc;
+}
+
+Scene sample_atmosphere()
+{
+    std::srand(time(NULL));
+    double seed = std::rand();
+    std::cout << "seed: " << seed << std::endl;
+
+    Vector3 camCenter(0, 0, 0);
+    Vector3 camFocus(0, 0, 1);
+    Vector3 camUp(0, 1, 0);
+
+    Camera cam = Camera(camCenter, camFocus, camUp.normalized(), fov_w / 2,
+                        fov_h / 2, dist_to_screen);
+    Scene sc = Scene(cam, 5, dist_to_skybox, seed);
+
+    Vector3 light_pos(0, 300, 100);
+    double luminosty = 2;
+    Point_Light light(luminosty, light_pos);
+    sc.lights_.push_back(std::make_shared<Point_Light>(light));
+
+    Uniform_Texture tex = Uniform_Texture(Material(Color(255, 255, 255), 1, 1));
+
+    Earth_Texture planete_tex = Earth_Texture(seed, 1000, 1000);
+    Sphere green_boulasse = Sphere(
+        Vector3(0, 0, 200), 100, std::make_shared<Earth_Texture>(planete_tex));
+
+    sc.objects_.push_back(std::make_shared<Sphere>(green_boulasse));
+
+    /*Planet green_boulasse =
+        Planet(Vector3(-100, -100, 100), 200, 15, 0.5, seed);
+
+    auto triangles =
+        green_boulasse.render(std::make_shared<Uniform_Texture>(tex));
+
+    std::cout << "size : " << triangles.size() << std::endl;
+
+    sc.objects_.insert(sc.objects_.end(), triangles.begin(), triangles.end());
+    */
+    Atmosphere atmos(Vector3(0, 0, 200), 130, 80,
+                     std::make_shared<Uniform_Texture>(tex));
+
+    sc.objects_.push_back(std::make_shared<Atmosphere>(atmos));
+    std::cout << "objects: " << sc.objects_.size() << std::endl;
     return sc;
 }

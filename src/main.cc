@@ -6,9 +6,9 @@
 #include "raytracer.hh"
 #include "scene_maker.hh"
 
-const size_t img_width = 1280;
-const size_t img_height = 960;
-const int max_threads = std::thread::hardware_concurrency();
+const size_t img_width = 1440;
+const size_t img_height = 1080;
+const int max_threads = std::thread::hardware_concurrency() + 1;
 
 const int anti_aliasing = 4;
 const int sqrt_anti_aliasing = sqrt(anti_aliasing);
@@ -29,19 +29,35 @@ void make_image_threads(Scene sc, double miny, double maxy, Image *img)
                 Ray ray = sc.camera_.get_ray(
                     x_pixel + x_distance * (n / sqrt_anti_aliasing),
                     y_pixel + y_distance * ((int)n % sqrt_anti_aliasing));
-                auto hit_info = find_closest_obj(sc.objects_, ray);
+                auto hit_info = find_closest_obj(sc.objects_, ray, true);
 
                 if (hit_info.get_obj() == nullptr)
                 {
-                    col = col + skybox(ray, sc) * (1.0 / anti_aliasing);
+                    col = col + Color(255, 255, 0) * (1.0 / anti_aliasing);
                 }
                 else
                 {
                     col = col
                         + get_color(hit_info.get_obj(), sc,
-                                    hit_info.get_location(), hit_info.get_dir(),
-                                    5)
+                                    hit_info.get_location(),
+                                    hit_info.get_dir().normalized(), 1)
                             * (1.0 / anti_aliasing);
+                    /*if (hit_info.get_obj()->is_skybox())
+                    {
+                        col = col
+                            + hit_info.get_obj()
+                                    ->get_texture(hit_info.get_location())
+                                    .get_color()
+                                * (1.0 / anti_aliasing);
+                    }
+                    else
+                    {
+                        col = col
+                            + get_color(hit_info.get_obj(), sc,
+                                        hit_info.get_location(),
+                                        hit_info.get_dir().normalized(), 1)
+                                * (1.0 / anti_aliasing);
+                    }*/
                 }
             }
             img->set(col, x, y);
@@ -55,6 +71,17 @@ void make_video(Scene sc, int frames_begin, int frames_end, Color *res)
 {
     for (int frame = frames_begin; frame < frames_end; frame++)
     {
+        sc.objects_[1]->set_position(Vector3(-frame, 0, -frame / 4.0 + 200));
+        sc.objects_[2]->set_position(Vector3(-frame, 0, -frame / 4.0 + 200));
+
+        sc.lights_[0]->set_position(Vector3(300 - frame, 200, 300 - 3 * frame));
+
+        sc.camera_.set_rotation_y(-frame / 4.0);
+        if (frames_begin == 0)
+        {
+            std::cout << frame << "/" << frames_end << std::endl;
+        }
+
         for (double y = 0; y < img_height; y++)
         {
             for (double x = 0; x < img_width; x++)
@@ -69,26 +96,21 @@ void make_video(Scene sc, int frames_begin, int frames_end, Color *res)
                     Ray ray = sc.camera_.get_ray(
                         x_pixel + x_distance * (n / sqrt_anti_aliasing),
                         y_pixel + y_distance * ((int)n % sqrt_anti_aliasing));
-                    auto hit_info = find_closest_obj(sc.objects_, ray);
+                    auto hit_info = find_closest_obj(sc.objects_, ray, true);
 
                     if (hit_info.get_obj() == nullptr)
                     {
-                        col = col + skybox(ray, sc) * (1.0 / anti_aliasing);
+                        col = col + Color(255, 255, 0) * (1.0 / anti_aliasing);
                     }
                     else
                     {
                         col = col
                             + get_color(hit_info.get_obj(), sc,
                                         hit_info.get_location(),
-                                        hit_info.get_dir(), 5)
+                                        hit_info.get_dir().normalized(), 1)
                                 * (1.0 / anti_aliasing);
                     }
                 }
-                sc.objects_[0]->set_position(Vector3(-50, -625, 600));
-
-                // sc.camera_.set_position(Vector3(0, 0, -frame));
-                sc.camera_.set_rotation_y(frame);
-                // sc.camera_.set_rotation_x(frame);
 
                 res[(int)(y * img_width + x) + frame * img_width * img_height] =
                     col;
@@ -100,11 +122,12 @@ void make_video(Scene sc, int frames_begin, int frames_end, Color *res)
 int main(int argc, char *argv[])
 {
     argv = argv;
-    size_t frames = 180;
+    size_t frames = 360;
 
     // Scene sc = make_scene();
-    Scene sc = planet();
+    // Scene sc = planet();
     // Scene sc = amogus();
+    Scene sc = sample_atmosphere();
 
     if (max_threads == 0)
     {
@@ -124,7 +147,6 @@ int main(int argc, char *argv[])
             threads.push_back(std::thread(make_video, sc.copy_for_thread(),
                                           i * frames_per_thread,
                                           (i + 1) * frames_per_thread, data));
-            std::cout << i + 1 << std::endl;
         }
 
         make_video(sc, (max_threads - 1) * frames_per_thread,
@@ -136,7 +158,10 @@ int main(int argc, char *argv[])
             + std::to_string(img_width) + std::string("x")
             + std::to_string(img_height)
             + std::string(
-                " -r 25 -i - -f mp4 -q:v 5 -an -vcodec mpeg4 raytracer.mp4");
+                //" -r 25 -i - -f webm -q:v 5 -an -vcodec libvpx-vp9
+                // raytracer.webm");
+                " -r 25 -i - -f mp4 -q:v 5 -an -vcodec mpeg4 "
+                "img/raytracer_bad_encoding.mp4");
 
         FILE *pipeout = popen(ffmpeg_data.c_str(), "w");
 
@@ -168,6 +193,13 @@ int main(int argc, char *argv[])
         free(data);
         fflush(pipeout);
         pclose(pipeout);
+        std::string ffmpeg_encoding =
+            "ffmpeg -loglevel quiet -y -i img/raytracer_bad_encoding.mp4 "
+            "-strict very raytracer.mp4";
+
+        FILE *pipe_encoding = popen(ffmpeg_encoding.c_str(), "w");
+        fflush(pipe_encoding);
+        pclose(pipe_encoding);
         std::string ffmpeg_sound =
             "ffmpeg -loglevel quiet -y -i raytracer.mp4 -i "
             "sound/universal.wav -map 0:v -map 1:a "

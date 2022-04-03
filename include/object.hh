@@ -20,9 +20,14 @@ public:
 
     virtual std::shared_ptr<Object> clone() = 0;
 
-    Material get_texture(Vector3 point)
+    virtual bool is_transparent()
     {
-        return texture_->get_Material(point, get_center());
+        return false;
+    }
+
+    Material get_texture(Vector3 point, double light_intensity)
+    {
+        return texture_->get_Material(point, get_center(), light_intensity);
     }
 
     void set_texture(std::shared_ptr<Texture_Material> texture)
@@ -32,7 +37,18 @@ public:
 
     virtual Vector3 get_center() = 0;
 
+    void set_skybox(bool b)
+    {
+        is_skybox_ = b;
+    }
+
+    bool is_skybox()
+    {
+        return is_skybox_;
+    }
+
 protected:
+    bool is_skybox_ = false;
     std::shared_ptr<Texture_Material> texture_;
     Object(std::shared_ptr<Texture_Material> texture)
         : texture_(texture)

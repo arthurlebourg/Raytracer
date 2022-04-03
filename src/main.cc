@@ -8,7 +8,7 @@
 
 const size_t img_width = 1440;
 const size_t img_height = 1080;
-const int max_threads = std::thread::hardware_concurrency();
+const int max_threads = std::thread::hardware_concurrency() + 1;
 
 const int anti_aliasing = 4;
 const int sqrt_anti_aliasing = sqrt(anti_aliasing);

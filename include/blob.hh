@@ -59,6 +59,10 @@ public:
     // normal at each vertex for smooth triangle creation
     std::vector<Vector3> gradient;
     double side_length_;
+
+    // get the potential and gradient from the meshgrid
+    // x, y, z is the coordinates of the lower left corner in the meshgrid
+    void fill(Meshgrid &grid, size_t x, size_t y, size_t z);
 };
 
 // abstract class for blob

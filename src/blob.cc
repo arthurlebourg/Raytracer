@@ -19,6 +19,18 @@ Sub_Cube::Sub_Cube(Vector3 corner, double side_length)
     potentials.emplace_back(x, y, z);
 }
 
+void Sub_Cube::fill(Meshgrid &grid, size_t x, size_t y, size_t z)
+{
+    potentials_values.push_back(grid.at(x, y + 1, z + 1));
+    potentials_values.push_back(grid.at(x + 1, y + 1, z + 1));
+    potentials_values.push_back(grid.at(x + 1, y + 1, z));
+    potentials_values.push_back(grid.at(x, y + 1, z));
+    potentials_values.push_back(grid.at(x, y, z + 1));
+    potentials_values.push_back(grid.at(x + 1, y, z + 1));
+    potentials_values.push_back(grid.at(x + 1, y, z));
+    potentials_values.push_back(grid.at(x, y, z));
+}
+
 Vector3 Blob::get_vertex_pos(Vector3 pt1, Vector3 pt2, double v1, double v2)
 {
     double t = (threshold_ - v1) / (v2 - v1);
@@ -177,11 +189,9 @@ std::vector<Smooth_Triangle> Blob::get_sub_triangles(Sub_Cube sub_cube,
 int Blob::get_table_index(Sub_Cube &sub_cube)
 {
     int index = 0;
-    for (size_t i = 0; i < sub_cube.potentials.size(); i++)
+    for (size_t i = 0; i < sub_cube.potentials_values.size(); i++)
     {
-        auto potential_value = evaluate_potential(sub_cube.potentials[i]);
-        sub_cube.potentials_values.push_back(potential_value);
-        if (potential_value > threshold_)
+        if (sub_cube.potentials_values[i] > threshold_)
             index |= (1 << i);
     }
     return index;
@@ -200,25 +210,28 @@ std::vector<std::shared_ptr<Smooth_Triangle>> Blob::render()
         {
             for (auto k = 0; k < nb_step_ + 2; k += 1)
             {
-                Vector3 pos(corner_.x() + i * sub_length,
-                            corner_.y() + j * sub_length,
-                            corner_.z() + k * sub_length);
+                Vector3 pos(corner_.x() + (i - 1) * sub_length,
+                            corner_.y() + (j - 1) * sub_length,
+                            corner_.z() + (k - 1) * sub_length);
                 auto val = evaluate_potential(pos);
                 grid_.set(i, j, k, val);
             }
         }
     }
 
-    for (auto i = corner_.x(); i < corner_.x() + side_length_; i += sub_length)
+    // render the triangles
+    for (auto i = 1; i <= nb_step_; i += 1)
     {
-        for (auto j = corner_.y(); j < corner_.y() + side_length_;
-             j += sub_length)
+        for (auto j = 1; j <= nb_step_; j += 1)
         {
-            for (auto k = corner_.z(); k < corner_.z() + side_length_;
-                 k += sub_length)
+            for (auto k = 1; k <= nb_step_; k += 1)
             {
-                Vector3 corner(i, j, k);
-                Sub_Cube sub_cube(corner, sub_length);
+                Vector3 pos(corner_.x() + (i - 1) * sub_length,
+                            corner_.y() + (j - 1) * sub_length,
+                            corner_.z() + (k - 1) * sub_length);
+                Sub_Cube sub_cube(pos, sub_length);
+                sub_cube.fill(grid_, i, j, k);
+
                 auto index = get_table_index(sub_cube);
                 auto sub_triangles = get_sub_triangles(sub_cube, index);
                 // concatenates sub vector's content to the main one
@@ -230,5 +243,6 @@ std::vector<std::shared_ptr<Smooth_Triangle>> Blob::render()
             }
         }
     }
+
     return triangles;
 }

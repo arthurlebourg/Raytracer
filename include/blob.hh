@@ -9,6 +9,13 @@
 #include "texture_material.hh"
 #include "tri_table.hh"
 
+// small struct used to return parts of smooth triangle
+struct pos_gradient
+{
+    Vector3 position;
+    Vector3 gradient;
+};
+
 // 3d array with all potential values
 class Meshgrid
 {
@@ -57,7 +64,7 @@ public:
     // potential value at each vertex like in meshgrid
     std::vector<double> potentials_values;
     // normal at each vertex for smooth triangle creation
-    std::vector<Vector3> gradient;
+    std::vector<Vector3> gradients;
     double side_length_;
 
     // get the potential and gradient from the meshgrid
@@ -88,7 +95,7 @@ protected:
     double side_length_;
     double threshold_;
     // Returns the appropriate vertex from the edge indexes in the sub cube
-    Vector3 edge_to_vect(int edge, Sub_Cube sub_cube);
+    pos_gradient edge_to_vect(int edge, Sub_Cube sub_cube);
     /*
        Returns the index to look up for in the tri_table
        by evaluating potentials in the sub cube(corner + side_length)

@@ -19,16 +19,40 @@ Sub_Cube::Sub_Cube(Vector3 corner, double side_length)
     potentials.emplace_back(x, y, z);
 }
 
+// source : https://web.cs.ucdavis.edu/~ma/ECS177/papers/marching_cubes.pdf
+Vector3 get_gradient(Meshgrid &grid, size_t x, size_t y, size_t z)
+{
+    double grad_x = grid.at(x + 1, y, z) - grid.at(x - 1, y, z);
+    double grad_y = grid.at(x, y + 1, z) - grid.at(x, y - 1, z);
+    double grad_z = grid.at(x, y, z + 1) - grid.at(x, y, z - 1);
+    return Vector3(grad_x, grad_y, grad_z);
+}
+
 void Sub_Cube::fill(Meshgrid &grid, size_t x, size_t y, size_t z)
 {
     potentials_values.push_back(grid.at(x, y + 1, z + 1));
+    gradients.push_back(get_gradient(grid, x, y + 1, z + 1));
+
     potentials_values.push_back(grid.at(x + 1, y + 1, z + 1));
+    gradients.push_back(get_gradient(grid, x + 1, y + 1, z + 1));
+
     potentials_values.push_back(grid.at(x + 1, y + 1, z));
+    gradients.push_back(get_gradient(grid, x + 1, y + 1, z));
+
     potentials_values.push_back(grid.at(x, y + 1, z));
+    gradients.push_back(get_gradient(grid, x, y + 1, z));
+
     potentials_values.push_back(grid.at(x, y, z + 1));
+    gradients.push_back(get_gradient(grid, x, y, z + 1));
+
     potentials_values.push_back(grid.at(x + 1, y, z + 1));
+    gradients.push_back(get_gradient(grid, x + 1, y, z + 1));
+
     potentials_values.push_back(grid.at(x + 1, y, z));
+    gradients.push_back(get_gradient(grid, x + 1, y, z));
+
     potentials_values.push_back(grid.at(x, y, z));
+    gradients.push_back(get_gradient(grid, x, y, z));
 }
 
 Vector3 Blob::get_vertex_pos(Vector3 pt1, Vector3 pt2, double v1, double v2)
@@ -37,7 +61,7 @@ Vector3 Blob::get_vertex_pos(Vector3 pt1, Vector3 pt2, double v1, double v2)
     return pt1 + t * (pt2 - pt1);
 }
 
-Vector3 Blob::edge_to_vect(int edge, Sub_Cube sub_cube)
+pos_gradient Blob::edge_to_vect(int edge, Sub_Cube sub_cube)
 {
     Vector3 intermediate;
     Vector3 pt1;
@@ -46,8 +70,10 @@ Vector3 Blob::edge_to_vect(int edge, Sub_Cube sub_cube)
     double v1;
     double v2;
 
-    int i1;
-    int i2;
+    int i1 = 0;
+    int i2 = 0;
+
+    pos_gradient res;
     switch (edge)
     {
     case 0:
@@ -58,7 +84,8 @@ Vector3 Blob::edge_to_vect(int edge, Sub_Cube sub_cube)
         v1 = sub_cube.potentials_values[i1];
         v2 = sub_cube.potentials_values[i2];
         intermediate = get_vertex_pos(pt1, pt2, v1, v2);
-        return Vector3(intermediate.x(), pt1.y(), pt1.z());
+        res.position = Vector3(intermediate.x(), pt1.y(), pt1.z());
+        break;
     case 1:
         i1 = 2;
         i2 = 1;
@@ -67,7 +94,8 @@ Vector3 Blob::edge_to_vect(int edge, Sub_Cube sub_cube)
         v1 = sub_cube.potentials_values[i1];
         v2 = sub_cube.potentials_values[i2];
         intermediate = get_vertex_pos(pt1, pt2, v1, v2);
-        return Vector3(pt1.x(), pt1.y(), intermediate.z());
+        res.position = Vector3(pt1.x(), pt1.y(), intermediate.z());
+        break;
     case 2:
         i1 = 3;
         i2 = 2;
@@ -76,7 +104,8 @@ Vector3 Blob::edge_to_vect(int edge, Sub_Cube sub_cube)
         v1 = sub_cube.potentials_values[i1];
         v2 = sub_cube.potentials_values[i2];
         intermediate = get_vertex_pos(pt1, pt2, v1, v2);
-        return Vector3(intermediate.x(), pt1.y(), pt1.z());
+        res.position = Vector3(intermediate.x(), pt1.y(), pt1.z());
+        break;
     case 3:
         i1 = 3;
         i2 = 0;
@@ -85,7 +114,8 @@ Vector3 Blob::edge_to_vect(int edge, Sub_Cube sub_cube)
         v1 = sub_cube.potentials_values[i1];
         v2 = sub_cube.potentials_values[i2];
         intermediate = get_vertex_pos(pt1, pt2, v1, v2);
-        return Vector3(pt1.x(), pt1.y(), intermediate.z());
+        res.position = Vector3(pt1.x(), pt1.y(), intermediate.z());
+        break;
     case 4:
         i1 = 4;
         i2 = 5;
@@ -94,7 +124,8 @@ Vector3 Blob::edge_to_vect(int edge, Sub_Cube sub_cube)
         v1 = sub_cube.potentials_values[i1];
         v2 = sub_cube.potentials_values[i2];
         intermediate = get_vertex_pos(pt1, pt2, v1, v2);
-        return Vector3(intermediate.x(), pt1.y(), pt1.z());
+        res.position = Vector3(intermediate.x(), pt1.y(), pt1.z());
+        break;
     case 5:
         i1 = 6;
         i2 = 5;
@@ -103,7 +134,8 @@ Vector3 Blob::edge_to_vect(int edge, Sub_Cube sub_cube)
         v1 = sub_cube.potentials_values[i1];
         v2 = sub_cube.potentials_values[i2];
         intermediate = get_vertex_pos(pt1, pt2, v1, v2);
-        return Vector3(pt1.x(), pt1.y(), intermediate.z());
+        res.position = Vector3(pt1.x(), pt1.y(), intermediate.z());
+        break;
     case 6:
         i1 = 7;
         i2 = 6;
@@ -112,7 +144,8 @@ Vector3 Blob::edge_to_vect(int edge, Sub_Cube sub_cube)
         v1 = sub_cube.potentials_values[i1];
         v2 = sub_cube.potentials_values[i2];
         intermediate = get_vertex_pos(pt1, pt2, v1, v2);
-        return Vector3(intermediate.x(), pt1.y(), pt1.z());
+        res.position = Vector3(intermediate.x(), pt1.y(), pt1.z());
+        break;
     case 7:
         i1 = 7;
         i2 = 4;
@@ -121,7 +154,8 @@ Vector3 Blob::edge_to_vect(int edge, Sub_Cube sub_cube)
         v1 = sub_cube.potentials_values[i1];
         v2 = sub_cube.potentials_values[i2];
         intermediate = get_vertex_pos(pt1, pt2, v1, v2);
-        return Vector3(pt1.x(), pt1.y(), intermediate.z());
+        res.position = Vector3(pt1.x(), pt1.y(), intermediate.z());
+        break;
     case 8:
         i1 = 4;
         i2 = 0;
@@ -130,7 +164,8 @@ Vector3 Blob::edge_to_vect(int edge, Sub_Cube sub_cube)
         v1 = sub_cube.potentials_values[i1];
         v2 = sub_cube.potentials_values[i2];
         intermediate = get_vertex_pos(pt1, pt2, v1, v2);
-        return Vector3(pt1.x(), intermediate.y(), pt1.z());
+        res.position = Vector3(pt1.x(), intermediate.y(), pt1.z());
+        break;
     case 9:
         i1 = 5;
         i2 = 1;
@@ -139,7 +174,8 @@ Vector3 Blob::edge_to_vect(int edge, Sub_Cube sub_cube)
         v1 = sub_cube.potentials_values[i1];
         v2 = sub_cube.potentials_values[i2];
         intermediate = get_vertex_pos(pt1, pt2, v1, v2);
-        return Vector3(pt1.x(), intermediate.y(), pt1.z());
+        res.position = Vector3(pt1.x(), intermediate.y(), pt1.z());
+        break;
     case 10:
         i1 = 6;
         i2 = 2;
@@ -148,7 +184,8 @@ Vector3 Blob::edge_to_vect(int edge, Sub_Cube sub_cube)
         v1 = sub_cube.potentials_values[i1];
         v2 = sub_cube.potentials_values[i2];
         intermediate = get_vertex_pos(pt1, pt2, v1, v2);
-        return Vector3(pt1.x(), intermediate.y(), pt1.z());
+        res.position = Vector3(pt1.x(), intermediate.y(), pt1.z());
+        break;
     case 11:
         i1 = 7;
         i2 = 3;
@@ -157,11 +194,18 @@ Vector3 Blob::edge_to_vect(int edge, Sub_Cube sub_cube)
         v1 = sub_cube.potentials_values[i1];
         v2 = sub_cube.potentials_values[i2];
         intermediate = get_vertex_pos(pt1, pt2, v1, v2);
-        return Vector3(pt1.x(), intermediate.y(), pt1.z());
-    // this should never be reached
-    default:
-        return Vector3(0, 0, 0);
+        res.position = Vector3(pt1.x(), intermediate.y(), pt1.z());
+        break;
+        // this should never be reached
+        /*
+        default:
+            return res;
+            */
     }
+    auto grad1 = sub_cube.gradients[i1];
+    auto grad2 = sub_cube.gradients[i2];
+    res.gradient = (grad1 + grad2) / 2;
+    return res;
 }
 
 /*
@@ -175,11 +219,14 @@ std::vector<Smooth_Triangle> Blob::get_sub_triangles(Sub_Cube sub_cube,
     auto edges = tri_table[index];
     for (int i = 0; edges[i] != -1; i += 3)
     {
-        auto vertex1 = edge_to_vect(edges[i], sub_cube);
-        auto vertex2 = edge_to_vect(edges[i + 1], sub_cube);
-        auto vertex3 = edge_to_vect(edges[i + 2], sub_cube);
+        // vector + normal at each vertex
+        auto p_g1 = edge_to_vect(edges[i], sub_cube);
+        auto p_g2 = edge_to_vect(edges[i + 1], sub_cube);
+        auto p_g3 = edge_to_vect(edges[i + 2], sub_cube);
 
-        auto triangle = Smooth_Triangle(vertex1, vertex2, vertex3, nullptr);
+        auto triangle = Smooth_Triangle(p_g1.position, p_g2.position,
+                                        p_g3.position, p_g1.gradient,
+                                        p_g2.gradient, p_g3.gradient, nullptr);
         set_texture(triangle);
         triangles.push_back(triangle);
     }

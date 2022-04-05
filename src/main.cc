@@ -71,11 +71,12 @@ void make_video(Scene sc, int frames_begin, int frames_end, Color *res)
 {
     for (int frame = frames_begin; frame < frames_end; frame++)
     {
-        sc.objects_[1]->set_position(Vector3(-frame, 0, -frame / 4.0 + 200));
+        // Sample atmosphere
+        /*sc.objects_[1]->set_position(Vector3(-frame, 0, -frame / 4.0 + 200));
         sc.objects_[2]->set_position(Vector3(-frame, 0, -frame / 4.0 + 200));
 
         sc.lights_[0]->set_position(Vector3(300 - frame, 200, 300 - 3 * frame));
-
+        */
         sc.camera_.set_rotation_y(-frame / 4.0);
         if (frames_begin == 0)
         {
@@ -127,7 +128,8 @@ int main(int argc, char *argv[])
     // Scene sc = make_scene();
     // Scene sc = planet();
     // Scene sc = amogus();
-    Scene sc = sample_atmosphere();
+    // Scene sc = sample_atmosphere();
+    Scene sc = sun_scene();
 
     if (max_threads == 0)
     {

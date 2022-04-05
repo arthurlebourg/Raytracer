@@ -22,3 +22,5 @@ Scene amogus();
 Scene planet();
 
 Scene sample_atmosphere();
+
+Scene sun_scene();

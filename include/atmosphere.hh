@@ -12,16 +12,19 @@ class Atmosphere : public Object
 {
 public:
     Atmosphere(Vector3 pos, double radius, double planet_radius,
+               Vector3 scatter, double scatterForce,
                std::shared_ptr<Texture_Material> texture)
         : Object(texture)
+        , scatterForce_(scatterForce)
         , pos_(pos)
         , radius_(radius)
         , planet_radius_(planet_radius)
         , noise_(Blue_noise(2000, 2000, 27))
     {
-        scatteringCoef_ = Vector3(pow(400.0 / 700.0, 4.0) * scatterForce_,
-                                  pow(400.0 / 530.0, 4.0) * scatterForce_,
-                                  pow(400.0 / 440.0, 4.0) * scatterForce_);
+        scatteringCoef_ =
+            Vector3(pow(400.0 / scatter.x(), 4.0) * scatterForce_,
+                    pow(400.0 / scatter.y(), 4.0) * scatterForce_,
+                    pow(400.0 / scatter.z(), 4.0) * scatterForce_);
     }
 
     Atmosphere(const Atmosphere &a)
@@ -126,7 +129,7 @@ public:
 private:
     Vector3 scatteringCoef_;
     double densityFallOff = 8;
-    double scatterForce_ = 20;
+    double scatterForce_;
     size_t numOpticalDepthPoints = 10;
     Vector3 pos_;
     double radius_;

@@ -193,6 +193,22 @@ std::vector<std::shared_ptr<Smooth_Triangle>> Blob::render()
     // length of sub cube's edge
     auto sub_length = side_length_ / nb_step_;
 
+    // fill the meshgrid
+    for (auto i = 0; i < nb_step_ + 2; i += 1)
+    {
+        for (auto j = 0; j < nb_step_ + 2; j += 1)
+        {
+            for (auto k = 0; k < nb_step_ + 2; k += 1)
+            {
+                Vector3 pos(corner_.x() + i * sub_length,
+                            corner_.y() + j * sub_length,
+                            corner_.z() + k * sub_length);
+                auto val = evaluate_potential(pos);
+                grid_.set(i, j, k, val);
+            }
+        }
+    }
+
     for (auto i = corner_.x(); i < corner_.x() + side_length_; i += sub_length)
     {
         for (auto j = corner_.y(); j < corner_.y() + side_length_;

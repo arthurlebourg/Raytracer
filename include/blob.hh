@@ -9,6 +9,44 @@
 #include "texture_material.hh"
 #include "tri_table.hh"
 
+// 3d array with all potential values
+class Meshgrid
+{
+public:
+    Meshgrid()
+        : buffer(nullptr)
+    {}
+
+    void init(size_t len)
+    {
+        buffer = new double[len * len * len];
+        len_x = len;
+        len_y = len;
+        len_z = len;
+    }
+
+    ~Meshgrid()
+    {
+        delete[] buffer;
+    }
+
+    double at(size_t x, size_t y, size_t z)
+    {
+        return buffer[x * len_y * len_z + y * len_z + z];
+    }
+
+    void set(size_t x, size_t y, size_t z, double val)
+    {
+        buffer[x * len_y * len_z + y * len_z + z] = val;
+    }
+
+private:
+    size_t len_x;
+    size_t len_y;
+    size_t len_z;
+    double *buffer;
+};
+
 // sub cube to split the blob
 class Sub_Cube
 {
@@ -16,8 +54,10 @@ public:
     Sub_Cube(Vector3 corner, double side_length);
     // coordinates of cube vertexs
     std::vector<Vector3> potentials;
-    // potential values at each vertex
+    // potential value at each vertex like in meshgrid
     std::vector<double> potentials_values;
+    // normal at each vertex for smooth triangle creation
+    std::vector<Vector3> gradient;
     double side_length_;
 };
 
@@ -31,7 +71,9 @@ public:
         , nb_step_(step)
         , side_length_(side_length)
         , threshold_(threshold)
-    {}
+    {
+        grid_.init(step + 2);
+    }
 
     // Render the desired forms with triangles
     std::vector<std::shared_ptr<Smooth_Triangle>> render();
@@ -51,6 +93,7 @@ protected:
     int get_table_index(Sub_Cube &sub_cube);
 
 private:
+    Meshgrid grid_;
     virtual double evaluate_potential(Vector3 point) = 0;
     virtual void set_texture(Smooth_Triangle &triangle) = 0;
 

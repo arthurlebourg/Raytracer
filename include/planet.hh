@@ -29,18 +29,10 @@ public:
         water_tex_ = std::make_shared<Uniform_Texture>(water_tex);
     }
 
-    std::vector<std::shared_ptr<Triangle>>
-    render(std::shared_ptr<Texture_Material> texture);
-
 private:
-    std::vector<Triangle>
-    get_sub_triangles(Sub_Cube sub_cube, int index,
-                      std::shared_ptr<Texture_Material> texture);
-
     double evaluate_potential(Vector3 point);
     double sum_octave(double init, size_t num_iterations, double x, double y,
                       double z, double persistence, double scale, double low,
-
                       double high);
     int seed_;
     FastNoiseLite noise_;
@@ -52,4 +44,6 @@ private:
     std::shared_ptr<Uniform_Texture> dirt_tex_;
     std::shared_ptr<Uniform_Texture> snow_tex_;
     std::shared_ptr<Uniform_Texture> water_tex_;
+
+    void set_texture(Smooth_Triangle &triangle);
 };

@@ -83,14 +83,10 @@ Scene planet()
     Point_Light light(luminosty, light_pos);
     sc.lights_.push_back(std::make_shared<Point_Light>(light));
 
-    Uniform_Texture planete_tex =
-        Uniform_Texture(Material(Color(0, 255, 0), 1, 1));
-
     Planet green_boulasse =
         Planet(Vector3(-100, -100, 100), 200, 25, 0.5, seed);
 
-    auto triangles =
-        green_boulasse.render(std::make_shared<Uniform_Texture>(planete_tex));
+    auto triangles = green_boulasse.render();
 
     std::cout << "size : " << triangles.size() << std::endl;
 

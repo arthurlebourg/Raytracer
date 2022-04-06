@@ -12,6 +12,7 @@
 #include "scene.hh"
 #include "skybox_texture.hh"
 #include "sphere.hh"
+#include "sun_texture.hh"
 #include "triangle.hh"
 #include "uniform_texture.hh"
 

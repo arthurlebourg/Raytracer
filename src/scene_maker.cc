@@ -180,11 +180,10 @@ Scene sun_scene()
     sc.objects_.push_back(std::make_shared<Atmosphere>(atmos));
 
     // Sun
-    Uniform_Texture sun_tex =
-        Uniform_Texture(Material(Color(255, 255, 255), 100, 1));
+    Sun_Texture sun_tex = Sun_Texture(Material(Color(255, 255, 255), 1, 1));
 
     Sphere yellow_boulasse = Sphere(Vector3(0, 300, 700), 100,
-                                    std::make_shared<Uniform_Texture>(sun_tex));
+                                    std::make_shared<Sun_Texture>(sun_tex));
 
     sc.objects_.push_back(std::make_shared<Sphere>(yellow_boulasse));
 

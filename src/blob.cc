@@ -55,157 +55,75 @@ void Sub_Cube::fill(Meshgrid &grid, size_t x, size_t y, size_t z)
     gradients.push_back(get_gradient(grid, x, y, z));
 }
 
-Vector3 Blob::get_vertex_pos(Vector3 pt1, Vector3 pt2, double v1, double v2)
+pos_gradient Blob::get_vertex_pos(Sub_Cube sub_cube, int i1, int i2)
 {
+    auto pt1 = sub_cube.potentials[i1];
+    auto pt2 = sub_cube.potentials[i2];
+    auto v1 = sub_cube.potentials_values[i1];
+    auto v2 = sub_cube.potentials_values[i2];
+    auto grad1 = sub_cube.gradients[i1];
+    auto grad2 = sub_cube.gradients[i2];
     double t = (threshold_ - v1) / (v2 - v1);
-    return pt1 + t * (pt2 - pt1);
+    return pos_gradient{ pt1 + t * (pt2 - pt1), grad1 + t * (grad2 - grad1) };
 }
 
 pos_gradient Blob::edge_to_vect(int edge, Sub_Cube sub_cube)
 {
-    Vector3 intermediate;
-    Vector3 pt1;
-    Vector3 pt2;
-
-    double v1;
-    double v2;
-
     int i1 = 0;
     int i2 = 0;
 
-    pos_gradient res;
     switch (edge)
     {
     case 0:
         i1 = 0;
         i2 = 1;
-        pt1 = sub_cube.potentials[i1];
-        pt2 = sub_cube.potentials[i2];
-        v1 = sub_cube.potentials_values[i1];
-        v2 = sub_cube.potentials_values[i2];
-        intermediate = get_vertex_pos(pt1, pt2, v1, v2);
-        res.position = Vector3(intermediate.x(), pt1.y(), pt1.z());
         break;
     case 1:
         i1 = 2;
         i2 = 1;
-        pt1 = sub_cube.potentials[i1];
-        pt2 = sub_cube.potentials[i2];
-        v1 = sub_cube.potentials_values[i1];
-        v2 = sub_cube.potentials_values[i2];
-        intermediate = get_vertex_pos(pt1, pt2, v1, v2);
-        res.position = Vector3(pt1.x(), pt1.y(), intermediate.z());
         break;
     case 2:
         i1 = 3;
         i2 = 2;
-        pt1 = sub_cube.potentials[i1];
-        pt2 = sub_cube.potentials[i2];
-        v1 = sub_cube.potentials_values[i1];
-        v2 = sub_cube.potentials_values[i2];
-        intermediate = get_vertex_pos(pt1, pt2, v1, v2);
-        res.position = Vector3(intermediate.x(), pt1.y(), pt1.z());
         break;
     case 3:
         i1 = 3;
         i2 = 0;
-        pt1 = sub_cube.potentials[i1];
-        pt2 = sub_cube.potentials[i2];
-        v1 = sub_cube.potentials_values[i1];
-        v2 = sub_cube.potentials_values[i2];
-        intermediate = get_vertex_pos(pt1, pt2, v1, v2);
-        res.position = Vector3(pt1.x(), pt1.y(), intermediate.z());
         break;
     case 4:
         i1 = 4;
         i2 = 5;
-        pt1 = sub_cube.potentials[i1];
-        pt2 = sub_cube.potentials[i2];
-        v1 = sub_cube.potentials_values[i1];
-        v2 = sub_cube.potentials_values[i2];
-        intermediate = get_vertex_pos(pt1, pt2, v1, v2);
-        res.position = Vector3(intermediate.x(), pt1.y(), pt1.z());
         break;
     case 5:
         i1 = 6;
         i2 = 5;
-        pt1 = sub_cube.potentials[i1];
-        pt2 = sub_cube.potentials[i2];
-        v1 = sub_cube.potentials_values[i1];
-        v2 = sub_cube.potentials_values[i2];
-        intermediate = get_vertex_pos(pt1, pt2, v1, v2);
-        res.position = Vector3(pt1.x(), pt1.y(), intermediate.z());
         break;
     case 6:
         i1 = 7;
         i2 = 6;
-        pt1 = sub_cube.potentials[i1];
-        pt2 = sub_cube.potentials[i2];
-        v1 = sub_cube.potentials_values[i1];
-        v2 = sub_cube.potentials_values[i2];
-        intermediate = get_vertex_pos(pt1, pt2, v1, v2);
-        res.position = Vector3(intermediate.x(), pt1.y(), pt1.z());
         break;
     case 7:
         i1 = 7;
         i2 = 4;
-        pt1 = sub_cube.potentials[i1];
-        pt2 = sub_cube.potentials[i2];
-        v1 = sub_cube.potentials_values[i1];
-        v2 = sub_cube.potentials_values[i2];
-        intermediate = get_vertex_pos(pt1, pt2, v1, v2);
-        res.position = Vector3(pt1.x(), pt1.y(), intermediate.z());
         break;
     case 8:
         i1 = 4;
         i2 = 0;
-        pt1 = sub_cube.potentials[i1];
-        pt2 = sub_cube.potentials[i2];
-        v1 = sub_cube.potentials_values[i1];
-        v2 = sub_cube.potentials_values[i2];
-        intermediate = get_vertex_pos(pt1, pt2, v1, v2);
-        res.position = Vector3(pt1.x(), intermediate.y(), pt1.z());
         break;
     case 9:
         i1 = 5;
         i2 = 1;
-        pt1 = sub_cube.potentials[i1];
-        pt2 = sub_cube.potentials[i2];
-        v1 = sub_cube.potentials_values[i1];
-        v2 = sub_cube.potentials_values[i2];
-        intermediate = get_vertex_pos(pt1, pt2, v1, v2);
-        res.position = Vector3(pt1.x(), intermediate.y(), pt1.z());
         break;
     case 10:
         i1 = 6;
         i2 = 2;
-        pt1 = sub_cube.potentials[i1];
-        pt2 = sub_cube.potentials[i2];
-        v1 = sub_cube.potentials_values[i1];
-        v2 = sub_cube.potentials_values[i2];
-        intermediate = get_vertex_pos(pt1, pt2, v1, v2);
-        res.position = Vector3(pt1.x(), intermediate.y(), pt1.z());
         break;
     case 11:
         i1 = 7;
         i2 = 3;
-        pt1 = sub_cube.potentials[i1];
-        pt2 = sub_cube.potentials[i2];
-        v1 = sub_cube.potentials_values[i1];
-        v2 = sub_cube.potentials_values[i2];
-        intermediate = get_vertex_pos(pt1, pt2, v1, v2);
-        res.position = Vector3(pt1.x(), intermediate.y(), pt1.z());
         break;
-        // this should never be reached
-        /*
-        default:
-            return res;
-            */
     }
-    auto grad1 = sub_cube.gradients[i1];
-    auto grad2 = sub_cube.gradients[i2];
-    res.gradient = (grad1 + grad2) / 2;
-    return res;
+    return get_vertex_pos(sub_cube, i1, i2);
 }
 
 /*

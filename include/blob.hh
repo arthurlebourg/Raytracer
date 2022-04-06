@@ -114,7 +114,7 @@ private:
         pt1/2 = postion if sub sub vertex
         v1/2 = potential value
     */
-    Vector3 get_vertex_pos(Vector3 pt1, Vector3 pt2, double v1, double v2);
+    pos_gradient get_vertex_pos(Sub_Cube sub_cube, int i1, int i2);
 
     /*
        returns the list of triangles from the potential points inside the sub

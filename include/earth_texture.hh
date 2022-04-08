@@ -24,15 +24,19 @@ public:
         {
             for (size_t x = 0; x < res_x_; x++)
             {
-                double terrain = sum_octave(8, x, y, 0.5, 0.5, 0, 1);
+                // double terrain = sum_octave(8, x, y, 0.5, 0.5, 0, 1);
+                double terrain = sum_octave(16, x, y, 0.4, 0.3, 0, 1);
                 // double lights = terrain > 0.54 ? sum_octave(2, y, x, 0.5,
                 // 0.5, 0, 2) : 0;
                 double lights = sum_octave_bis(
                     7, x, y, 2, 1, -0.5, 8,
                     [](double x) -> double { return x; }, 0, 255);
+                lights *= 1 - terrain;
                 // Color c = Color(terrain * 255, r >= 0.54 && r <= 0.55 ? 255 :
                 // 0, 0);
-                Color c = Color(terrain * 255, terrain > 0.725 ? lights : 0, 0);
+                Color c = Color(
+                    terrain * 255,
+                    terrain * 255 > 150 && terrain * 255 < 175 ? lights : 0, 0);
                 tex[y * res_x_ + x] = c;
                 texture.set(c, x, y);
             }
@@ -64,12 +68,18 @@ public:
         if (px > res_x_ * res_y_)
             std::cout << "texture out of bound earth" << std::endl;
 
-        Color c(25, 77, 150);
         double r = tex[px].red();
-        if (r > 0.75 * 255)
-            c = Color(187, 170, 128);
-        if (r > 0.55 * 255)
-            c = Color(64, 96, 40);
+        Color grass(0, 154, 22);
+        Color sand(248, 214, 114);
+        Color snow(255, 250, 250);
+        Color water(0, 84, 148);
+        Color c = grass;
+        if (r <= 125)
+            c = sand;
+        if (r <= 120)
+            c = water;
+        if (r >= 200)
+            c = snow;
         if (light_specular_intensity <= 0.3 && tex[px].green() > 0)
         {
             Color city_lights(255, 255, 155);

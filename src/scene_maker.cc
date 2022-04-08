@@ -145,8 +145,8 @@ Scene sun_scene()
     double seed = std::rand();
     std::cout << "seed: " << seed << std::endl;
 
-    Vector3 camCenter(0, 0, 0);
-    Vector3 camFocus(0, 0, 1);
+    Vector3 camCenter(0, -0.5, 0);
+    Vector3 camFocus(0, -0.5, 1);
     Vector3 camUp(0, 1, 0);
 
     Camera cam = Camera(camCenter, camFocus, camUp.normalized(), fov_w / 2,
@@ -178,13 +178,13 @@ Scene sun_scene()
     // Sun
     Sun_Texture sun_tex = Sun_Texture(Material(Color(255, 255, 255), 1, 1));
 
-    Sphere yellow_boulasse = Sphere(Vector3(0, 300, 700), 100,
+    Sphere yellow_boulasse = Sphere(Vector3(0, 300, 700), 50,
                                     std::make_shared<Sun_Texture>(sun_tex));
 
     sc.objects_.push_back(std::make_shared<Sphere>(yellow_boulasse));
 
     // Sun "Atmosphere"
-    Atmosphere sun_atmos(Vector3(0, 300, 700), 130, 80,
+    Atmosphere sun_atmos(Vector3(0, 300, 700), 65, 40,
                          Vector3(700.0, 700.0, 100.0), 100,
                          std::make_shared<Uniform_Texture>(tex));
 

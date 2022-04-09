@@ -34,7 +34,7 @@ debug: all
 
 exe: all
 	./$(BIN_DIR)/$(TARGET)
-	@feh bite.ppm
+	@feh result.ppm
 
 clean:
 	-@rm -rvf $(OBJ_DIR)/*

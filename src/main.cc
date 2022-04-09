@@ -218,7 +218,7 @@ int main(int argc, char *argv[])
 
     double y_num = img_height / max_threads;
     std::vector<std::thread> threads;
-    Image img = Image("bite.ppm", img_width, img_height);
+    Image img = Image("result.ppm", img_width, img_height);
     for (int i = 0; i < max_threads - 1; i++)
     {
         threads.push_back(std::thread(make_image_threads, sc, i * y_num,

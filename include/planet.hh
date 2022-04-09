@@ -1,5 +1,5 @@
 #include "blob.hh"
-#include "fastnoise.hh"
+#include "noise.hh"
 #include "uniform_texture.hh"
 
 class Planet : public Blob
@@ -31,9 +31,6 @@ public:
 
 private:
     double evaluate_potential(Vector3 point);
-    double sum_octave(double init, size_t num_iterations, double x, double y,
-                      double z, double persistence, double scale, double low,
-                      double high);
     int seed_;
     FastNoiseLite noise_;
     double side_length_;

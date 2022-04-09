@@ -1,29 +1,5 @@
 #include "planet.hh"
 
-double Planet::sum_octave(double init, size_t num_iterations, double x,
-                          double y, double z, double persistence, double scale,
-                          double low, double high)
-{
-    double maxAmp = 0;
-    double amp = 1;
-    double freq = scale;
-    double noise = init;
-
-    for (size_t i = 0; i < num_iterations; i++)
-    {
-        noise += noise_.GetNoise(x * freq, y * freq, z * freq) * amp;
-        maxAmp += amp;
-        amp *= persistence;
-        freq *= 2;
-    }
-
-    noise /= maxAmp;
-
-    noise = noise * (high - low) / 2 + (high + low) / 2;
-
-    return noise;
-}
-
 double Planet::evaluate_potential(Vector3 point)
 {
     noise_.SetNoiseType(FastNoiseLite::NoiseType_OpenSimplex2);
@@ -36,8 +12,8 @@ double Planet::evaluate_potential(Vector3 point)
 
     double density = dist_from_center / (maxD + 1) - 0.5;
 
-    double res =
-        sum_octave(0, 16, point.x(), point.y(), point.z(), 0.25, 1, -0.5, 0.5);
+    double res = sum_octave(noise_, 0, 16, point.x(), point.y(), point.z(),
+                            0.25, 1, -0.5, 0.5);
 
     return density + res;
 }

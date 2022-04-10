@@ -2,12 +2,8 @@
 
 double Planet::evaluate_potential(Vector3 point)
 {
-    noise_.SetNoiseType(FastNoiseLite::NoiseType_OpenSimplex2);
-    noise_.SetSeed(seed_);
-    double planet_radius = side_length_ / 2;
-
     double dist_from_center = (point - center_).length();
-    double half_radius = planet_radius / 2;
+    double half_radius = radius_ / 2;
     double maxD = Vector3(half_radius, half_radius, half_radius).length();
 
     double density = dist_from_center / (maxD + 1) - 0.5;

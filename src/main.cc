@@ -6,8 +6,8 @@
 #include "raytracer.hh"
 #include "scene_maker.hh"
 
-const size_t img_width = 1440;
-const size_t img_height = 1080;
+const size_t img_width = 720;
+const size_t img_height = 480;
 const int max_threads = std::thread::hardware_concurrency() + 1;
 
 const int anti_aliasing = 4;
@@ -131,7 +131,7 @@ int main(int argc, char *argv[])
     // Scene sc = planet();
     // Scene sc = amogus();
     // Scene sc = sample_atmosphere();
-    Scene sc = sun_scene();
+    Scene sc = moon_scene();
 
     if (max_threads == 0)
     {

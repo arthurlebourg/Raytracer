@@ -156,7 +156,7 @@ int Blob::get_table_index(Sub_Cube &sub_cube)
     int index = 0;
     for (size_t i = 0; i < sub_cube.potentials_values.size(); i++)
     {
-        if (sub_cube.potentials_values[i] > threshold_)
+        if (sub_cube.potentials_values[i] >= threshold_)
             index |= (1 << i);
     }
     return index;

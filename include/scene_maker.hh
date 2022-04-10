@@ -4,6 +4,7 @@
 #include "earth_texture.hh"
 #include "hit_info.hh"
 #include "image.hh"
+#include "moon.hh"
 #include "obj_load.hh"
 #include "plane.hh"
 #include "planet.hh"
@@ -25,3 +26,5 @@ Scene planet();
 Scene sample_atmosphere();
 
 Scene sun_scene();
+
+Scene moon_scene();

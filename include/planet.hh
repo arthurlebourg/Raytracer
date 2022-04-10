@@ -8,9 +8,10 @@ public:
     Planet(Vector3 lower_left_corner, double side_length, int step,
            double threshold, int seed)
         : Blob(lower_left_corner, side_length, step, threshold)
-        , seed_(seed)
         , side_length_(side_length)
     {
+        noise_.SetNoiseType(FastNoiseLite::NoiseType_OpenSimplex2);
+        noise_.SetSeed(seed);
         radius_ = side_length / 2;
         center_ = Vector3(corner_.x() + radius_, corner_.y() + radius_,
                           corner_.z() + radius_);
@@ -31,7 +32,6 @@ public:
 
 private:
     double evaluate_potential(Vector3 point);
-    int seed_;
     FastNoiseLite noise_;
     double side_length_;
     Vector3 center_;

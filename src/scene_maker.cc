@@ -193,3 +193,32 @@ Scene sun_scene()
     std::cout << "objects: " << sc.objects_.size() << std::endl;
     return sc;
 }
+
+Scene moon_scene()
+{
+    std::srand(time(NULL));
+    double seed = std::rand();
+    std::cout << "seed: " << seed << std::endl;
+
+    Vector3 camCenter(0, 0, 0);
+    Vector3 camFocus(0, 0, 1);
+    Vector3 camUp(0, 1, 0);
+
+    Camera cam = Camera(camCenter, camFocus, camUp.normalized(), fov_w / 2,
+                        fov_h / 2, dist_to_screen);
+    Scene sc = Scene(cam, 5, dist_to_skybox, seed);
+
+    Vector3 light_pos(0, 10, 0);
+    double luminosty = 2;
+    Point_Light light(luminosty, light_pos);
+    sc.lights_.push_back(std::make_shared<Point_Light>(light));
+
+    Moon moon = Moon(Vector3(-100, -100, 100), 200, 15, 1.2, seed);
+
+    auto triangles = moon.render();
+
+    std::cout << "size : " << triangles.size() << std::endl;
+
+    sc.objects_.insert(sc.objects_.end(), triangles.begin(), triangles.end());
+    return sc;
+}

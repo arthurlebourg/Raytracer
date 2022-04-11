@@ -98,7 +98,6 @@ public:
         // if (localDensity < 0)
         //     return 0;
         // if (height01 > 1.000001)
-        // std::cout << "couille dans paté: " << height01 << std::endl;
         return localDensity;
     }
 

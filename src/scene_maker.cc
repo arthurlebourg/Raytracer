@@ -91,6 +91,7 @@ Scene planet()
     std::cout << "size : " << triangles.size() << std::endl;
 
     sc.objects_.insert(sc.objects_.end(), triangles.begin(), triangles.end());
+
     return sc;
 }
 

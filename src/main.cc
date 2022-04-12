@@ -12,18 +12,29 @@ int main(int argc, char *argv[])
     }
 
     std::string arg = std::string(argv[1]);
-    Scene sc = make_scene();
     if (arg == "planet")
     {
         Scene sc = planet();
+        make_image(sc);
+        return 0;
     }
     if (arg == "amogus")
     {
         Scene sc = amogus();
+        make_image(sc);
+        return 0;
     }
     if (arg == "atomsphere")
     {
         Scene sc = sample_atmosphere();
+        make_image(sc);
+        return 0;
+    }
+    if (arg == "alien")
+    {
+        Scene sc = alien_scene();
+        make_image(sc);
+        return 0;
     }
     if (arg == "video")
     {
@@ -31,6 +42,7 @@ int main(int argc, char *argv[])
         make_video(sc);
         return 0;
     }
+    Scene sc = make_scene();
     make_image(sc);
 
     return 0;

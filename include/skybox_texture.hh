@@ -94,22 +94,11 @@ public:
     {
         Vector3 normal = (center - point).normalized();
 
-        double tmp = atan2(normal.z(), normal.x());
-
-        double test = asin(normal.y());
-
-        double u = 0.5 + tmp / (2 * pi);
-        double v = 0.5 + test / pi;
-
-        int width = u * (res_x_ - 1);
-        int height = v * (res_y_ - 1);
-
-        size_t px = height + (width * res_x_);
+        size_t px = mercator(normal, res_x_, res_y_);
 
         if (px > res_x_ * res_y_)
         {
-            std::cout << "texture out of bound skybox:" << width << "/"
-                      << res_x_ << " " << height << "/" << res_y_ << std::endl;
+            std::cout << "texture out of bound earth" << std::endl;
             return Material(Color(255, 255, 0), 1, 1);
         }
 

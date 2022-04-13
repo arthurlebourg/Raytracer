@@ -24,7 +24,7 @@ int main(int argc, char *argv[])
         make_image(sc);
         return 0;
     }
-    if (arg == "atomsphere")
+    if (arg == "atmosphere")
     {
         Scene sc = sample_atmosphere();
         make_image(sc);

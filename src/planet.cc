@@ -8,8 +8,8 @@ double Planet::evaluate_potential(Vector3 point)
 
     double density = dist_from_center / (maxD + 1) - 0.5;
 
-    double res = sum_octave(noise_, 0, 16, point.x(), point.y(), point.z(),
-                            0.25, 1, -0.5, 0.5);
+    double res = sum_octave(noise_, 0, 5, point.x(), point.y(), point.z(), 0.25,
+                            1, 0, threshold_ / 2);
 
     return density + res;
 }

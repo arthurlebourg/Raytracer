@@ -15,6 +15,7 @@ public:
         radius_ = side_length / 2;
         center_ = Vector3(corner_.x() + radius_, corner_.y() + radius_,
                           corner_.z() + radius_);
+        radius_ *= 0.9;
         Uniform_Texture grass_tex =
             Uniform_Texture(Material(Color(86, 125, 70), 1, 0));
         Uniform_Texture dirt_tex =

@@ -1,6 +1,6 @@
 #include "maker.hh"
-const size_t img_width = 1440;
-const size_t img_height = 1080;
+const size_t img_width = 740;
+const size_t img_height = 480;
 const size_t frames = 360;
 const int max_threads = std::thread::hardware_concurrency() + 1;
 

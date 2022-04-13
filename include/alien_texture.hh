@@ -3,8 +3,8 @@
 #include <cmath>
 #include <iostream>
 
-#include "fastnoise.hh"
 #include "image.hh"
+#include "noise.hh"
 #include "texture_material.hh"
 #include "utils.hh"
 

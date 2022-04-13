@@ -82,7 +82,7 @@ bool is_shadowed(const Scene &scene, const Ray &light_ray,
     auto other_object =
         find_closest_obj(scene.objects_, light_ray, false).get_obj();
 
-    if (other_object->is_skybox())
+    if (other_object->is_skybox() || other_object->is_transparent())
         return false;
     return other_object.get() != object.get();
 }

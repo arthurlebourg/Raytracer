@@ -84,7 +84,7 @@ Scene planet()
     sc.lights_.push_back(std::make_shared<Point_Light>(light));
 
     Planet green_boulasse =
-        Planet(Vector3(-100, -100, 100), 200, 25, 0.5, seed);
+        Planet(Vector3(-100, -100, 100), 200, 15, 0.5, seed);
 
     auto triangles = green_boulasse.render();
 
@@ -213,7 +213,7 @@ Scene moon_scene()
     Point_Light light(luminosty, light_pos);
     sc.lights_.push_back(std::make_shared<Point_Light>(light));
 
-    Moon moon = Moon(Vector3(-100, -100, 100), 200, 15, 1.2, seed);
+    Moon moon(Vector3(-100, -100, 100), 200, 15, 1, seed);
 
     auto triangles = moon.render();
 

@@ -1,5 +1,6 @@
 #pragma once
 
+#include "asteroid.hh"
 #include "atmosphere.hh"
 #include "earth_texture.hh"
 #include "hit_info.hh"

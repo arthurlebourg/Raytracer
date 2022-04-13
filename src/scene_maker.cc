@@ -84,13 +84,14 @@ Scene planet()
     sc.lights_.push_back(std::make_shared<Point_Light>(light));
 
     Planet green_boulasse =
-        Planet(Vector3(-100, -100, 100), 200, 15, 0.5, seed);
+        Planet(Vector3(-100, -100, 100), 200, 25, 0.5, seed);
 
     auto triangles = green_boulasse.render();
 
     std::cout << "size : " << triangles.size() << std::endl;
 
     sc.objects_.insert(sc.objects_.end(), triangles.begin(), triangles.end());
+
     return sc;
 }
 
@@ -194,31 +195,56 @@ Scene sun_scene()
     return sc;
 }
 
-Scene moon_scene()
+Scene alien_scene()
 {
     std::srand(time(NULL));
     double seed = std::rand();
-    std::cout << "seed: " << seed << std::endl;
+    std::cout << "alien scene\nseed: " << seed << std::endl;
 
-    Vector3 camCenter(0, 0, 0);
-    Vector3 camFocus(0, 0, 1);
+    Vector3 camCenter(0, -0.5, 0);
+    Vector3 camFocus(0, -0.5, 1);
     Vector3 camUp(0, 1, 0);
 
     Camera cam = Camera(camCenter, camFocus, camUp.normalized(), fov_w / 2,
                         fov_h / 2, dist_to_screen);
     Scene sc = Scene(cam, 5, dist_to_skybox, seed);
 
-    Vector3 light_pos(0, 10, 0);
-    double luminosty = 2;
+    Vector3 light_pos(0, 200, -550);
+    double luminosty = 1;
     Point_Light light(luminosty, light_pos);
     sc.lights_.push_back(std::make_shared<Point_Light>(light));
 
-    Moon moon(Vector3(-100, -100, 100), 200, 15, 1, seed);
+    // Planet
+    Uniform_Texture tex = Uniform_Texture(Material(Color(255, 255, 255), 1, 1));
 
-    auto triangles = moon.render();
+    Alien_Texture alien_tex = Alien_Texture(seed, 1000, 1000);
+    Sphere green_boulasse = Sphere(Vector3(0, -100, 400), 100,
+                                   std::make_shared<Alien_Texture>(alien_tex));
 
-    std::cout << "size : " << triangles.size() << std::endl;
+    sc.objects_.push_back(std::make_shared<Sphere>(green_boulasse));
 
-    sc.objects_.insert(sc.objects_.end(), triangles.begin(), triangles.end());
+    // Planet Atmosphere
+    Atmosphere atmos(Vector3(0, -100, 400), 130, 80,
+                     Vector3(200.0, 730.0, 440.0), 20,
+                     std::make_shared<Uniform_Texture>(tex));
+
+    sc.objects_.push_back(std::make_shared<Atmosphere>(atmos));
+
+    // Sun
+    Sun_Texture sun_tex = Sun_Texture(Material(Color(255, 255, 255), 1, 1));
+
+    Sphere yellow_boulasse = Sphere(Vector3(0, 300, 700), 50,
+                                    std::make_shared<Sun_Texture>(sun_tex));
+
+    sc.objects_.push_back(std::make_shared<Sphere>(yellow_boulasse));
+
+    // Sun "Atmosphere"
+    Atmosphere sun_atmos(Vector3(0, 300, 700), 65, 40,
+                         Vector3(700.0, 700.0, 100.0), 100,
+                         std::make_shared<Uniform_Texture>(tex));
+
+    sc.objects_.push_back(std::make_shared<Atmosphere>(sun_atmos));
+
+    std::cout << "objects: " << sc.objects_.size() << std::endl;
     return sc;
 }

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cmath>
+#include <functional>
 #include <iostream>
 
 #include "image.hh"
@@ -11,14 +12,14 @@
 class Skybox_Texture : public Texture_Material
 {
 public:
+    Skybox_Texture(int seed, int res_x, int res_y);
+
     Skybox_Texture(int res_x, int res_y, Color *texture_map)
         : seed_(0)
         , res_x_(res_x)
         , res_y_(res_y)
         , tex(texture_map)
     {}
-
-    Skybox_Texture(int seed, int res_x, int res_y);
 
     Material get_Material(Vector3 point, Vector3 center,
                           double light_specular_intensity);

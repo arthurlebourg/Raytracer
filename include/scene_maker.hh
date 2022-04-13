@@ -1,5 +1,6 @@
 #pragma once
 
+#include "alien_texture.hh"
 #include "asteroid.hh"
 #include "atmosphere.hh"
 #include "earth_texture.hh"
@@ -29,3 +30,5 @@ Scene sample_atmosphere();
 Scene sun_scene();
 
 Scene moon_scene();
+
+Scene alien_scene();

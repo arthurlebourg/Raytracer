@@ -34,7 +34,7 @@ debug: all
 
 exe: all
 	./$(BIN_DIR)/$(TARGET)
-	@feh result.ppm
+	@feh scene.ppm
 
 clean:
 	-@rm -rvf $(OBJ_DIR)/*

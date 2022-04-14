@@ -5,9 +5,7 @@ OBJ_DIR  := ./build
 BIN_DIR  := ./bin
 TARGET   := raytracer
 INCLUDE  := -Iinclude/
-SRC      := $(wildcard src/*.cc)
-HEADERS      := $(wildcard include/*.hh)
-
+SRC := $(shell find . -name *.cc)
 OBJECTS  := $(SRC:%.cc=$(OBJ_DIR)/%.o)
 DEPENDENCIES \
          := $(OBJECTS:.o=.d)

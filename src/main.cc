@@ -1,6 +1,6 @@
 #include <string>
 
-#include "maker.hh"
+#include "maker/maker.hh"
 
 int main(int argc, char *argv[])
 {
@@ -18,9 +18,9 @@ int main(int argc, char *argv[])
         make_image(sc);
         return 0;
     }
-    if (arg == "amogus")
+    if (arg == "sun")
     {
-        Scene sc = amogus();
+        Scene sc = planet();
         make_image(sc);
         return 0;
     }

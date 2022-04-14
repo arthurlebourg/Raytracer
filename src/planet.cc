@@ -1,4 +1,4 @@
-#include "planet.hh"
+#include "blob/planet.hh"
 
 double Planet::evaluate_potential(Vector3 point)
 {

@@ -1,4 +1,4 @@
-#include "metaball.hh"
+#include "blob/metaball.hh"
 
 double Metaball::evaluate_potential(Vector3 point)
 {

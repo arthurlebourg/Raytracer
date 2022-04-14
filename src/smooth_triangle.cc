@@ -1,4 +1,4 @@
-#include "smooth_triangle.hh"
+#include "object/smooth_triangle.hh"
 
 Vector3 Smooth_Triangle::normal(Vector3 point)
 {

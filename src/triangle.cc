@@ -1,4 +1,4 @@
-#include "triangle.hh"
+#include "object/triangle.hh"
 
 #include <iostream>
 

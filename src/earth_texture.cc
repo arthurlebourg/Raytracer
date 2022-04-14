@@ -1,4 +1,4 @@
-#include "earth_texture.hh"
+#include "planet_texture/earth_texture.hh"
 
 Earth_Texture::Earth_Texture(int seed, size_t res_x, size_t res_y)
     : seed_(seed)

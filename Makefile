@@ -6,6 +6,7 @@ BIN_DIR  := ./bin
 TARGET   := raytracer
 INCLUDE  := -Iinclude/
 SRC      := $(wildcard src/*.cc)
+HEADERS      := $(wildcard include/*.hh)
 
 OBJECTS  := $(SRC:%.cc=$(OBJ_DIR)/%.o)
 DEPENDENCIES \

@@ -1,4 +1,4 @@
-#include "atmosphere.hh"
+#include "atmosphere/atmosphere.hh"
 
 std::optional<Vector3> Atmosphere::hit(Ray ray)
 {

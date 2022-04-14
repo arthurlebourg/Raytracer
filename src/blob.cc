@@ -1,4 +1,4 @@
-#include "blob.hh"
+#include "blob/blob.hh"
 
 Sub_Cube::Sub_Cube(Vector3 corner, double side_length)
 {

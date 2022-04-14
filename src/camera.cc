@@ -1,4 +1,4 @@
-#include "camera.hh"
+#include "raytracer/camera.hh"
 
 #include <iostream>
 

@@ -1,4 +1,4 @@
-#include "noise.hh"
+#include "noise/noise.hh"
 
 double sum_octave(FastNoiseLite &noise, double init, size_t num_iterations,
                   double x, double y, double z, double persistence,

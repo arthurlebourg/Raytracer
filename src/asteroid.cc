@@ -1,4 +1,4 @@
-#include "asteroid.hh"
+#include "blob/asteroid.hh"
 
 #include <stdlib.h>
 

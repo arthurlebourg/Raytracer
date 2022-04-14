@@ -1,6 +1,6 @@
-#include "raytracer.hh"
+#include "raytracer/raytracer.hh"
 
-#include "atmosphere.hh"
+#include "atmosphere/atmosphere.hh"
 
 size_t numInScatteringPoints = 10;
 

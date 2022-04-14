@@ -1,4 +1,4 @@
-#include "plane.hh"
+#include "object/plane.hh"
 
 std::optional<Vector3> Plane::hit(Ray ray)
 {

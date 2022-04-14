@@ -1,4 +1,4 @@
-#include "skybox_texture.hh"
+#include "planet_texture/skybox_texture.hh"
 
 Skybox_Texture::Skybox_Texture(int seed, int res_x, int res_y)
     : seed_(seed)

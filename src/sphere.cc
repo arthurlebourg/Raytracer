@@ -1,4 +1,4 @@
-#include "sphere.hh"
+#include "object/sphere.hh"
 
 std::optional<Vector3> Sphere::hit(Ray ray)
 {

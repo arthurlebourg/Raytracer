@@ -1,0 +1,61 @@
+#pragma once
+
+#include "raytracer/hit_info.hh"
+#include "raytracer/object.hh"
+#include "raytracer/ray.hh"
+#include "texture_material/texture_material.hh"
+
+class Sphere : public Object
+{
+public:
+    Sphere(Vector3 pos, double radius,
+           std::shared_ptr<Texture_Material> texture)
+        : Object(texture)
+        , pos_(pos)
+        , radius_(radius)
+    {}
+
+    Sphere(const Sphere &s)
+        : Object(s.texture_)
+        , pos_(s.pos_)
+        , radius_(s.radius_)
+    {}
+
+    std::optional<Vector3> hit(Ray ray);
+
+    Vector3 normal(Vector3 point);
+
+    void move(Vector3 vec)
+    {
+        pos_ = pos_ + vec;
+    }
+
+    void set_position(Vector3 vec)
+    {
+        pos_ = vec;
+    }
+
+    std::shared_ptr<Object> clone()
+    {
+        return std::make_shared<Sphere>(Sphere(*this));
+    }
+
+    bool is_transparent()
+    {
+        return false;
+    }
+
+    Vector3 get_center()
+    {
+        return pos_;
+    }
+
+    double get_radius()
+    {
+        return radius_;
+    }
+
+private:
+    Vector3 pos_;
+    double radius_;
+};
